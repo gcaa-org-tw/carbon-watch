@@ -17,7 +17,6 @@ export default defineNuxtConfig({
     typeCheck: true,
   },
   compatibilityDate: '2024-04-03',
-  ssr: false,
   nitro: {
     preset: 'static',
   },
