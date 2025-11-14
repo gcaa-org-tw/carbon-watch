@@ -1,2 +1,69 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
+
+
+:root {
+  --ui-bg: white;
+}
+
+.dark {
+  --ui-bg: var(--color-surface-mint);
+}
+
+/**
+ * Custom Color Palette
+ * Semantic color names for carbon watch theme
+ * Usage: bg-surface-mint, text-green-pure, border-accent-yellow, etc.
+ * Dark mode: automatically switches to -dark variants when dark mode is active
+ */
+@theme {
+  /* Background & Surface Colors */
+  --color-surface-mint: #F0F4F2;
+  --color-surface-warm: #D9D7CA;
+  
+  /* Text & Neutral Colors */
+  --color-earth-brown: #5C573D;
+  
+  /* Green Scale - Primary Brand Colors */
+  --color-green-mint: #73FFAD;
+  --color-green-spring: #2FDB5D;
+  --color-green-pure: #04B300;
+  --color-green-deep: #207443;
+  --color-green-forest: #065705;
+  
+  /* Accent Colors */
+  --color-accent-yellow: #FFD52F;
+  --color-accent-red: #DF0C0C;
+}
+
+/* Dark Mode Color Variants */
+.dark {
+  @theme {
+    /* Background & Surface Colors - darker, muted */
+    --color-surface-mint: #1C2B23;
+    --color-surface-warm: #2B2A24;
+    
+    /* Text & Neutral Colors - lighter for readability */
+    --color-earth-brown: #C4BE9A;
+    
+    /* Green Scale - adjusted for dark backgrounds */
+    --color-green-mint: #5AE694;
+    --color-green-spring: #26C04F;
+    --color-green-pure: #05D915;
+    --color-green-deep: #3A9D63;
+    --color-green-forest: #0A8F0A;
+    
+    /* Accent Colors - slightly adjusted brightness */
+    --color-accent-yellow: #F5C71A;
+    --color-accent-red: #FF4040;
+  }
+}
+
+/**
+ * Content Container Utility
+ * Provides consistent max-width (90rem/1440px) and responsive padding (1rem on mobile)
+ * 
+ * Note: For Tailwind v4+, use the ContentContainer component or inline classes:
+ * - Component: <ContentContainer>...</ContentContainer>
+ * - Inline: class="mx-auto w-full max-w-[90rem] px-4"
+ */

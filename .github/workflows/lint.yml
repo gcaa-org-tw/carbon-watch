@@ -21,6 +21,9 @@ jobs:
       
       - name: Install dependencies
         run: npm ci
+
+      - name: Build nuxt for linting
+        run: npm run build
       
       - name: Run ESLint
-        run: npx eslint .
+        run: npm run lint
