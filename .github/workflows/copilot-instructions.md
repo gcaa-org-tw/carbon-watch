@@ -12,6 +12,106 @@ Copilot must follow these rules by default when generating or modifying Vue comp
 3. **Dark/light mode = via Tailwind `dark:` selectors only**
 4. **Design decisions must be centralized in `app.config.ts`**
 5. **Avoid reinventing or overriding Nuxt UI primitives**
+6. **Use custom color palette instead of arbitrary hex values**
+7. **DRY (Don't Repeat Yourself) - use `v-for`, computed properties, and reusable components**
+
+---
+
+## **DRY Principle**
+
+Always eliminate repetitive code by using Vue's built-in features:
+
+✅ **DO:**
+```vue
+<script setup lang="ts">
+const menuItems = [
+  { to: '/page1', label: 'Page 1' },
+  { to: '/page2', label: 'Page 2' }
+]
+</script>
+
+<template>
+  <NuxtLink 
+    v-for="item in menuItems"
+    :key="item.to"
+    :to="item.to"
+    class="nav-link"
+  >
+    {{ item.label }}
+  </NuxtLink>
+</template>
+```
+
+❌ **DON'T:**
+```vue
+<template>
+  <NuxtLink to="/page1" class="nav-link">Page 1</NuxtLink>
+  <NuxtLink to="/page2" class="nav-link">Page 2</NuxtLink>
+  <!-- Repeating the same structure multiple times -->
+</template>
+```
+
+**When to apply DRY:**
+- Lists of navigation items, menu links, or similar elements
+- Repeated card/tile components with different data
+- Form fields with similar structure
+- Any pattern that appears 3+ times
+
+---
+
+## **Custom Color Palette**
+
+All components must use the predefined custom color palette defined in `app/assets/css/main.css`. These colors automatically adapt to dark mode.
+
+### **Available Colors**
+
+**Surface & Background:**
+- `surface-mint` - Very light mint gray (#EFF4F1 / dark: #1A2420)
+- `surface-warm` - Warm desaturated beige (#D8D5C7 / dark: #2A2822)
+
+**Text & Neutral:**
+- `earth-brown` - Muted earth olive brown (#5F5939 / dark: #B8B599)
+
+**Green Scale (Primary Brand):**
+- `green-mint` - Mint green (#7EFFB9 / dark: #4DB889)
+- `green-spring` - Spring green (#2ED758 / dark: #25A847)
+- `green-pure` - Pure green (#01B90F / dark: #02D412)
+- `green-forest` - Dark forest green (#005A0B / dark: #00802F)
+
+**Accents:**
+- `accent-yellow` - Warm yellow (#F8C832 / dark: #E0B520)
+- `accent-red` - Strong red (#DB0D0C / dark: #FF3736)
+
+### **Usage Rules**
+
+✅ **DO:**
+```vue
+<!-- Use custom color utilities -->
+<div class="bg-surface-mint text-earth-brown">
+<button class="bg-green-pure hover:bg-green-forest">
+<span class="text-green-spring dark:text-green-mint">
+
+<!-- Combine with dark mode variants -->
+<nav class="bg-white dark:bg-gray-900">
+<p class="text-earth-brown dark:text-surface-warm">
+```
+
+❌ **DON'T:**
+```vue
+<!-- Avoid arbitrary hex values -->
+<div class="text-[#5F5939]">
+<button class="bg-[#01B90F]">
+
+<!-- Don't use arbitrary Tailwind colors when custom palette exists -->
+<div class="bg-green-500"> <!-- Use bg-green-pure instead -->
+<p class="text-gray-700"> <!-- Use text-earth-brown instead -->
+```
+
+### **Dark Mode Implementation**
+
+- Always provide dark mode variants using `dark:` prefix
+- Dark mode colors are automatically mapped via CSS media queries
+- Example: `text-green-forest dark:text-earth-brown`
 
 ---
 
