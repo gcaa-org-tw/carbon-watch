@@ -1,7 +1,7 @@
 <template>
   <nav class="border-b border-gray-200">
-    <div class="container mx-auto px-4 py-4">
-      <div class="flex items-center justify-between">
+    <ContentContainer>
+      <div class="flex items-center justify-between py-4">
         <NuxtLink to="/" class="text-xl font-bold">
           排碳大戶觀測站
         </NuxtLink>
@@ -17,6 +17,6 @@
           </NuxtLink>
         </div>
       </div>
-    </div>
+    </ContentContainer>
   </nav>
 </template>

@@ -1,2 +1,11 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
+
+/**
+ * Content Container Utility
+ * Provides consistent max-width (90rem/1440px) and responsive padding (1rem on mobile)
+ * 
+ * Note: For Tailwind v4+, use the ContentContainer component or inline classes:
+ * - Component: <ContentContainer>...</ContentContainer>
+ * - Inline: class="mx-auto w-full max-w-[90rem] px-4"
+ */
