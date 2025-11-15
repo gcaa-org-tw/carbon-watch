@@ -44,6 +44,7 @@
  * - Merges basic and advanced data by company name (公司)
  * - Logs all operations for transparency and traceability
  * - Follows the data source roadmap (Phase 1, item 3)
+ * - missing abbr: 國巨, 彩晶, 穩懋, 永豐實, 唐榮公司, 中碳, 中環, 精金, 台燿, 晶碩, 台達化, 台耀, 環泰, 台鹽, 台半
  */
 
 import { readFileSync, writeFileSync, mkdirSync } from 'fs';
@@ -223,6 +224,88 @@ function mergeCompanyData(
 }
 
 /**
+ * Add 代表縣市 data to company list
+ */
+function addRepresentativeCity(
+  companyList: Record<string, string>[],
+  allCompanyData: Record<string, string>[],
+  companyDetailData: Record<string, string>[],
+  logger: Logger
+): Record<string, string>[] {
+  logger.info('Step 3: Adding 代表縣市, 事業統編, and 公司全名 data');
+  
+  // Create lookup maps
+  // Map 1: name_abbr -> { tax_code, name }
+  const nameAbbrToCompany = new Map<string, { taxCode: string; fullName: string }>();
+  for (const company of allCompanyData) {
+    const nameAbbr = company['name_abbr']?.trim();
+    const taxCode = company['tax_code']?.trim();
+    const fullName = company['name']?.trim();
+    if (nameAbbr && taxCode && fullName) {
+      nameAbbrToCompany.set(nameAbbr, { taxCode, fullName });
+    }
+  }
+  logger.info(`Loaded ${nameAbbrToCompany.size} company mappings from all-company.csv`);
+  
+  // Map 2: tax_code -> 代表縣市
+  const taxCodeToCity = new Map<string, string>();
+  for (const detail of companyDetailData) {
+    const taxCode = detail['事業統編']?.trim();
+    const city = detail['代表縣市']?.trim();
+    if (taxCode && city) {
+      taxCodeToCity.set(taxCode, city);
+    }
+  }
+  logger.info(`Loaded ${taxCodeToCity.size} city mappings from II. 公司總表（原始值）.csv`);
+  
+  // Add 代表縣市, 事業統編, and 公司全名 to each company
+  let successCount = 0;
+  const failedCompanies: string[] = [];
+  
+  for (const company of companyList) {
+    const companyName = company['公司'];
+    
+    // Step 1: Get tax_code and full name from all-company using name_abbr
+    const companyInfo = nameAbbrToCompany.get(companyName);
+    
+    if (!companyInfo) {
+      failedCompanies.push(companyName);
+      logger.info(`⚠️  Cannot find tax_code for company: ${companyName}`);
+      continue;
+    }
+    
+    const { taxCode, fullName } = companyInfo;
+    
+    // Step 2: Get 代表縣市 using tax_code
+    const city = taxCodeToCity.get(taxCode);
+    
+    if (!city) {
+      failedCompanies.push(companyName);
+      logger.info(`⚠️  Cannot find 代表縣市 for company: ${companyName} (tax_code: ${taxCode})`);
+      // Still add tax_code and full name even if city is not found
+      company['事業統編'] = taxCode;
+      company['公司全名'] = fullName;
+      continue;
+    }
+    
+    // Add all fields to company record
+    company['代表縣市'] = city;
+    company['事業統編'] = taxCode;
+    company['公司全名'] = fullName;
+    successCount++;
+  }
+  
+  logger.success(`Successfully added 代表縣市 for ${successCount}/${companyList.length} companies`);
+  
+  if (failedCompanies.length > 0) {
+    logger.info(`⚠️  Failed to map ${failedCompanies.length} companies:`);
+    failedCompanies.forEach(name => logger.info(`  - ${name}`));
+  }
+  
+  return companyList;
+}
+
+/**
  * Main transformation function
  */
 async function transformCompanyData() {
@@ -247,7 +330,7 @@ async function transformCompanyData() {
     logger.info(`Parsed ${advancedData.length} records from advanced table`);
 
     // Merge data
-    const companyList = mergeCompanyData(basicData, advancedData);
+    let companyList = mergeCompanyData(basicData, advancedData);
     logger.success(`Merged company data: ${companyList.length} companies`);
 
     // 2. Load and transform grade map
@@ -263,6 +346,22 @@ async function transformCompanyData() {
     const gradeMapFields = Object.keys(gradeMap);
     logger.success(`Transformed grade map: ${gradeMapFields.length} fields`);
     logger.info(`Grade map fields: ${gradeMapFields.join(', ')}`);
+
+    // 3. Load all-company.csv and company detail data
+    const allCompanyCsvPath = join(RAW_DATA_DIR, 'all-company.csv');
+    logger.info(`Reading all-company data from: ${allCompanyCsvPath}`);
+    const allCompanyCsvContent = readFileSync(allCompanyCsvPath, 'utf-8');
+    const allCompanyData = parseCSV(allCompanyCsvContent);
+    logger.info(`Parsed ${allCompanyData.length} records from all-company.csv`);
+
+    const companyDetailCsvPath = join(RAW_DATA_DIR, 'II. 公司總表（原始值）.csv');
+    logger.info(`Reading company detail data from: ${companyDetailCsvPath}`);
+    const companyDetailCsvContent = readFileSync(companyDetailCsvPath, 'utf-8');
+    const companyDetailData = parseCSV(companyDetailCsvContent);
+    logger.info(`Parsed ${companyDetailData.length} records from II. 公司總表（原始值）.csv`);
+
+    // Add 代表縣市 to company list
+    companyList = addRepresentativeCity(companyList, allCompanyData, companyDetailData, logger);
 
     // Create output directory if it doesn't exist
     mkdirSync(OUTPUT_DIR, { recursive: true });
