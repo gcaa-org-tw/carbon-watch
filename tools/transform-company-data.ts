@@ -38,6 +38,18 @@
  * }
  * ```
  * 
+ * ### Region List (`app/assets/data/region-list.json`)
+ * 
+ * Array of unique 代表縣市 values, ordered by geographic location (north to south, west to east).
+ * 
+ * ### Industry List (`app/assets/data/industry-list.json`)
+ * 
+ * Array of 產業分類 with counts, ordered by count descending:
+ * 
+ * ```typescript
+ * Array<{ industry: string; count: number }>
+ * ```
+ * 
  * ## Implementation Notes
  * 
  * - Uses CSV parser that handles quoted fields and special characters
@@ -385,6 +397,78 @@ async function transformCompanyData() {
     );
     logger.success(`Saved grade map to: company-grade-map.json`);
 
+    // Generate region list (ordered by geographic location: north to south, west to east)
+    logger.info('Step 4: Generating region list');
+    const regionSet = new Set<string>();
+    companyList.forEach(company => {
+      const region = company['代表縣市'];
+      if (region && region.trim()) {
+        regionSet.add(region.trim());
+      }
+    });
+    
+    // Manual ordering: north to south, west to east
+    const taiwanRegionOrder = [
+      '基隆市',
+      '臺北市',
+      '新北市',
+      '桃園市',
+      '新竹市',
+      '新竹縣',
+      '苗栗縣',
+      '臺中市',
+      '彰化縣',
+      '雲林縣',
+      '嘉義市',
+      '嘉義縣',
+      '臺南市',
+      '高雄市',
+      '屏東縣',
+      '南投縣',
+      '宜蘭縣',
+      '花蓮縣',
+      '臺東縣',
+      '澎湖縣',
+      '金門縣',
+      '連江縣',
+    ];
+    
+    const regionList = taiwanRegionOrder.filter(region => regionSet.has(region));
+    logger.info(`Found ${regionList.length} unique regions`);
+    
+    const regionListPath = join(OUTPUT_DIR, 'region-list.json');
+    writeFileSync(
+      regionListPath,
+      JSON.stringify(regionList, null, 2),
+      'utf-8'
+    );
+    logger.success(`Saved region list to: region-list.json`);
+
+    // Generate industry list (ordered by count desc)
+    logger.info('Step 5: Generating industry list');
+    const industryCount = new Map<string, number>();
+    companyList.forEach(company => {
+      const industry = company['產業分類'];
+      if (industry && industry.trim()) {
+        const trimmedIndustry = industry.trim();
+        industryCount.set(trimmedIndustry, (industryCount.get(trimmedIndustry) || 0) + 1);
+      }
+    });
+    
+    const industryList = Array.from(industryCount.entries())
+      .sort((a, b) => b[1] - a[1]) // Sort by count descending
+      .map(([industry, count]) => ({ industry, count }));
+    
+    logger.info(`Found ${industryList.length} unique industries`);
+    
+    const industryListPath = join(OUTPUT_DIR, 'industry-list.json');
+    writeFileSync(
+      industryListPath,
+      JSON.stringify(industryList, null, 2),
+      'utf-8'
+    );
+    logger.success(`Saved industry list to: industry-list.json`);
+
     // Log sample of transformed data
     logger.info('Sample of company data (first 2 records):');
     console.log(JSON.stringify(companyList.slice(0, 2), null, 2));
@@ -401,6 +485,8 @@ async function transformCompanyData() {
     logger.success('Data transformation completed successfully');
     logger.info(`Total companies processed: ${companyList.length}`);
     logger.info(`Total grade fields: ${gradeMapFields.length}`);
+    logger.info(`Total regions: ${regionList.length}`);
+    logger.info(`Total industries: ${industryList.length}`);
     logger.logDuration();
     logger.info('='.repeat(60));
 
