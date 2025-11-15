@@ -469,6 +469,36 @@ async function transformCompanyData() {
     );
     logger.success(`Saved industry list to: industry-list.json`);
 
+    // Generate top 10 companies by 溫室氣體排放量
+    logger.info('Step 6: Generating top 10 companies by emissions');
+    const companiesWithEmissions = companyList
+      .map(company => {
+        const emissions = parseNumber(company['溫室氣體排放量（公噸二氧化碳當量）']);
+        return {
+          ...company,
+          emissionsValue: emissions || 0
+        };
+      })
+      .filter(company => company.emissionsValue > 0)
+      .sort((a, b) => b.emissionsValue - a.emissionsValue)
+      .slice(0, 10);
+    
+    const top10Companies = companiesWithEmissions.map(({ emissionsValue, ...company }) => company); // Remove the temporary emissionsValue field
+    
+    logger.info(`Top 10 companies by emissions:`);
+    companiesWithEmissions.forEach((item, index) => {
+      const company = item as Record<string, string> & { emissionsValue: number };
+      logger.info(`  ${index + 1}. ${company['公司']} - ${company['溫室氣體排放量（公噸二氧化碳當量）']}`);
+    });
+    
+    const top10Path = join(OUTPUT_DIR, 'top-10-companies.json');
+    writeFileSync(
+      top10Path,
+      JSON.stringify(top10Companies, null, 2),
+      'utf-8'
+    );
+    logger.success(`Saved top 10 companies to: top-10-companies.json`);
+
     // Log sample of transformed data
     logger.info('Sample of company data (first 2 records):');
     console.log(JSON.stringify(companyList.slice(0, 2), null, 2));
@@ -487,6 +517,7 @@ async function transformCompanyData() {
     logger.info(`Total grade fields: ${gradeMapFields.length}`);
     logger.info(`Total regions: ${regionList.length}`);
     logger.info(`Total industries: ${industryList.length}`);
+    logger.info(`Top 10 companies exported: ${top10Companies.length}`);
     logger.logDuration();
     logger.info('='.repeat(60));
 

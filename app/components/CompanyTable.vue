@@ -7,10 +7,12 @@ import companyGradeMap from '~/assets/data/company-grade-map.json'
 interface Props {
   rows: CompanyData[]
   isPro?: boolean
+  showLegend?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  isPro: false
+  isPro: false,
+  showLegend: true
 })
 
 // Helper function to parse value (handle commas and percentages)
@@ -455,7 +457,7 @@ const sorting = ref([
 <template>
   <div class="space-y-4">
     <!-- Color Legend -->
-    <div class="flex gap-4 items-center text-sm">
+    <div v-if="showLegend" class="flex gap-4 items-center text-sm">
       <div class="flex gap-3">
         <div class="flex items-center gap-1.5">
           <div class="w-3 h-3 rounded-full bg-green-pure border-2 border-green-pure/30" />

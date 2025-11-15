@@ -31,7 +31,7 @@
 3. 基金觀測
    - URL:
      - `/funds` for 首頁
-      - `/funds/{slug}` for 基金詳細頁
+      - `/funds/{slug}[/pro]` for 基金詳細頁
    - 首頁 sections
      - 基金列表 (*2 - 00850)
    - 基金詳細頁 sections (*2 - 00850)
