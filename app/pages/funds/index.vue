@@ -13,6 +13,9 @@ interface FundData {
   使用燃煤家數: number
 }
 
+// Get view mode
+const { isPro } = useViewMode()
+
 // Search filter
 const search = ref('')
 
@@ -53,6 +56,24 @@ const columns: TableColumn<FundData>[] = [
     accessorKey: '基金代號',
     header: ({ column }) => createSortableHeader(column, '基金代號'),
     enableSorting: true,
+    cell: ({ row }) => {
+      const fundPath = `/funds/${row.original.基金代號}${isPro.value ? '/pro' : ''}`
+      return h(
+        'a',
+        {
+          href: fundPath,
+          class: 'flex items-center gap-1.5 hover:underline cursor-pointer group',
+          onClick: (e: MouseEvent) => {
+            e.preventDefault()
+            navigateTo(fundPath)
+          }
+        },
+        [
+          h('span', { class: 'i-heroicons-link-20-solid text-sm text-gray-400 group-hover:text-green-pure transition-colors' }),
+          h('span', row.original.基金代號)
+        ]
+      )
+    },
   },
   {
     accessorKey: '基金名稱',
