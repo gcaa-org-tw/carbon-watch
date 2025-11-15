@@ -1,10 +1,38 @@
+<script setup lang="ts">
+// Initialize view mode composable
+const { mode } = useViewMode()
+
+// Use shared company filter logic
+const { filters, filteredCompanies } = useCompanyFilter()
+
+// Watch for mode changes and redirect if needed
+watch(mode, (newMode) => {
+  if (newMode === 'pro') {
+    navigateTo('/companies/pro')
+  }
+})
+
+// SEO metadata
+useHead({
+  title: '排碳大戶觀測企業清單 - 易讀版',
+  meta: [
+    { name: 'description', content: '檢視台灣排碳大戶企業的溫室氣體排放量、減量目標與氣候行動' }
+  ]
+})
+</script>
+
 <template>
-  <div>
-    <h1 class="text-4xl font-bold">企業觀測清單 - 易讀版</h1>
-    <div class="mt-4">
-      <NuxtLink to="/companies/example-company" class="text-blue-600 hover:underline">
-        範例企業
-      </NuxtLink>
+  <ContentContainer class="py-8">
+    <CompanyListFilter v-model="filters" />
+    
+    <div class="mt-8">
+      <CompanyTable :rows="filteredCompanies" :is-pro="false" />
     </div>
-  </div>
+
+    <div v-if="filteredCompanies.length === 0" class="text-center py-12">
+      <p class="text-gray-500 dark:text-gray-400">
+        找不到符合條件的企業
+      </p>
+    </div>
+  </ContentContainer>
 </template>
