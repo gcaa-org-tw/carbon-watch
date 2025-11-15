@@ -17,7 +17,7 @@ interface Emits {
 const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
 
-const { setMode, isPro } = useViewMode()
+const { isPro, setMode } = useViewMode()
 const route = useRoute()
 
 // Local state
@@ -38,16 +38,20 @@ const industryOptions = computed(() => [
   ...industryList.map(item => item.industry)
 ])
 
-// Handle mode toggle - preserve query parameters
-const handleModeToggle = (newMode: 'regular' | 'pro') => {
-  setMode(newMode)
-  
-  // Navigate to the appropriate route while preserving query params
-  const targetPath = newMode === 'pro' ? '/companies/pro' : '/companies'
-  navigateTo({
-    path: targetPath,
-    query: route.query
-  })
+// Compute target links preserving query params
+const regularModeLink = computed(() => ({
+  path: '/companies',
+  query: route.query
+}))
+
+const proModeLink = computed(() => ({
+  path: '/companies/pro',
+  query: route.query
+}))
+
+// Handle mode changes
+const handleModeClick = (mode: 'regular' | 'pro') => {
+  setMode(mode)
 }
 
 // Update search
@@ -70,28 +74,30 @@ const updateSearch = (value: string) => {
       <!-- Row 1, Column 2: Mode toggle -->
       <div class="flex items-center justify-end">
         <div class="inline-flex rounded-full bg-surface-mint p-1">
-          <button
+          <NuxtLink
+            :to="regularModeLink"
             :class="[
-              'px-4 py-2 rounded-full text-sm font-medium transition-colors',
+              'px-4 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer',
               !isPro
                 ? 'bg-green-pure text-white'
                 : 'bg-transparent text-gray-700 hover:bg-surface-mint/50'
             ]"
-            @click="handleModeToggle('regular')"
+            @click="handleModeClick('regular')"
           >
             易讀版
-          </button>
-          <button
+          </NuxtLink>
+          <NuxtLink
+            :to="proModeLink"
             :class="[
-              'px-4 py-2 rounded-full text-sm font-medium transition-colors',
+              'px-4 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer',
               isPro
                 ? 'bg-green-pure text-white'
                 : 'bg-transparent text-gray-700 hover:bg-surface-mint/50'
             ]"
-            @click="handleModeToggle('pro')"
+            @click="handleModeClick('pro')"
           >
             專業版
-          </button>
+          </NuxtLink>
         </div>
       </div>
 
@@ -146,28 +152,30 @@ const updateSearch = (value: string) => {
       <!-- Mode toggle -->
       <div class="flex justify-center">
         <div class="inline-flex rounded-full bg-surface-mint p-1 w-full max-w-xs">
-          <button
+          <NuxtLink
+            :to="regularModeLink"
             :class="[
-              'flex-1 px-4 py-2 rounded-full text-sm font-medium transition-colors',
+              'flex-1 px-4 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer text-center',
               !isPro
                 ? 'bg-green-pure text-white'
                 : 'bg-transparent text-gray-700'
             ]"
-            @click="handleModeToggle('regular')"
+            @click="handleModeClick('regular')"
           >
             易讀版
-          </button>
-          <button
+          </NuxtLink>
+          <NuxtLink
+            :to="proModeLink"
             :class="[
-              'flex-1 px-4 py-2 rounded-full text-sm font-medium transition-colors',
+              'flex-1 px-4 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer text-center',
               isPro
                 ? 'bg-green-pure text-white'
                 : 'bg-transparent text-gray-700'
             ]"
-            @click="handleModeToggle('pro')"
+            @click="handleModeClick('pro')"
           >
             專業版
-          </button>
+          </NuxtLink>
         </div>
       </div>
 
