@@ -1,13 +1,14 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 
 const mobileMenuOpen = ref(false)
+const { isPro } = useViewMode()
 
-const menuItems = [
-  { to: '/companies', label: '企業觀測清單' },
+const menuItems = computed(() => [
+  { to: isPro.value ? '/companies/pro' : '/companies', label: '企業觀測清單' },
   { to: '/funds', label: '基金觀測' },
   { to: '/methodology', label: '綠盟的氣候績效指標' }
-]
+])
 
 const toggleMobileMenu = () => {
   mobileMenuOpen.value = !mobileMenuOpen.value
