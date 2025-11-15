@@ -20,6 +20,7 @@ export default defineNuxtConfig({
   nitro: {
     preset: 'static',
     prerender: {
+      // see https://github.com/gcaa-org-tw/carbon-watch/issues/4 for details
       ignore: ['/funds/0055', '/funds/0055/pro'],
     },
   },
