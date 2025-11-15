@@ -174,7 +174,7 @@ const filteredFunds = computed(() => {
       :ui="{
         th: 'bg-green-forest text-white',
         tr: 'even:bg-surface-mint dark:even:bg-surface-mint/10 odd:bg-white dark:odd:bg-gray-900',
-        td: ''
+        td: 'text-black dark:text-white'
       }"
     />
   </div>
