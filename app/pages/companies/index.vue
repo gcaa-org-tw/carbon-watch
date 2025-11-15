@@ -22,7 +22,7 @@ useHead({
 </script>
 
 <template>
-  <ContentContainer class="py-8">
+  <div class="py-8">
     <CompanyListFilter v-model="filters" />
     
     <div class="mt-8">
@@ -34,5 +34,5 @@ useHead({
         找不到符合條件的企業
       </p>
     </div>
-  </ContentContainer>
+  </div>
 </template>

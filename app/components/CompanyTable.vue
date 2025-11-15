@@ -482,7 +482,7 @@ const sorting = ref([
       sticky
       :columns="columns"
       :data="rows"
-      class="max-h-200 border-1 border-gray-300 dark:border-gray-600"
+      class="max-h-200 border-1 border-gray-300 dark:border-gray-600 -mx-4"
       :ui="{
         th: 'bg-green-forest text-white min-w-20',
         tr: 'even:bg-surface-mint dark:even:bg-surface-mint/10 odd:bg-white dark:odd:bg-gray-900',
