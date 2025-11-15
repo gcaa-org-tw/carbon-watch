@@ -8,7 +8,8 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "lint": "eslint --ext .js,.ts,.vue .",
-    "download-data": "tsx tools/download-raw-data.ts"
+    "download-data": "tsx tools/download-raw-data.ts",
+    "transform-fund-data": "tsx tools/transform-fund-data.ts"
   },
   "dependencies": {
     "@nuxt/content": "^3.8.0",

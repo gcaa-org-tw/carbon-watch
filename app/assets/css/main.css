@@ -1,22 +1,14 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
 
+/**
+ * Custom Color Palette - CSS Variables
+ * Step 1: Define CSS variables for light and dark modes
+ */
 
 :root {
   --ui-bg: white;
-}
-
-.dark {
-  --ui-bg: var(--color-surface-mint);
-}
-
-/**
- * Custom Color Palette
- * Semantic color names for carbon watch theme
- * Usage: bg-surface-mint, text-green-pure, border-accent-yellow, etc.
- * Dark mode: automatically switches to -dark variants when dark mode is active
- */
-@theme {
+  
   /* Background & Surface Colors */
   --color-surface-mint: #F0F4F2;
   --color-surface-warm: #D9D7CA;
@@ -38,25 +30,42 @@
 
 /* Dark Mode Color Variants */
 .dark {
-  @theme {
-    /* Background & Surface Colors - darker, muted */
-    --color-surface-mint: #1C2B23;
-    --color-surface-warm: #2B2A24;
-    
-    /* Text & Neutral Colors - lighter for readability */
-    --color-earth-brown: #C4BE9A;
-    
-    /* Green Scale - adjusted for dark backgrounds */
-    --color-green-mint: #5AE694;
-    --color-green-spring: #26C04F;
-    --color-green-pure: #05D915;
-    --color-green-deep: #3A9D63;
-    --color-green-forest: #0A8F0A;
-    
-    /* Accent Colors - slightly adjusted brightness */
-    --color-accent-yellow: #F5C71A;
-    --color-accent-red: #FF4040;
-  }
+  --ui-bg: #1C2B23;
+  
+  /* Background & Surface Colors - darker, muted */
+  --color-surface-mint: #1C2B23;
+  --color-surface-warm: #2B2A24;
+  
+  /* Text & Neutral Colors - lighter for readability */
+  --color-earth-brown: #C4BE9A;
+  
+  /* Green Scale - adjusted for dark backgrounds */
+  --color-green-mint: #5AE694;
+  --color-green-spring: #26C04F;
+  --color-green-pure: #05D915;
+  --color-green-deep: #3A9D63;
+  --color-green-forest: #0A8F0A;
+  
+  /* Accent Colors - slightly adjusted brightness */
+  --color-accent-yellow: #F5C71A;
+  --color-accent-red: #FF4040;
+}
+
+/**
+ * Step 2: Map CSS variables to Tailwind theme colors
+ * This allows using: bg-surface-mint, text-green-pure, etc.
+ */
+@theme {
+  --color-surface-mint: var(--color-surface-mint);
+  --color-surface-warm: var(--color-surface-warm);
+  --color-earth-brown: var(--color-earth-brown);
+  --color-green-mint: var(--color-green-mint);
+  --color-green-spring: var(--color-green-spring);
+  --color-green-pure: var(--color-green-pure);
+  --color-green-deep: var(--color-green-deep);
+  --color-green-forest: var(--color-green-forest);
+  --color-accent-yellow: var(--color-accent-yellow);
+  --color-accent-red: var(--color-accent-red);
 }
 
 /**
