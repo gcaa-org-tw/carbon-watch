@@ -14,6 +14,7 @@ import { google } from 'googleapis';
 import { writeFileSync, mkdirSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { Logger } from './lib/logger.js';
 
 // Get directory path for ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -25,40 +26,6 @@ const SPREADSHEET_ID = process.env.GOOGLE_SHEETS_ID;
 
 // Output directory for raw CSV files
 const RAW_DATA_DIR = join(__dirname, '..', 'raw-data');
-
-/**
- * Logger for transparency and traceability
- */
-class Logger {
-  private startTime: number;
-
-  constructor() {
-    this.startTime = Date.now();
-  }
-
-  info(message: string) {
-    const timestamp = new Date().toISOString();
-    console.log(`[INFO] ${timestamp} - ${message}`);
-  }
-
-  success(message: string) {
-    const timestamp = new Date().toISOString();
-    console.log(`[SUCCESS] ${timestamp} - ${message}`);
-  }
-
-  error(message: string, error?: unknown) {
-    const timestamp = new Date().toISOString();
-    console.error(`[ERROR] ${timestamp} - ${message}`);
-    if (error) {
-      console.error(error);
-    }
-  }
-
-  logDuration() {
-    const duration = ((Date.now() - this.startTime) / 1000).toFixed(2);
-    this.info(`Total execution time: ${duration}s`);
-  }
-}
 
 /**
  * Convert 2D array to CSV string

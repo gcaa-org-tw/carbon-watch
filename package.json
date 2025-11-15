@@ -9,7 +9,8 @@
     "preview": "nuxt preview",
     "lint": "eslint --ext .js,.ts,.vue .",
     "download-data": "tsx tools/download-raw-data.ts",
-    "transform-fund-data": "tsx tools/transform-fund-data.ts"
+    "transform-fund-data": "tsx tools/transform-fund-data.ts",
+    "transform-company-data": "tsx tools/transform-company-data.ts"
   },
   "dependencies": {
     "@nuxt/content": "^3.8.0",
