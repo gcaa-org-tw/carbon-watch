@@ -1,14 +1,44 @@
 <script setup lang="ts">
 import type { CompanyData } from '~/types/company'
 
+interface FundData {
+  meta: {
+    基金代號: string
+    基金名稱: string
+    總市值: number
+    排碳大戶家數: number
+    排碳大戶佔比: number
+    排碳大戶總碳排量: number
+    使用燃煤家數: number
+  }
+  companies: CompanyData[]
+}
+
 const route = useRoute()
 const { mode } = useViewMode()
 
 // Get fund code from route params
 const fundCode = computed(() => route.params.slug as string)
 
-// Load fund data
-const fundData = await import(`~/assets/data/funds/${fundCode.value}.json`).then(m => m.default)
+// Load fund data with error handling
+let fundData: FundData | null = null
+let loadError = false
+
+try {
+  fundData = await import(`~/assets/data/funds/${fundCode.value}.json`).then(m => m.default)
+} catch (error) {
+  loadError = true
+  console.error(`Fund code ${fundCode.value} not found`, error)
+}
+
+// If fund not found, show 404
+if (loadError || !fundData) {
+  throw createError({
+    statusCode: 404,
+    statusMessage: '找不到此基金',
+    message: `基金代號 ${fundCode.value} 不存在`,
+  })
+}
 
 // Convert fund companies to CompanyData format
 const companies = computed<CompanyData[]>(() => {
