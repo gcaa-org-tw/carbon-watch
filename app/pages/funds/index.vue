@@ -2,6 +2,7 @@
 import type { TableColumn } from '@nuxt/ui'
 import type { Column } from '@tanstack/vue-table'
 import fundListData from '~/assets/data/fund-list.json'
+import { Icon } from '#components'
 
 interface FundData {
   基金代號: string
@@ -69,7 +70,7 @@ const columns: TableColumn<FundData>[] = [
           }
         },
         [
-          h('span', { class: 'i-heroicons-link-20-solid text-sm text-gray-400 group-hover:text-green-pure transition-colors' }),
+          h(Icon, { name: 'heroicons:link-20-solid', class: 'text-sm text-gray-400 group-hover:text-green-pure transition-colors' }),
           h('span', row.original.基金代號)
         ]
       )
