@@ -14,6 +14,24 @@ interface FundData {
   使用燃煤家數: number
 }
 
+// SEO metadata
+useSeoMeta({
+  title: '投資基金觀測表 - 台灣基金碳排放分析 | 碳排大戶觀測站',
+  description: '追蹤台灣投資基金的排碳大戶投資狀況，分析基金持股企業碳排放、燃煤使用等環境指標。協助投資人做出更負責任的投資決策。',
+})
+
+useHead({
+  htmlAttrs: {
+    lang: 'zh-TW'
+  },
+  link: [
+    {
+      rel: 'canonical',
+      href: 'https://carbon-watch.gcaa.org.tw/funds'
+    }
+  ]
+})
+
 // Get view mode
 const { isPro } = useViewMode()
 

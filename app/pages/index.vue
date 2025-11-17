@@ -7,6 +7,24 @@ definePageMeta({
   layout: 'landing'
 })
 
+// SEO metadata
+useSeoMeta({
+  title: '碳排大戶觀測站 - 台灣企業碳排放追蹤與分析',
+  description: '台灣企業碳排放觀測平台，追蹤排碳大戶、分析區域排放量、檢視投資基金碳排表現。綠盟十項檢驗標準，協助您快速辨識企業環境責任表現。',
+})
+
+useHead({
+  htmlAttrs: {
+    lang: 'zh-TW'
+  },
+  link: [
+    {
+      rel: 'canonical',
+      href: 'https://carbon-watch.gcaa.org.tw/'
+    }
+  ]
+})
+
 // Get top 10 companies
 const top10Companies = top10CompaniesData as CompanyData[]
 </script>

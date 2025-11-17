@@ -6,6 +6,24 @@ const { data: page } = await useAsyncData('methodology', () => {
 if (!page.value) {
   throw createError({ statusCode: 404, statusMessage: 'Page not found', fatal: true })
 }
+
+// SEO metadata
+useSeoMeta({
+  title: '關於氣候績效指標 | 碳排大戶觀測站',
+  description: '了解綠盟制定的十項企業碳排放檢驗標準。參考國際標準，綜合承諾、實作進度等指標，協助快速辨識企業環境表現與減碳責任。',
+})
+
+useHead({
+  htmlAttrs: {
+    lang: 'zh-TW'
+  },
+  link: [
+    {
+      rel: 'canonical',
+      href: 'https://carbon-watch.gcaa.org.tw/methodology'
+    }
+  ]
+})
 </script>
 
 <template>
