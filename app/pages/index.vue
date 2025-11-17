@@ -31,6 +31,9 @@ const top10Companies = top10CompaniesData as CompanyData[]
       </template>
     </UPageHero>
 
+    <!-- Region Emission Map Section -->
+    <RegionEmissionSection />
+
     <!-- Top 10 Companies Section -->
     <UPageHero
       title="觀測企業清單 Top 10"
