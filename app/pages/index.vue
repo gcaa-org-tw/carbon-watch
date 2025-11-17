@@ -17,7 +17,7 @@ const top10Companies = top10CompaniesData as CompanyData[]
     <RegionEmissionSection />
 
     <!-- Methodology Section -->
-    <div class="py-8">
+    <div class="py-12">
       <ContentContainer>
         <UPageHero
           title="綠盟的十項檢驗標準"
@@ -44,7 +44,7 @@ const top10Companies = top10CompaniesData as CompanyData[]
     </div>
 
     <!-- Top 10 Companies Section -->
-    <div class="py-8">
+    <div class="py-6 top-10-section">
       <ContentContainer>
         <UPageHero
           title="觀測企業清單 Top 10"
@@ -71,5 +71,9 @@ const top10Companies = top10CompaniesData as CompanyData[]
 
 .custom-hero :deep(h1) {
   font-size: 2.25rem;
+}
+
+.top-10-section {
+  background: linear-gradient(to bottom right, var(--color-surface-mint, #e0f2f1), var(--color-surface-warm, #f5f5dc));
 }
 </style>

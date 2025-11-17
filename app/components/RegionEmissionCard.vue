@@ -28,16 +28,16 @@ const formattedEmissions = computed(() => {
   >
     <div class="flex justify-between items-center gap-4">
       <div class="flex-1 min-w-0">
-        <h3 class="text-xl font-semibold text-green-deep dark:text-green-mint mb-2 flex items-baseline gap-2 flex-wrap">
+        <h3 class="text-xl sm:text-xl text-lg font-semibold text-green-deep dark:text-green-mint mb-2 flex items-baseline gap-2 flex-wrap">
           {{ 縣市 }} 
-          <span class="text-sm font-normal text-gray-600 dark:text-gray-400">| {{ 企業數 }} 家企業</span>
+          <span class="text-sm sm:text-sm text-xs font-normal text-gray-600 dark:text-gray-400">| {{ 企業數 }} 家企業</span>
         </h3>
-        <p class="text-base text-gray-800 dark:text-gray-200 m-0">
+        <p class="text-base sm:text-base text-sm text-gray-800 dark:text-gray-200 m-0">
           {{ formattedEmissions }} 公噸 CO<sub class="text-xs">2</sub>e
         </p>
       </div>
       <div class="flex-shrink-0">
-        <div class="text-3xl font-bold text-earth-brown dark:text-green-mint text-right leading-none">
+        <div class="sm:text-3xl text-2xl font-bold text-earth-brown dark:text-green-mint text-right leading-none">
           {{ 總排放量佔比 }}%
         </div>
       </div>
@@ -46,17 +46,6 @@ const formattedEmissions = computed(() => {
 </template>
 
 <style scoped>
-/* Mobile responsive adjustments */
-@media (max-width: 640px) {
-  h3 {
-    font-size: 1.125rem;
-  }
-  
-  .text-3xl {
-    font-size: 1.75rem;
-  }
-}
-
 /* Blink animation */
 @keyframes blink {
   0%, 100% {

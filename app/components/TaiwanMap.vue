@@ -26,6 +26,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<{
   regionClick: [regionName: string]
+  mapLoaded: []
 }>()
 
 const svgRef = ref<SVGSVGElement | null>(null)
@@ -160,6 +161,9 @@ const initMap = async () => {
       svg.call(zoom)
     }
   }
+  
+  // Emit map loaded event
+  emit('mapLoaded')
 }
 
 const updateHighlight = () => {
@@ -208,7 +212,9 @@ const zoomToRegion = async (regionName: string) => {
   const dy = bounds[1][1] - bounds[0][1]
   const x = (bounds[0][0] + bounds[1][0]) / 2
   const y = (bounds[0][1] + bounds[1][1]) / 2
-  const scale = Math.min(8, 0.9 / Math.max(dx / width, dy / height))
+  
+  // Reduce zoom level to show more context (0.5 instead of 0.9)
+  const scale = Math.min(8, 0.5 / Math.max(dx / width, dy / height))
   const translate: [number, number] = [width / 2 - scale * x, height / 2 - scale * y]
 
   // Animate zoom

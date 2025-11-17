@@ -17,6 +17,7 @@ const carouselRef = ref<HTMLDivElement | null>(null)
 const cardsContainerRef = ref<HTMLDivElement | null>(null)
 const isPhone = ref(false)
 const blinkingRegion = ref<string | null>(null)
+const mapLoaded = ref(false)
 
 // Get list of valid region names
 const validRegionNames = computed(() => regions.map(r => r.縣市))
@@ -111,6 +112,22 @@ const handleCardHover = (regionName: string | null) => {
     highlightedRegion.value = regionName
   }
 }
+
+// Handle map loaded event
+const handleMapLoaded = () => {
+  mapLoaded.value = true
+  
+  // On mobile, scroll to first card (already at index 0)
+  if (isPhone.value && carouselRef.value) {
+    // Ensure we're at the first card
+    carouselRef.value.scrollLeft = 0
+  }
+}
+
+// Computed property to check if we should show mobile carousel
+const showMobileCarousel = computed(() => {
+  return isPhone.value && mapLoaded.value
+})
 </script>
 
 <template>
@@ -122,14 +139,16 @@ const handleCardHover = (regionName: string | null) => {
       
       <!-- Mobile Layout -->
       <div v-if="isPhone" class="flex flex-col gap-4" style="height: calc(80vh - 6rem);">
-        <div class="flex-1 min-h-0">
+        <div :class="showMobileCarousel ? 'flex-1 min-h-0' : 'flex-1'">
           <TaiwanMap 
             :focused-region="focusedRegion"
             :allow-zoom="true"
+            @map-loaded="handleMapLoaded"
           />
         </div>
         
         <div 
+          v-show="showMobileCarousel"
           ref="carouselRef"
           class="flex-shrink-0 flex gap-4 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-4 pt-2"
           style="-webkit-overflow-scrolling: touch;"
