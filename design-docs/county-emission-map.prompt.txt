@@ -1,0 +1,44 @@
+## my
+
+Add 排碳縣市分佈 hero section. Make it as component & sub component, if necessary for modulization & readability.
+
+- title: 排碳縣市分佈
+- the main content show a Taiwan map + per county carbon emission info card
+- the map is tw-counties.json, a topo json, which can be zoom & pan
+   - for zoom, we need to zoom into county level programmatically
+   - for zoom & pan, it will require 2 finger to trigger in mobile device, so to avoid confusion between page scroll and map pan
+  - note that 
+   - find proper library to support above functionality
+- the per county emission card use `region-emission-list.json`, which is already ordered by emission
+
+## Overall layout for phone version
+
+1. For phone version, the secion is 90vh height
+2. below title, map take the remaining space
+   a. user can pan/zoom the map using 2 fingers
+3. Use full width horizontal carousel to show list of county emission, each card width should take 70vw, so we can see next card a little bit
+   a. On new card shows up, zoom the map to corresponding county on map w/ animation, highlight the county, user should still see other counties around.
+4. On click on the card, jump to `/companies[/pro]?region=<target county>
+
+## Overall layout for tablet and wider screen
+
+1. the secion is 90vh height
+2. below title, use 2 columns to display map (left) and the county list (right)
+   a. zoom/pan the map is not allowed, always show entire Taiwan map
+   b. On hover the county card, highlight the county on the map
+   c. the height of county list is the same as the map, use scroll bar if overflow
+   c. On click the count on the map, scroll corresponding card into view
+4. On click on the card, jump to `/companies[/pro]?region=<target county>
+
+## county emission card layout
+
+1. Left
+   a. Title: <county name> | <N> 家企業
+   b. <總排放量>公噸 CO2e
+2. Right
+   c. <總排放量佔比>%, larger text
+
+## color detail
+
+1. Use surface-warm as section bg
+2. Use earth-brown as map & county border

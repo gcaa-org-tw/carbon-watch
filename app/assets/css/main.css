@@ -15,6 +15,7 @@
   
   /* Text & Neutral Colors */
   --color-earth-brown: #5C573D;
+  --color-earth-brown-light: #D2691E;
   
   /* Green Scale - Primary Brand Colors */
   --color-green-mint: #73FFAD;
@@ -39,6 +40,7 @@
   
   /* Text & Neutral Colors - lighter for readability */
   --color-earth-brown: #C4BE9A;
+  --color-earth-brown-light: #E8A87C;
   
   /* Green Scale - adjusted for dark backgrounds */
   --color-green-mint: #5AE694;
@@ -61,6 +63,7 @@
   --color-surface-mint: var(--color-surface-mint);
   --color-surface-warm: var(--color-surface-warm);
   --color-earth-brown: var(--color-earth-brown);
+  --color-earth-brown-light: var(--color-earth-brown-light);
   --color-green-mint: var(--color-green-mint);
   --color-green-spring: var(--color-green-spring);
   --color-green-pure: var(--color-green-pure);

@@ -34,6 +34,9 @@ jobs:
       - name: Transform fund data
         run: npm run transform-fund-data
       
+      - name: Transform region map data
+        run: npm run transform-region-map-data
+      
       - name: Commit and push changes
         run: |
           git config --global user.name 'github-actions[bot]'
