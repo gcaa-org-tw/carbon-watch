@@ -5,6 +5,7 @@ interface Props {
   總排放量佔比: number
   企業數: number
   isActive?: boolean
+  shouldBlink?: boolean
 }
 
 const props = defineProps<Props>()
@@ -17,108 +18,81 @@ const formattedEmissions = computed(() => {
 
 <template>
   <div 
-    class="region-emission-card"
-    :class="{ 'is-active': isActive }"
+    class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-md transition-all duration-300 cursor-pointer border-2"
+    :class="[
+      isActive 
+        ? 'border-earth-brown dark:border-green-mint shadow-lg' 
+        : 'border-transparent hover:shadow-xl hover:-translate-y-0.5',
+      shouldBlink ? 'blink-animation' : ''
+    ]"
   >
-    <div class="card-content">
-      <div class="card-left">
-        <h3 class="card-title">
-          {{ 縣市 }} <span class="company-count">| {{ 企業數 }} 家企業</span>
+    <div class="flex justify-between items-center gap-4">
+      <div class="flex-1 min-w-0">
+        <h3 class="text-xl font-semibold text-green-deep dark:text-green-mint mb-2 flex items-baseline gap-2 flex-wrap">
+          {{ 縣市 }} 
+          <span class="text-sm font-normal text-gray-600 dark:text-gray-400">| {{ 企業數 }} 家企業</span>
         </h3>
-        <p class="emissions-amount">
-          {{ formattedEmissions }} 公噸 CO<sub>2</sub>e
+        <p class="text-base text-gray-800 dark:text-gray-200 m-0">
+          {{ formattedEmissions }} 公噸 CO<sub class="text-xs">2</sub>e
         </p>
       </div>
-      <div class="card-right">
-        <div class="percentage">{{ 總排放量佔比 }}%</div>
+      <div class="flex-shrink-0">
+        <div class="text-3xl font-bold text-earth-brown dark:text-green-mint text-right leading-none">
+          {{ 總排放量佔比 }}%
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-.region-emission-card {
-  background: white;
-  border-radius: 12px;
-  padding: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
-  cursor: pointer;
-  border: 2px solid transparent;
-}
-
-.region-emission-card:hover {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-  transform: translateY(-2px);
-}
-
-.region-emission-card.is-active {
-  border-color: var(--color-earth-brown, #8B4513);
-  box-shadow: 0 4px 16px rgba(139, 69, 19, 0.2);
-}
-
-.card-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1rem;
-}
-
-.card-left {
-  flex: 1;
-  min-width: 0;
-}
-
-.card-title {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: var(--color-green-deep, #1a472a);
-  margin: 0 0 0.5rem 0;
-  display: flex;
-  align-items: baseline;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.company-count {
-  font-size: 0.875rem;
-  font-weight: 400;
-  color: var(--color-text-secondary, #666);
-}
-
-.emissions-amount {
-  font-size: 1rem;
-  color: var(--color-text-primary, #333);
-  margin: 0;
-}
-
-.emissions-amount sub {
-  font-size: 0.75em;
-}
-
-.card-right {
-  flex-shrink: 0;
-}
-
-.percentage {
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--color-earth-brown, #8B4513);
-  text-align: right;
-  line-height: 1;
-}
-
+/* Mobile responsive adjustments */
 @media (max-width: 640px) {
-  .card-title {
+  h3 {
     font-size: 1.125rem;
   }
   
-  .percentage {
+  .text-3xl {
     font-size: 1.75rem;
   }
-  
-  .region-emission-card {
-    padding: 1.25rem;
+}
+
+/* Blink animation */
+@keyframes blink {
+  0%, 100% {
+    background-color: white;
   }
+  25% {
+    background-color: #f5deb3;
+  }
+  50% {
+    background-color: white;
+  }
+  75% {
+    background-color: #f5deb3;
+  }
+}
+
+@keyframes blink-dark {
+  0%, 100% {
+    background-color: rgb(31, 41, 55);
+  }
+  25% {
+    background-color: rgb(16, 56, 48);
+  }
+  50% {
+    background-color: rgb(31, 41, 55);
+  }
+  75% {
+    background-color: rgb(16, 56, 48);
+  }
+}
+
+.blink-animation {
+  animation: blink 3s ease-in-out;
+}
+
+.dark .blink-animation {
+  animation: blink-dark 3s ease-in-out;
 }
 </style>

@@ -14,7 +14,12 @@ const regions = regionEmissionList as RegionEmission[]
 const activeCardIndex = ref(0)
 const highlightedRegion = ref<string | null>(null)
 const carouselRef = ref<HTMLDivElement | null>(null)
+const cardsContainerRef = ref<HTMLDivElement | null>(null)
 const isPhone = ref(false)
+const blinkingRegion = ref<string | null>(null)
+
+// Get list of valid region names
+const validRegionNames = computed(() => regions.map(r => r.縣市))
 
 // Check if device is mobile
 onMounted(() => {
@@ -25,8 +30,26 @@ onMounted(() => {
   checkViewport()
   window.addEventListener('resize', checkViewport)
   
+  // Prevent body scroll when scrolling inside cards container
+  const handleWheel = (e: WheelEvent) => {
+    if (!cardsContainerRef.value) return
+    
+    const container = cardsContainerRef.value
+    const isScrollingDown = e.deltaY > 0
+    const isAtTop = container.scrollTop === 0
+    const isAtBottom = container.scrollTop + container.clientHeight >= container.scrollHeight - 1
+    
+    // Prevent body scroll if we're scrolling within bounds
+    if ((isScrollingDown && !isAtBottom) || (!isScrollingDown && !isAtTop)) {
+      e.stopPropagation()
+    }
+  }
+  
+  cardsContainerRef.value?.addEventListener('wheel', handleWheel, { passive: false })
+  
   return () => {
     window.removeEventListener('resize', checkViewport)
+    cardsContainerRef.value?.removeEventListener('wheel', handleWheel)
   }
 })
 
@@ -67,11 +90,19 @@ const handleMapClick = async (regionName: string) => {
   const regionIndex = regions.findIndex(r => r.縣市 === regionName)
   if (regionIndex === -1) return
   
-  // Scroll to card
+  // Trigger blink animation
+  blinkingRegion.value = regionName
+  
+  // Scroll to card with center alignment to ensure full visibility
   const cardElement = document.querySelector(`[data-region-index="${regionIndex}"]`)
   if (cardElement) {
-    cardElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    cardElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
   }
+  
+  // Remove blink animation after 3 seconds
+  setTimeout(() => {
+    blinkingRegion.value = null
+  }, 3000)
 }
 
 // Handle card hover on desktop
@@ -83,13 +114,15 @@ const handleCardHover = (regionName: string | null) => {
 </script>
 
 <template>
-  <section class="region-emission-section">
-    <ContentContainer>
-      <h2 class="section-title">排碳縣市分佈</h2>
+  <section class="bg-surface-warm py-8 min-h-[80vh]">
+    <div class="mx-auto w-full px-4" :class="isPhone ? 'max-w-[90rem]' : 'max-w-[80rem]'">
+      <h2 class="text-4xl font-bold text-green-deep dark:text-green-mint mb-8 text-center">
+        排碳縣市分佈
+      </h2>
       
       <!-- Mobile Layout -->
-      <div v-if="isPhone" class="mobile-layout">
-        <div class="map-container">
+      <div v-if="isPhone" class="flex flex-col gap-4" style="height: calc(80vh - 6rem);">
+        <div class="flex-1 min-h-0">
           <TaiwanMap 
             :focused-region="focusedRegion"
             :allow-zoom="true"
@@ -98,14 +131,16 @@ const handleCardHover = (regionName: string | null) => {
         
         <div 
           ref="carouselRef"
-          class="carousel"
+          class="flex-shrink-0 flex gap-4 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-4 pt-2"
+          style="-webkit-overflow-scrolling: touch;"
           @scroll="handleScroll"
         >
           <div
             v-for="(region, index) in regions"
             :key="region.縣市"
             :data-region-index="index"
-            class="carousel-item"
+            class="flex-none snap-start"
+            style="flex: 0 0 70vw;"
             @click="handleCardClick(region.縣市)"
           >
             <RegionEmissionCard
@@ -120,21 +155,22 @@ const handleCardHover = (regionName: string | null) => {
       </div>
       
       <!-- Desktop/Tablet Layout -->
-      <div v-else class="desktop-layout">
-        <div class="map-container">
+      <div v-else class="grid grid-cols-2 gap-16" style="height: calc(80vh - 6rem);">
+        <div class="h-full">
           <TaiwanMap 
             :highlighted-region="highlightedRegion"
             :allow-zoom="false"
+            :valid-regions="validRegionNames"
             @region-click="handleMapClick"
           />
         </div>
         
-        <div class="cards-container">
+        <div ref="cardsContainerRef" class="overflow-y-auto pr-2 flex flex-col gap-4">
           <div
             v-for="(region, index) in regions"
             :key="region.縣市"
             :data-region-index="index"
-            class="card-wrapper"
+            class="flex-shrink-0"
             @click="handleCardClick(region.縣市)"
             @mouseenter="handleCardHover(region.縣市)"
             @mouseleave="handleCardHover(null)"
@@ -144,131 +180,62 @@ const handleCardHover = (regionName: string | null) => {
               :總排放量="region.總排放量"
               :總排放量佔比="region.總排放量佔比"
               :企業數="region.企業數"
+              :should-blink="blinkingRegion === region.縣市"
             />
           </div>
         </div>
       </div>
-    </ContentContainer>
+    </div>
   </section>
 </template>
 
 <style scoped>
-.region-emission-section {
-  background: var(--color-surface-warm, #f5f5dc);
-  padding: 2rem 0;
-  min-height: 90vh;
-}
-
-.section-title {
-  font-size: 2.25rem;
-  font-weight: 700;
-  color: var(--color-green-deep, #1a472a);
-  margin: 0 0 2rem 0;
-  text-align: center;
-}
-
-/* Mobile Layout */
-.mobile-layout {
-  display: flex;
-  flex-direction: column;
-  height: calc(90vh - 6rem); /* Account for title and padding */
-  gap: 1rem;
-}
-
-.mobile-layout .map-container {
-  flex: 1;
-  min-height: 0;
-}
-
-.carousel {
-  flex-shrink: 0;
-  display: flex;
-  gap: 1rem;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  scroll-behavior: smooth;
-  padding: 0.5rem 0 1rem 0;
-  -webkit-overflow-scrolling: touch;
-}
-
-.carousel::-webkit-scrollbar {
+/* Carousel scrollbar styling */
+[ref="carouselRef"]::-webkit-scrollbar {
   height: 4px;
 }
 
-.carousel::-webkit-scrollbar-track {
+[ref="carouselRef"]::-webkit-scrollbar-track {
   background: rgba(0, 0, 0, 0.1);
   border-radius: 2px;
 }
 
-.carousel::-webkit-scrollbar-thumb {
+[ref="carouselRef"]::-webkit-scrollbar-thumb {
   background: var(--color-earth-brown, #8B4513);
   border-radius: 2px;
 }
 
-.carousel-item {
-  flex: 0 0 70vw;
-  scroll-snap-align: start;
-}
-
-/* Desktop/Tablet Layout */
-.desktop-layout {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2rem;
-  height: calc(90vh - 6rem); /* Account for title and padding */
-}
-
-.desktop-layout .map-container {
-  height: 100%;
-}
-
-.cards-container {
-  overflow-y: auto;
-  padding-right: 0.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.cards-container::-webkit-scrollbar {
+/* Cards container scrollbar styling */
+.overflow-y-auto::-webkit-scrollbar {
   width: 6px;
 }
 
-.cards-container::-webkit-scrollbar-track {
+.overflow-y-auto::-webkit-scrollbar-track {
   background: rgba(0, 0, 0, 0.05);
   border-radius: 3px;
 }
 
-.cards-container::-webkit-scrollbar-thumb {
+.overflow-y-auto::-webkit-scrollbar-thumb {
   background: var(--color-earth-brown, #8B4513);
   border-radius: 3px;
 }
 
-.card-wrapper {
-  flex-shrink: 0;
-}
-
-.map-container {
-  background: var(--color-surface-warm, #f5f5dc);
-  border-radius: 12px;
-  overflow: hidden;
-}
-
-/* Responsive adjustments */
-@media (min-width: 768px) and (max-width: 1024px) {
-  .desktop-layout {
-    grid-template-columns: 1.2fr 1fr;
-  }
-}
-
+/* Responsive title */
 @media (max-width: 767px) {
-  .section-title {
+  h2 {
     font-size: 1.75rem;
     margin-bottom: 1rem;
   }
   
-  .region-emission-section {
+  section {
     padding: 1rem 0;
+  }
+}
+
+/* Desktop grid adjustments for tablets */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .grid-cols-2 {
+    grid-template-columns: 1.2fr 1fr;
   }
 }
 </style>

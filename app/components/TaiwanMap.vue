@@ -9,6 +9,7 @@ interface Props {
   highlightedRegion?: string | null
   allowZoom?: boolean
   focusedRegion?: string | null
+  validRegions?: string[]
 }
 
 interface RegionProperties {
@@ -20,6 +21,7 @@ const props = withDefaults(defineProps<Props>(), {
   highlightedRegion: null,
   allowZoom: true,
   focusedRegion: null,
+  validRegions: () => [],
 })
 
 const emit = defineEmits<{
@@ -79,15 +81,22 @@ const initMap = async () => {
     .attr('fill', 'var(--color-surface-warm, #f5f5dc)')
     .attr('stroke', 'var(--color-earth-brown, #8B4513)')
     .attr('stroke-width', 1)
-    .style('cursor', 'pointer')
+    .style('cursor', (d: any) => {
+      const regionName = d.properties?.name
+      const isValid = props.validRegions.length === 0 || props.validRegions.includes(regionName)
+      return isValid ? 'pointer' : 'default'
+    })
     .on('click', function(_event: any, d: any) {
       const regionName = d.properties?.name
-      if (regionName) {
+      const isValid = props.validRegions.length === 0 || props.validRegions.includes(regionName)
+      if (regionName && isValid) {
         emit('regionClick', regionName)
       }
     })
-    .on('mouseenter', function(this: SVGPathElement) {
-      if (!props.focusedRegion) {
+    .on('mouseenter', function(this: SVGPathElement, _event: any, d: any) {
+      const regionName = d.properties?.name
+      const isValid = props.validRegions.length === 0 || props.validRegions.includes(regionName)
+      if (!props.focusedRegion && isValid) {
         d3.select(this)
           .attr('fill', 'var(--color-earth-brown-light, #D2691E)')
           .attr('stroke-width', 2)
@@ -110,26 +119,46 @@ const initMap = async () => {
         g?.attr('transform', event.transform)
       })
 
-    // For mobile, require 2 fingers
+    // For mobile, require 2 fingers for zoom/pan
     if ('ontouchstart' in window) {
-      let touchCount = 0
+      // Track touch state
+      let activeTouches = 0
+      
       svg.on('touchstart', function(event: TouchEvent) {
-        touchCount = event.touches.length
-        if (touchCount < 2) {
+        activeTouches = event.touches.length
+        // Only allow zoom/pan with 2+ fingers
+        if (activeTouches < 2) {
           event.preventDefault()
-          event.stopPropagation()
+          return false
         }
-      })
+      }, { passive: false })
       
       svg.on('touchmove', function(event: TouchEvent) {
-        if (event.touches.length < 2) {
+        activeTouches = event.touches.length
+        // Only allow zoom/pan with 2+ fingers
+        if (activeTouches < 2) {
           event.preventDefault()
-          event.stopPropagation()
+          return false
         }
+      }, { passive: false })
+      
+      svg.on('touchend', function(event: TouchEvent) {
+        activeTouches = event.touches.length
       })
+      
+      // Apply zoom with touch filter
+      svg.call(zoom.filter((event: any) => {
+        // For touch events, only allow if 2+ touches
+        if (event.type.startsWith('touch')) {
+          return event.touches && event.touches.length >= 2
+        }
+        // Allow all other events (mouse, etc)
+        return true
+      }))
+    } else {
+      // Desktop: normal zoom behavior
+      svg.call(zoom)
     }
-
-    svg.call(zoom)
   }
 }
 
@@ -232,27 +261,13 @@ onMounted(() => {
 </script>
 
 <template>
-  <div ref="containerRef" class="taiwan-map-container">
-    <svg ref="svgRef" class="taiwan-map" />
+  <div ref="containerRef" class="w-full h-full relative bg-surface-warm rounded-lg overflow-hidden">
+    <svg ref="svgRef" class="block touch-none" />
   </div>
 </template>
 
 <style scoped>
-.taiwan-map-container {
-  width: 100%;
-  height: 100%;
-  position: relative;
-  background: var(--color-surface-warm, #f5f5dc);
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.taiwan-map {
-  display: block;
-  touch-action: none;
-}
-
-.taiwan-map :deep(.county) {
+svg :deep(.county) {
   transition: fill 0.2s ease, stroke-width 0.2s ease;
 }
 </style>
