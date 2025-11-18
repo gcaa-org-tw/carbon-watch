@@ -32,7 +32,7 @@ interface SeoOptions {
    */
   content?: {
     title?: string
-    [key: string]: any
+    [key: string]: unknown
   }
 }
 
@@ -99,19 +99,16 @@ export function useSeo(options: SeoOptions = {}) {
   useSeoMeta(seoMeta)
   
   // Set HTML attributes and canonical link
-  const headConfig: any = {
+  const headConfig = {
     htmlAttrs: {
       lang: 'zh-TW',
     },
-  }
-  
-  if (canonical) {
-    headConfig.link = [
+    link: canonical ? [
       {
         rel: 'canonical',
         href: canonical,
       },
-    ]
+    ] : undefined,
   }
   
   useHead(headConfig)
