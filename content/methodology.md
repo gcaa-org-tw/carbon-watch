@@ -4,11 +4,11 @@ title: 企業氣候績效指標
 
 # 企業氣候績效指標制定方法
 
-綠色公民行動聯盟（綠盟）與台灣氣候行動網絡研究中心（TCAN），根據台灣《<a href="https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=O0020098" target="_blank">氣候變遷因應法</a>》、《<a href="https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=J0130095" target="_blank">一定契約容量以上之電力用戶應設置再生能源發電設備管理辦法</a>》、《<a href="https://gazette.nat.gov.tw/egFront/detail.do?metaid=154504" target="_blank">中華民國一百十四年至一百十七年能源用戶訂定節約能源目標及執行計畫規定</a>》及《<a href="https://www.selaw.com.tw/Chinese/RegulatoryInformationResult?sysNumber=LW10867094" target="_blank">上市公司編製與申報永續報告書作業辦法</a>》等規定，並參考聯合國2022年「<a href="https://www.un.org/sites/un2.un.org/files/high-level_expert_group_n7b.pdf" target="_blank">誠信第一（Integrity Matters）</a>」報告、國際組織SBTi、CDP、Climate Action 100+（CA100+）、Net Zero Tracker、World Benchmarking Alliance等制定的企業氣候績效指標內容，綜合整理為一套涵蓋三大面向、共十項指標的氣候績效檢核表。
+綠色公民行動聯盟（綠盟）與台灣氣候行動網絡研究中心（TCAN），根據台灣《<a href="https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=O0020098" target="_blank">氣候變遷因應法🔗</a>》、《<a href="https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=J0130095" target="_blank">一定契約容量以上之電力用戶應設置再生能源發電設備管理辦法🔗</a>》、《<a href="https://gazette.nat.gov.tw/egFront/detail.do?metaid=154504" target="_blank">中華民國一百十四年至一百十七年能源用戶訂定節約能源目標及執行計畫規定🔗</a>》及《<a href="https://www.selaw.com.tw/Chinese/RegulatoryInformationResult?sysNumber=LW10867094" target="_blank">上市公司編製與申報永續報告書作業辦法🔗</a>》等規定，並參考聯合國2022年「<a href="https://www.un.org/sites/un2.un.org/files/high-level_expert_group_n7b.pdf" target="_blank">誠信第一（Integrity Matters）🔗</a>」報告、國際組織SBTi、CDP、Climate Action 100+（CA100+）、Net Zero Tracker、World Benchmarking Alliance等制定的企業氣候績效指標內容，綜合整理為一套涵蓋三大面向、共十項指標的氣候績效檢核表。
 
 ## 指標檢視對象
 
-「排碳大戶觀測站」聚焦於環境部「<a href="https://ghgregistry.moenv.gov.tw/epa_ghg/Accession/PublicInformation.aspx" target="_blank">事業應盤查登錄及查驗溫室氣體排放量之排放源</a>」中，全廠（場）化石燃料燃燒之直接排放產生溫室氣體年排放量達2.5萬公噸二氧化碳當量者及全廠（場）化石燃料燃燒之直接排放及使用電力之間接排放產生溫室氣體年排放量達2.5萬公噸二氧化碳當量之製造業。資料來源以企業公開資訊為主，包括永續報告書、財務報告、官方排放資料、能源使用資訊與第三方查驗資料等。
+「排碳大戶觀測站」聚焦於環境部「<a href="https://ghgregistry.moenv.gov.tw/epa_ghg/Accession/PublicInformation.aspx" target="_blank">事業應盤查登錄及查驗溫室氣體排放量之排放源🔗</a>」，全廠（場）化石燃料燃燒之直接排放產生溫室氣體年排放量達2.5萬公噸二氧化碳當量者及全廠（場）化石燃料燃燒之直接排放及使用電力之間接排放產生溫室氣體年排放量達2.5萬公噸二氧化碳當量之製造業。資料來源以企業公開資訊為主，包括永續報告書、財務報告、官方排放資料、能源使用資訊與第三方查驗資料等。
 
 ## 指標三大面向
 
@@ -26,14 +26,14 @@ title: 企業氣候績效指標
 | :--: | :--: | -- |
 | 氣候承諾 | 1 | **承諾在2050年或更早實現淨零排放（範疇一+二）**<br><ul><li>台灣已於2022年宣布將於2050年達成淨零碳排，並將目標納入《氣候變遷因應法》，因此企業應與國家目標對齊，設定2050淨零排放目標，以符合國家淨零政策。</li></ul> |
 |  | 2 | **2030年的減量目標不低於國家目標（26%），或是有取得科學基礎減量目標（SBT）**<br><ul><li>台灣於2024年更新國家自定貢獻目標（NDC），將2030減量目標由24正負1加嚴為28正負2，因此以低標26%作為標準。由於各企業的減量基準年設定不一，我們統一以2019年作為基準年進行換算，讓資料具有可比性。</li><li>科學基礎減量目標（SBT）是協助企業訂定「符合《巴黎協定》（全球均溫升幅控制在工業化前的1.5°C）」 減碳目標的方法學，因此企業的減碳目標若能取得SBTi審核通過，則代表該企業已符合中期減量目標要求。</li></ul> |
-| 氣候行動 | 3 | **近三年的能源密集度（2022年-2024年）平均進步幅度達2%**<br><ul><li>工研院的「工業部門能源查核與效率管理計畫」年度執行報告顯示：我國工業部門近幾年的能源密集度年均進步率已高於2%，因此企業的能源密集度年均進步率也應達到2%的平均水準。</li><li>為求資料的統一性及可比較性，計算企業能源密集度的進步率時，以能源總消耗量除以總營收來進行分析。</li></ul> |
+| 氣候行動 | 3 | **近三年的能源密集度（2022年-2024年）平均進步幅度達2%**<br><ul><li>工研院的「工業部門能源查核與效率管理計畫」年度執行報告顯示：我國工業部門近幾年的能源密集度年均進步率已高於2%，因此企業的能源密集度年均進步率也應達到2%的平均水準。</li><li>為使資料具可比性，企業能源密集度進步率，以能源總消耗量除以總營收計算。</li></ul> |
 |  | 4 | **中期（2030年）的平均年節能率或年節電率目標大於1.5%**<br><ul><li>參考COP28倡議「2030年達成再生能源（裝置容量）增加2倍、能源效率年均改善從2%提升至4%」，以及經濟部於2025年公告「中華民國一百十四年至一百十七年能源用戶訂定節約能源目標及執行計畫規定」，針對契約用電容量合計達10,000瓩之公司，要求平均年節電率目標應達到1.5%。因此，企業所訂定的中期節能或節電目標應高於1.5%。</li></ul> |
 |  | 5 | **用電大戶完成法規要求「再生能源建置義務為契約容量的10%」**<br><ul><li>根據經濟部2021年實施的《一定契約容量以上之電力用戶應設置再生能源發電設備管理辦法》之規定，契約容量達5,000瓩以上的再生能源義務用戶，須於2025年前完成設置相當於契約容量10%的再生能源裝置。因此，企業應符合法規要求，達成法定設置目標。</li></ul> |
 |  | 6 | **說明既有法規義務之上的再生能源中長期規劃**<br><ul><li>台灣2030年電力結構目標為再生能源佔比達30%，因此，企業應響應國家目標，主動說明其在2030的中長期再生能源規劃策略，且應不低於政策目標（30%）。</li></ul> |
 |  | 7 | **說明關鍵減量策略的進展與未來規劃，包括該策略的執行及預期完成時間點、評量指標、預期減排量等**<br><ul><li>考量到不同產業的特殊性，若僅觀察能源效率或再生能源目標的表現，並不足以全盤了解其在氣候行動的實質進展。因此企業應主動說明其關鍵的減量策略（製程轉換或導入綠氫、或CCUS等技術），包含已經投入研發或預計執行的重大策略、當前進展、預期帶來的減排量、預計執行的時間點等。</li></ul> |
 | 資料透明度 | 8 | **揭露近三年範疇一及範疇二的排放量，以及範疇三主要類別的排放量**<br><ul><li>排碳大戶應完整揭露範疇一及二的排放量已是國際普遍共識，環境部自2016年起即針對高碳排行業及排碳大戶之製造業者，要求其盤查溫室氣體並登錄於事業溫室氣體排放量資訊平台。此外，隨著國際上對範疇三的揭露與減量要求越趨重視，企業也需盤查與揭露其範疇三主要類別的排放量，以利於公眾監督其實際減碳成效。</li></ul> |
-|  | 9 | **揭露當年度各類能源消費量（煤炭、石油、天然氣、非再生電力與再生電力），並且說明再生電力形式及佔比**<br><ul><li>企業的能源使用揭露是評估該企業是否確實轉型的重要指標，諸如燃煤、燃氣、再生能源使用占比等，企業應詳盡提出自身使用的能源種類及使用量，並明確說明再生能源使用狀況與取得方式。</li><li>若該企業當年度未使用再生能源電力，則此指標不適用。</li><li>為使資料具可比性，建議能源使用單位統一以十億焦耳（GJ）作為資訊揭露的標準。</li></ul> |
-|  | 10 | **揭露公司當年度「支持轉型至低碳經濟之產品/服務」之收入佔總營收之比例。公司須說明該低碳產品與服務之定義**<br><ul><li>我國2026-2028年將實施的IFRS-S2，以及CDP與CA100+等國際知名組織的揭露框架中，企業「支持轉型至低碳經濟之產品/服務」的收入佔比是瞭解企業低碳轉型進展的重要指標。</li><li>低碳產品與服務之定義可參考：EUTaxonomy，或新加坡-亞洲分類法，或台灣永續經濟活動認定參考指引2.0。</li><li>若企業未提供定義說明或定義模糊具爭議性，則不符合本指標要求。</li></ul> |
+|  | 9 | **揭露當年度各類能源消費量（煤炭、石油、天然氣、非再生電力與再生電力），並且說明再生電力形式及佔比**<br><ul><li>企業的能源使用揭露是評估該企業是否確實轉型的重要指標，諸如燃煤、燃氣、再生能源使用占比等，企業應詳盡提出自身使用的能源種類及使用量，並明確說明再生能源使用狀況與取得方式。</li><li>若該企業當年度未使用再生能源電力，則此指標不適用。</li><li>為使資料具可比性，能源使用單位統一以十億焦耳（GJ）作為資訊揭露的標準。</li></ul> |
+|  | 10 | **揭露公司當年度「支持轉型至低碳經濟之產品/服務」之收入佔總營收之比例。公司須說明該低碳產品與服務之定義**<br><ul><li>我國2026-2028年將實施的IFRS-S2，以及CDP與CA100+等國際知名組織的揭露框架中，企業「支持轉型至低碳經濟之產品/服務」的收入佔比是瞭解企業低碳轉型進展的重要指標。</li><li>低碳產品與服務之定義可參考：EU taxonomy，或新加坡-亞洲分類法，或台灣永續經濟活動認定參考指引2.0。</li><li>若企業未提供定義說明或定義模糊具爭議性，則不符合本指標要求。</li></ul> |
 
 ## 指標評估流程
 
@@ -52,31 +52,37 @@ title: 企業氣候績效指標
 
 # 資料來源
 
-本網站資料來自以下來源：
+「**排碳大戶觀測站**」資料來自以下來源：
 *	政府開放資料
 *	公開資訊觀測站
+*	基金資訊觀測站
 *	企業永續報告書
 *	經上述資料運算後之數據
-上述所有資料來源均為一般大眾可自行存取的開放資料，「排碳大戶觀測站」網站僅進行資料彙整、計算與再應用，並未修改任何原始數據及資料，資料正確性由原始提供者負責。
+上述所有資料來源均為一般大眾可自行存取的開放資料，本網站僅進行資料彙整、計算與再應用，並未修改任何原始數據及資料，資料正確性由原始提供者負責。
 
-## 使用之政府開放資料如下：
+## 政府開放資料：
 環境部：
-*	<a href="https://data.moenv.gov.tw/dataset/detail/GHG_P_01" target="_blank">溫室氣體年排放量</a>
-*	<a href="https://data.moenv.gov.tw/dataset/detail/GHG_P_02" target="_blank">國家溫室氣體排放清冊報告</a>
-*	<a href="https://data.moenv.gov.tw/dataset/detail/AQX_P_555" target="_blank">燃料季用量申報資料</a>
-*	<a href="https://data.moenv.gov.tw/dataset/detail/EMS_P_08" target="_blank">各工廠空氣污染物排放資料</a>
+*  <a href="https://data.moenv.gov.tw/dataset/detail/GHG_P_01" target="_blank">溫室氣體年排放量🔗</a>
+*  <a href="https://data.moenv.gov.tw/dataset/detail/GHG_P_02" target="_blank">國家溫室氣體排放清冊報告🔗</a>
+*  <a href="https://data.moenv.gov.tw/dataset/detail/AQX_P_555" target="_blank">燃料季用量申報資料🔗</a>
+*  <a href="https://data.moenv.gov.tw/dataset/detail/EMS_P_08" target="_blank">各工廠空氣污染物排放資料🔗</a>
 
 經濟部國際貿易署：
-*	<a href="https://www.greentrade.org.tw/content/%E8%87%BA%E7%81%A3%E5%9C%8B%E9%9A%9B%E6%B8%9B%E7%A2%B3%E5%80%A1%E8%AD%B0%E5%8F%83%E8%88%87%E4%BC%81%E6%A5%AD%E5%B9%B3%E5%8F%B0" target="_blank">臺灣加入國際減碳倡議企業動態儀表板</a>
+*  <a href="https://www.greentrade.org.tw/content/%E8%87%BA%E7%81%A3%E5%9C%8B%E9%9A%9B%E6%B8%9B%E7%A2%B3%E5%80%A1%E8%AD%B0%E5%8F%83%E8%88%87%E4%BC%81%E6%A5%AD%E5%B9%B3%E5%8F%B0" target="_blank">臺灣加入國際減碳倡議企業動態儀表板🔗</a>
 
 金融監督管理委員會證券期貨局：
-*	<a href="https://data.gov.tw/dataset/18419" target="_blank">上市公司基本資料</a>
-*	<a href="https://data.gov.tw/dataset/25036" target="_blank">上櫃股票基本資料</a>
-*	<a href="https://data.gov.tw/dataset/28568" target="_blank">興櫃公司基本資料</a>
-*	<a href="https://data.gov.tw/dataset/28567" target="_blank">公開發行公司基本資料</a>
+*  <a href="https://data.gov.tw/dataset/18419" target="_blank">上市公司基本資料🔗</a>
+*  <a href="https://data.gov.tw/dataset/25036" target="_blank">上櫃股票基本資料🔗</a>
+*  <a href="https://data.gov.tw/dataset/28568" target="_blank">興櫃公司基本資料🔗</a>
+*  <a href="https://data.gov.tw/dataset/28567" target="_blank">公開發行公司基本資料🔗</a>
 
 ## 公開資訊觀測站資料：
-*	<a href="https://mops.twse.com.tw/mops/#/web/t163sb04" target="_blank">公司營運資料－綜合損益表</a>
+*  <a href="https://mops.twse.com.tw/mops/#/web/t163sb04" target="_blank">公司營運資料－綜合損益表🔗</a>
+
+## 基金資訊觀測站資料：
+*  <a href="https://www.fundclear.com.tw/etf/product" target="_blank">基金營運資料－國內成分股ETF名單🔗</a>
+*  <a href="https://mopsov.twse.com.tw/mops/web/t78sb35_new" target="_blank">國內成分股ETF每季持股明細表🔗</a>
+
 
 ## 企業永續報告書資料使用說明：
 
