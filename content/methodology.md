@@ -58,6 +58,7 @@ title: 企業氣候績效指標
 *	基金資訊觀測站
 *	企業永續報告書
 *	經上述資料運算後之數據
+
 上述所有資料來源均為一般大眾可自行存取的開放資料，本網站僅進行資料彙整、計算與再應用，並未修改任何原始數據及資料，資料正確性由原始提供者負責。
 
 ## 政府開放資料：
@@ -78,10 +79,10 @@ title: 企業氣候績效指標
 
 ## 公開資訊觀測站資料：
 *  <a href="https://mops.twse.com.tw/mops/#/web/t163sb04" target="_blank">公司營運資料－綜合損益表🔗</a>
+*  <a href="https://mopsov.twse.com.tw/mops/web/t78sb35_new" target="_blank">國內成分股ETF每季持股明細表🔗</a>
 
 ## 基金資訊觀測站資料：
 *  <a href="https://www.fundclear.com.tw/etf/product" target="_blank">基金營運資料－國內成分股ETF名單🔗</a>
-*  <a href="https://mopsov.twse.com.tw/mops/web/t78sb35_new" target="_blank">國內成分股ETF每季持股明細表🔗</a>
 
 
 ## 企業永續報告書資料使用說明：
