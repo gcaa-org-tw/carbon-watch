@@ -8,6 +8,11 @@ const { data: page } = await useAsyncData('page-' + route.path, () => {
 if (!page.value) {
   throw createError({ statusCode: 404, statusMessage: 'Page not found', fatal: true })
 }
+
+// SEO metadata using unified helper - will use content title if available
+useSeo({
+  content: page.value,
+})
 </script>
 
 <template>

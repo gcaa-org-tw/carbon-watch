@@ -12,12 +12,10 @@ watch(mode, (newMode) => {
   }
 })
 
-// SEO metadata
-useHead({
+// SEO metadata using unified helper
+useSeo({
   title: '排碳大戶觀測企業清單 - 專業版',
-  meta: [
-    { name: 'description', content: '檢視台灣排碳大戶企業的詳細氣候數據與減碳策略' }
-  ]
+  description: '檢視台灣排碳大戶企業的詳細氣候數據與減碳策略',
 })
 </script>
 

@@ -22,12 +22,10 @@ watch(mode, (newMode) => {
   }
 })
 
-// SEO metadata
-useHead({
+// SEO metadata using unified helper
+useSeo({
   title: `${fundData.meta.基金名稱} - 基金詳情 - 專業版`,
-  meta: [
-    { name: 'description', content: `檢視${fundData.meta.基金名稱}投資的排碳大戶企業詳細資訊（專業版）` }
-  ]
+  description: `檢視${fundData.meta.基金名稱}投資的排碳大戶企業詳細資訊（專業版）`,
 })
 </script>
 
