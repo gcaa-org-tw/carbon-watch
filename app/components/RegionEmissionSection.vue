@@ -64,11 +64,12 @@ const focusedRegion = computed(() => {
 // Handle carousel scroll on mobile
 const handleScroll = () => {
   if (!carouselRef.value || !isPhone.value) return
-  
+
   const scrollLeft = carouselRef.value.scrollLeft
-  const cardWidth = carouselRef.value.offsetWidth * 0.7 + 16 // 70vw + gap
+  // Card uses 70vw (viewport width), not container width
+  const cardWidth = window.innerWidth * 0.7 + 16 // 70vw + gap
   const newIndex = Math.round(scrollLeft / cardWidth)
-  
+
   if (newIndex !== activeCardIndex.value) {
     activeCardIndex.value = newIndex
   }
