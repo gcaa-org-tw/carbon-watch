@@ -86,20 +86,25 @@ const handleCardClick = (region: string) => {
 // Handle map region click (desktop only)
 const handleMapClick = async (regionName: string) => {
   if (isPhone.value) return
-  
+
   // Find the card for this region
   const regionIndex = regions.findIndex(r => r.縣市 === regionName)
   if (regionIndex === -1) return
-  
+
   // Trigger blink animation
   blinkingRegion.value = regionName
-  
-  // Scroll to card with center alignment to ensure full visibility
-  const cardElement = document.querySelector(`[data-region-index="${regionIndex}"]`)
-  if (cardElement) {
-    cardElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
+
+  // Scroll within the cards container (not the whole page)
+  const cardElement = document.querySelector(`[data-region-index="${regionIndex}"]`) as HTMLElement | null
+  const container = cardsContainerRef.value
+  if (cardElement && container) {
+    const containerRect = container.getBoundingClientRect()
+    const cardRect = cardElement.getBoundingClientRect()
+    // Calculate scroll position to center the card in the container
+    const scrollTop = cardElement.offsetTop - container.offsetTop - (containerRect.height / 2) + (cardRect.height / 2)
+    container.scrollTo({ top: Math.max(0, scrollTop), behavior: 'smooth' })
   }
-  
+
   // Remove blink animation after 3 seconds
   setTimeout(() => {
     blinkingRegion.value = null
