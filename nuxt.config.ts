@@ -24,4 +24,5 @@ export default defineNuxtConfig({
       ignore: ['/funds/0055', '/funds/0055/pro'],
     },
   },
+  srcDir: 'app/',
 })
