@@ -1,4 +1,8 @@
 {
+  "permissions": {
+    "allow": ["mcp__playwright"],
+    "deny": []
+  },
   "PostToolUse": [
     {
       "matcher": "Write|Edit|MultiEdit",
