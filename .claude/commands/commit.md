@@ -1,4 +1,4 @@
-description: Generate a commit message from staged changes (ask before committing)
+description: Generate a commit message from staged changes
 allowed-tools: Bash(git status:*), Bash(git diff:*), Bash(git log:*), Bash(git commit:*)
 —
 
