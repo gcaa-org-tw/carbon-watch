@@ -112,19 +112,18 @@ const initMap = async () => {
         .attr('stroke-width', isHighlighted ? 2 : 1)
     })
 
-  // Setup zoom behavior
-  if (props.allowZoom) {
-    zoom = d3.zoom<SVGSVGElement, unknown>()
-      .scaleExtent([1, 8])
-      .on('zoom', (event) => {
-        g?.attr('transform', event.transform)
-      })
+  zoom = d3.zoom<SVGSVGElement, unknown>()
+    .scaleExtent([1, 8])
+    .on('zoom', (event) => {
+      g?.attr('transform', event.transform)
+    })
 
+  if (props.allowZoom) {
     // For mobile, require 2 fingers for zoom/pan
     if ('ontouchstart' in window) {
       // Track touch state
       let activeTouches = 0
-      
+
       svg.on('touchstart', function(event: TouchEvent) {
         activeTouches = event.touches.length
         // Only allow zoom/pan with 2+ fingers
@@ -133,7 +132,7 @@ const initMap = async () => {
           return false
         }
       }, { passive: false })
-      
+
       svg.on('touchmove', function(event: TouchEvent) {
         activeTouches = event.touches.length
         // Only allow zoom/pan with 2+ fingers
@@ -142,11 +141,11 @@ const initMap = async () => {
           return false
         }
       }, { passive: false })
-      
+
       svg.on('touchend', function(event: TouchEvent) {
         activeTouches = event.touches.length
       })
-      
+
       // Apply zoom with touch filter
       svg.call(zoom.filter((event: any) => {
         // For touch events, only allow if 2+ touches
@@ -213,7 +212,6 @@ const zoomToRegion = async (regionName: string) => {
   const x = (bounds[0][0] + bounds[1][0]) / 2
   const y = (bounds[0][1] + bounds[1][1]) / 2
   
-  // Reduce zoom level to show more context (0.5 instead of 0.9)
   const scale = Math.min(8, 0.5 / Math.max(dx / width, dy / height))
   const translate: [number, number] = [width / 2 - scale * x, height / 2 - scale * y]
 
@@ -234,8 +232,16 @@ const resetZoom = () => {
     .call(zoom.transform as any, d3.zoomIdentity)
 }
 
-watch(() => props.highlightedRegion, () => {
+watch(() => props.highlightedRegion, async (newRegion) => {
   updateHighlight()
+
+  // Zoom to highlighted region on desktop/tablet
+  if (newRegion) {
+    await nextTick()
+    await zoomToRegion(newRegion)
+  } else {
+    resetZoom()
+  }
 })
 
 watch(() => props.focusedRegion, async (newRegion) => {
