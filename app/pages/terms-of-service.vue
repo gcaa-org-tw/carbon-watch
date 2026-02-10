@@ -7,22 +7,11 @@ if (!page.value) {
   throw createError({ statusCode: 404, statusMessage: 'Page not found', fatal: true })
 }
 
-// SEO metadata
-useSeoMeta({
-  title: '免責聲明與資料來源 | 碳排大戶觀測站',
+// SEO metadata using unified helper
+useSeo({
+  title: '免責聲明與資料來源',
   description: '了解排碳大戶觀測站的使用條款、免責聲明與資料來源說明。',
-})
-
-useHead({
-  htmlAttrs: {
-    lang: 'zh-TW'
-  },
-  link: [
-    {
-      rel: 'canonical',
-      href: 'https://carbon-watch.gcaa.org.tw/terms-of-service'
-    }
-  ]
+  canonical: 'https://carbon-watch.gcaa.org.tw/terms-of-service',
 })
 </script>
 
