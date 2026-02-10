@@ -7,11 +7,13 @@ if (!page.value) {
   throw createError({ statusCode: 404, statusMessage: 'Page not found', fatal: true })
 }
 
+
 // SEO metadata using unified helper
 useSeo({
   title: '免責聲明與資料來源',
   description: '了解排碳大戶觀測站的使用條款、免責聲明與資料來源說明。',
   canonical: 'https://carbon-watch.gcaa.org.tw/terms-of-service',
+
 })
 </script>
 
