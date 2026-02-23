@@ -63,6 +63,48 @@ const parseParagraph = (value?: string): string => {
 const companyReductionStrategy = computed(() =>
   parseParagraph(props.company['有具體減量策略'])
 )
+
+// Net Zero Path Simulator data (mock baseline + real targets)
+const 基準年 = 2020
+const 基準年排放量 = computed(() => {
+  // Mock: baseline is ~10% higher than current emissions
+  return Math.round(companyEmission.value * 1.1)
+})
+
+const 現狀年 = new Date().getFullYear()
+const 中期目標年 = 2030
+const 中期減量目標 = computed(() => {
+  // Parse "28.0%" → 0.28
+  const raw = props.company['2030 年減量目標設定']
+  if (!raw) return 0.2 // default mock
+  const parsed = parseFloat(raw.replace('%', ''))
+  return isNaN(parsed) ? 0.2 : parsed / 100
+})
+const 中期預估排放量 = computed(() => {
+  return Math.round(基準年排放量.value * (1 - 0.15))
+})
+
+// Interpolate current year target: linear between base year and mid-term target
+const 現狀目標排放量 = computed(() => {
+  const totalYears = 中期目標年 - 基準年
+  const elapsed = 現狀年 - 基準年
+  const ratio = totalYears > 0 ? elapsed / totalYears : 0
+  const targetReduction = 中期減量目標.value * ratio
+  return Math.round(基準年排放量.value * (1 - targetReduction))
+})
+
+const 中期目標排放量 = computed(() => {
+  return Math.round(基準年排放量.value * (1 - 中期減量目標.value))
+})
+
+const 淨零目標年 = computed(() => {
+  const year = parseInt(props.company['淨零目標年'], 10)
+  return isNaN(year) ? 2050 : year
+})
+
+const 淨零年預估排放量 = computed(() => {
+ return Math.round(基準年排放量.value * (1 - 0.7))
+})
 </script>
 
 <template>
@@ -98,6 +140,20 @@ const companyReductionStrategy = computed(() =>
     <CompanyCoalUsageChart
       v-if="coalUsageData.length > 0"
       :data="coalUsageData"
+    />
+
+     <!-- Net Zero Path Simulator -->
+    <CompanyNetZeroPathChart
+      :基準年="基準年"
+      :基準年排放量="基準年排放量"
+      :現狀年="現狀年"
+      :現狀排放量="companyEmission"
+      :現狀目標排放量="現狀目標排放量"
+      :中期目標年="中期目標年"
+      :中期目標排放量="中期目標排放量"
+      :中期預估排放量="中期預估排放量"
+      :淨零目標年="淨零目標年"
+      :淨零年預估排放量="淨零年預估排放量"
     />
   </UCard>
 </template>
