@@ -32,6 +32,8 @@ Node.js 22+ required (see @.nvmrc)
 5. Do NOT rename data fields.
    - All schemas use Chinese field names.
 
+6. Component granularity rule.
+  - Keep components at section level. Only split when there is complex logic, reuse, or the file becomes too large.
 ---
 
 # UI System (Always Follow)

@@ -1,6 +1,10 @@
 {
   "permissions": {
-    "allow": ["mcp__playwright"],
+    "allow": [
+      "mcp__playwright",
+      "Bash(npm run build:*)",
+      "Bash(npm run lint:*)"
+    ],
     "deny": []
   },
   "PostToolUse": [
