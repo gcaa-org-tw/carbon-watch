@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { CompanyData } from '~/types/company'
+import coalUsageMap from '~/assets/data/coal-usage-map.json'
 
 interface Props {
   company: CompanyData
@@ -47,18 +48,11 @@ const regionEmissions = computed(() => {
   ]
 })
 
-// Coal usage historical data (mock data - will be replaced with real data)
+// Coal usage historical data from coal-usage-map.json (keyed by 公司全名)
 const coalUsageData = computed(() => {
-
-  // Generate mock historical data based on current value
-  return [
-    { year: 2020, value: Math.round(275883.3) },
-    { year: 2021, value: Math.round(678381.0) },
-    { year: 2022, value: Math.round(343964.1) },
-    { year: 2023, value: Math.round(309234.0) },
-    { year: 2024, value: Math.round(319759.0) },
-    { year: 2025, value: Math.round(150060.0) }
-  ]
+  const fullName = props.company['公司全名']
+  if (!fullName) return []
+  return (coalUsageMap as Record<string, Array<{ year: number; value: number }>>)[fullName] || []
 })
 
 const parseParagraph = (value?: string): string => {
