@@ -150,7 +150,7 @@ function drawRadarChart() {
     const sinA = Math.sin(angle)
 
     let x = labelOffset * cosA
-    let y = labelOffset * sinA
+    const y = labelOffset * sinA
 
     let textAnchor: string = 'middle'
     if (cosA > 0.3) {
