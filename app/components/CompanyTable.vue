@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { TableColumn } from '@nuxt/ui'
 import type { Column } from '@tanstack/vue-table'
+import { RouterLink } from 'vue-router'
 import type { CompanyData } from '~/types/company'
 import companyGradeMap from '~/assets/data/company-grade-map.json'
 
@@ -152,6 +153,17 @@ const nonProColumns: TableColumn<CompanyData>[] = [
     accessorKey: '公司',
     header: ({ column }) => createSortableHeader(column, '企業名稱'),
     enableSorting: true,
+    cell: ({ row }) =>{
+      const companyName = row.original['公司']
+      return h(
+        RouterLink,
+        {
+          to: `/companies/${encodeURIComponent(companyName)}`,
+          class: 'hover:underline'
+        },
+        () => companyName
+      )
+    }
   },
   {
     accessorKey: '產業分類',
@@ -273,6 +285,17 @@ const proColumns: TableColumn<CompanyData>[] = [
     accessorKey: '公司',
     header: ({ column }) => createSortableHeader(column, '企業名稱'),
     enableSorting: true,
+    cell: ({ row }) =>{
+      const companyName = row.original['公司']
+      return h(
+        RouterLink,
+        {
+          to: `/companies/${encodeURIComponent(companyName)}`,
+          class: 'hover:underline'
+        },
+        () => companyName
+      )
+    }
   },
   {
     accessorKey: '產業分類',
