@@ -73,7 +73,14 @@ useHead({
   margin-bottom: 0.75rem;
   line-height: 1.4;
 }
-
+  
+.methodology-content :deep(h2 a),
+.methodology-content :deep(h3 a) {
+  color: inherit;
+  text-decoration: none;
+  pointer-events: none;
+}
+  
 .terms-content :deep(p) {
   font-size: 1rem;
   line-height: 1.75;
