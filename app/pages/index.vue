@@ -9,8 +9,8 @@ definePageMeta({
 
 // SEO metadata
 useSeoMeta({
-  title: '碳排大戶觀測站 - 台灣企業碳排放追蹤與分析',
-  description: '台灣企業碳排放觀測平台，追蹤排碳大戶、分析區域排放量、檢視投資基金碳排表現。綠盟十項檢驗標準，協助您快速辨識企業環境責任表現。',
+  title: '排碳大戶觀測站 - 台灣排碳大戶氣候績效分析',
+  description: '追蹤台灣排碳大戶，分析溫室氣體排放與氣候表現、檢視基金永續作為，透過氣候績效方法論協助快速辨識企業氣候責任。',
 })
 
 useHead({
@@ -38,14 +38,15 @@ const top10Companies = top10CompaniesData as CompanyData[]
     <div class="py-12">
       <ContentContainer>
         <UPageHero
-          title="綠盟的十項檢驗標準"
-          description="我們制定了十項標準來檢驗企業組織在排碳上的表現"
+          title="氣候績效指標方法論"
+          description="依據法規與國際標準，制定企業氣候表現檢核表"
           class="methodology-section"
           :ui="{container: 'gap-6 sm:gap-6'}"
         >
           <template #description>
-            <p>我們制定了十項標準來檢驗企業組織在排碳上的表現</p>
-            <p>參考國際多項標準，綜合了承諾、實作進度等指標，協助快速辨識企業表現。</p>
+            <p>綠盟參考台灣氣候法規及國際標準，</p>
+            <p>制定涵蓋承諾、行動與透明度三大面向，</p>
+            <p>共十項指標的氣候績效檢核表，檢驗企業氣候表現。</p>
           </template>
           <template #links>
             <UButton
@@ -65,7 +66,7 @@ const top10Companies = top10CompaniesData as CompanyData[]
     <div class="py-6 top-10-section">
       <ContentContainer>
         <UPageHero
-          title="觀測企業清單 Top 10"
+          title="前十大溫室氣體排放企業"
           class="custom-hero"
           :ui="{container: 'gap-8 sm:gap-8'}"
         >
