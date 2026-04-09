@@ -5,9 +5,9 @@ const mobileMenuOpen = ref(false)
 const { isPro } = useViewMode()
 
 const menuItems = computed(() => [
-  { to: isPro.value ? '/companies/pro' : '/companies', label: '企業觀測清單' },
-  { to: '/funds', label: '基金觀測' },
-  { to: '/methodology', label: '綠盟的氣候績效指標' }
+  { to: isPro.value ? '/companies/pro' : '/companies', label: '了解企業表現' },
+  { to: '/funds', label: '了解基金表現' },
+  { to: '/methodology', label: '氣候績效指標方法論' }
 ])
 
 const toggleMobileMenu = () => {
