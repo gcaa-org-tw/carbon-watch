@@ -9,7 +9,7 @@ if (!page.value) {
 
 // SEO metadata
 useSeoMeta({
-  title: '免責聲明與資料來源 | 碳排大戶觀測站',
+  title: '免責聲明與資料來源 | 排碳大戶觀測站',
   description: '了解排碳大戶觀測站的使用條款、免責聲明與資料來源說明。',
 })
 
