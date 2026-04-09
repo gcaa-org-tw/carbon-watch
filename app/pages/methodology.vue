@@ -64,7 +64,14 @@ useHead({
   border-left: 4px solid var(--color-green-spring);
   padding-left: 1rem;
 }
-
+  
+.methodology-content :deep(h2 a),
+.methodology-content :deep(h3 a) {
+  color: inherit;
+  text-decoration: none;
+  pointer-events: none;
+}
+  
 .methodology-content :deep(p) {
   font-size: 1rem;
   line-height: 1.75;
