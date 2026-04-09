@@ -24,7 +24,7 @@
           
           <p class="text-earth-brown">
             <a 
-              href="https://gcaa.neticrm.tw/civicrm/contribute/transact?reset=1&id=41&utm_source=Web&utm_content=ESG_donate&utm_campaign=TB3" 
+              href="https://gcaa.neticrm.tw/civicrm/contribute/transact?reset=1&id=41&utm_source=Web&utm_content=ESG&utm_campaign=FOOT" 
               target="_blank" 
               rel="noopener noreferrer"
               class="font-medium hover:text-green-pure transition-colors underline"
