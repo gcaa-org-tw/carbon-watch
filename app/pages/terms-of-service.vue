@@ -74,8 +74,8 @@ useHead({
   line-height: 1.4;
 }
   
-.methodology-content :deep(h2 a),
-.methodology-content :deep(h3 a) {
+.terms-content :deep(h2 a),
+.terms-content :deep(h3 a) {
   color: inherit;
   text-decoration: none;
   pointer-events: none;
