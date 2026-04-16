@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { TableColumn } from '@nuxt/ui'
-import type { Column } from '@tanstack/vue-table'
+import type { Column, Row } from '@tanstack/vue-table'
 import { RouterLink } from 'vue-router'
 import type { CompanyData } from '~/types/company'
 import companyGradeMap from '~/assets/data/company-grade-map.json'
@@ -19,18 +19,34 @@ const props = withDefaults(defineProps<Props>(), {
 // Helper function to parse value (handle commas and percentages)
 const parseValue = (value: string | number): number => {
   if (typeof value === 'number') return value
-  
+
   // Remove commas and trim
   let cleanValue = value.replace(/,/g, '').trim()
-  
+
   // Handle percentage values (e.g., "28.0%")
   if (cleanValue.endsWith('%')) {
     cleanValue = cleanValue.slice(0, -1)
     const percentValue = parseFloat(cleanValue)
     return isNaN(percentValue) ? NaN : percentValue / 100
   }
-  
+
   return parseFloat(cleanValue)
+}
+
+// Numeric sort comparator: parses comma-formatted numbers and percentages before comparing.
+// Treats unparseable/empty values as the smallest rank so they sink to the bottom when sorting descending.
+const numericSortingFn = (rowA: Row<CompanyData>, rowB: Row<CompanyData>, columnId: string): number => {
+  const rawA = rowA.getValue(columnId)
+  const rawB = rowB.getValue(columnId)
+  const a = parseValue((rawA ?? '') as string | number)
+  const b = parseValue((rawB ?? '') as string | number)
+  const aIsNum = !isNaN(a)
+  const bIsNum = !isNaN(b)
+  if (!aIsNum && !bIsNum) return 0
+  if (!aIsNum) return -1
+  if (!bIsNum) return 1
+  if (a === b) return 0
+  return a < b ? -1 : 1
 }
 
 // Helper function to split header with units
@@ -174,6 +190,7 @@ const nonProColumns: TableColumn<CompanyData>[] = [
     accessorKey: '溫室氣體排放量（公噸二氧化碳當量）',
     header: ({ column }) => createSortableHeader(column, '溫室氣體排放量（公噸二氧化碳當量）', 'right'),
     enableSorting: true,
+    sortingFn: numericSortingFn,
     cell: ({ row }) => h('div', { class: 'text-right' }, row.original['溫室氣體排放量（公噸二氧化碳當量）']),
     meta: {
       class: {
@@ -185,12 +202,14 @@ const nonProColumns: TableColumn<CompanyData>[] = [
     accessorKey: '淨零目標年',
     header: ({ column }) => createSortableHeader(column, '淨零目標年'),
     enableSorting: true,
+    sortingFn: numericSortingFn,
   },
   {
     accessorKey: '2030 年減量目標設定',
     header: ({ column }) => createSortableHeader(column, '2030 年減量目標設定'),
     enableSorting: true,
-    cell: ({ row }) => h('div', { class: 'text-right' }, 
+    sortingFn: numericSortingFn,
+    cell: ({ row }) => h('div', { class: 'text-right' },
       renderValueWithGrade('2030 年減量目標設定', row.original['2030 年減量目標設定'], false)
     ),
   },
@@ -203,7 +222,8 @@ const nonProColumns: TableColumn<CompanyData>[] = [
     accessorKey: '2030年溫室氣體絕對減量目標',
     header: ({ column }) => createSortableHeader(column, '2030 年溫室氣體絕對減量目標'),
     enableSorting: true,
-    cell: ({ row }) => h('div', { class: 'flex justify-center' }, 
+    sortingFn: numericSortingFn,
+    cell: ({ row }) => h('div', { class: 'flex justify-center' },
       renderRadarGrade(row.original['2030年溫室氣體絕對減量目標'])
     ),
     meta: {
@@ -216,7 +236,8 @@ const nonProColumns: TableColumn<CompanyData>[] = [
     accessorKey: '2030年再生能源使用率目標',
     header: ({ column }) => createSortableHeader(column, '2030 年再生能源使用率目標'),
     enableSorting: true,
-    cell: ({ row }) => h('div', { class: 'flex justify-center' }, 
+    sortingFn: numericSortingFn,
+    cell: ({ row }) => h('div', { class: 'flex justify-center' },
       renderRadarGrade(row.original['2030年再生能源使用率目標'])
     ),
     meta: {
@@ -229,7 +250,8 @@ const nonProColumns: TableColumn<CompanyData>[] = [
     accessorKey: '2030年能源效率進步目標',
     header: ({ column }) => createSortableHeader(column, '2030 年能源效率進步目標'),
     enableSorting: true,
-    cell: ({ row }) => h('div', { class: 'flex justify-center' }, 
+    sortingFn: numericSortingFn,
+    cell: ({ row }) => h('div', { class: 'flex justify-center' },
       renderRadarGrade(row.original['2030年能源效率進步目標'])
     ),
     meta: {
@@ -242,7 +264,8 @@ const nonProColumns: TableColumn<CompanyData>[] = [
     accessorKey: '2024年再生能源使用率',
     header: ({ column }) => createSortableHeader(column, '去年再生能源使用率'),
     enableSorting: true,
-    cell: ({ row }) => h('div', { class: 'flex justify-center' }, 
+    sortingFn: numericSortingFn,
+    cell: ({ row }) => h('div', { class: 'flex justify-center' },
       renderRadarGrade(row.original['2024年再生能源使用率'])
     ),
     meta: {
@@ -255,7 +278,8 @@ const nonProColumns: TableColumn<CompanyData>[] = [
     accessorKey: '2022-2024年能源效率進步率',
     header: ({ column }) => createSortableHeader(column, '近三年能效進步率'),
     enableSorting: true,
-    cell: ({ row }) => h('div', { class: 'flex justify-center' }, 
+    sortingFn: numericSortingFn,
+    cell: ({ row }) => h('div', { class: 'flex justify-center' },
       renderRadarGrade(row.original['2022-2024年能源效率進步率'])
     ),
     meta: {
@@ -268,7 +292,8 @@ const nonProColumns: TableColumn<CompanyData>[] = [
     accessorKey: '範疇三減量規劃',
     header: ({ column }) => createSortableHeader(column, '範疇三減量規劃'),
     enableSorting: true,
-    cell: ({ row }) => h('div', { class: 'flex justify-center' }, 
+    sortingFn: numericSortingFn,
+    cell: ({ row }) => h('div', { class: 'flex justify-center' },
       renderRadarGrade(row.original['範疇三及減量策略'])
     ),
     meta: {
@@ -306,6 +331,7 @@ const proColumns: TableColumn<CompanyData>[] = [
     accessorKey: '溫室氣體排放量（公噸二氧化碳當量）',
     header: ({ column }) => createSortableHeader(column, '溫室氣體排放量（公噸二氧化碳當量）', 'right'),
     enableSorting: true,
+    sortingFn: numericSortingFn,
     cell: ({ row }) => h('div', { class: 'text-right' }, row.original['溫室氣體排放量（公噸二氧化碳當量）']),
     meta: {
       class: {
@@ -317,12 +343,14 @@ const proColumns: TableColumn<CompanyData>[] = [
     accessorKey: '淨零目標年',
     header: ({ column }) => createSortableHeader(column, '淨零目標年'),
     enableSorting: true,
+    sortingFn: numericSortingFn,
   },
   {
     accessorKey: '2030 年減量目標設定',
     header: ({ column }) => createSortableHeader(column, '2030 年減量目標設定'),
     enableSorting: true,
-    cell: ({ row }) => h('div', { class: 'text-right' }, 
+    sortingFn: numericSortingFn,
+    cell: ({ row }) => h('div', { class: 'text-right' },
       renderValueWithGrade('2030 年減量目標設定', row.original['2030 年減量目標設定'], false)
     ),
   },
@@ -375,6 +403,7 @@ const proColumns: TableColumn<CompanyData>[] = [
     accessorKey: '近三年能效進步率',
     header: ({ column }) => createSortableHeader(column, '近三年能效進步率'),
     enableSorting: true,
+    sortingFn: numericSortingFn,
     cell: ({ row }) => h('div', { class: 'text-right' }, row.original['近三年能效進步率']),
     meta: {
       class: {
@@ -386,6 +415,7 @@ const proColumns: TableColumn<CompanyData>[] = [
     accessorKey: '節能目標設定',
     header: ({ column }) => createSortableHeader(column, '節能目標設定'),
     enableSorting: true,
+    sortingFn: numericSortingFn,
     cell: ({ row }) => h('div', { class: 'text-right' }, row.original['節能目標設定']),
     meta: {
       class: {
@@ -397,6 +427,7 @@ const proColumns: TableColumn<CompanyData>[] = [
     accessorKey: '再生能源使用率',
     header: ({ column }) => createSortableHeader(column, '再生能源使用率'),
     enableSorting: true,
+    sortingFn: numericSortingFn,
     cell: ({ row }) => h('div', { class: 'text-right' }, row.original['再生能源使用率']),
     meta: {
       class: {
@@ -408,7 +439,8 @@ const proColumns: TableColumn<CompanyData>[] = [
     accessorKey: '再生能源設置容量',
     header: ({ column }) => createSortableHeader(column, '再生能源設置容量'),
     enableSorting: true,
-    cell: ({ row }) => h('div', { class: 'text-right' }, 
+    sortingFn: numericSortingFn,
+    cell: ({ row }) => h('div', { class: 'text-right' },
       renderValueWithGrade('再生能源設置容量', row.original['再生能源設置容量'], true)
     ),
     meta: {
@@ -432,6 +464,7 @@ const proColumns: TableColumn<CompanyData>[] = [
     accessorKey: '中期再生能源目標設定',
     header: ({ column }) => createSortableHeader(column, '中期再生能源目標設定'),
     enableSorting: true,
+    sortingFn: numericSortingFn,
     cell: ({ row }) => h('div', { class: 'text-right' }, row.original['中期再生能源目標設定']),
     meta: {
       class: {
@@ -454,7 +487,8 @@ const proColumns: TableColumn<CompanyData>[] = [
     accessorKey: '燃煤使用量（公噸）',
     header: ({ column }) => createSortableHeader(column, '燃煤使用量（公噸）', 'right'),
     enableSorting: true,
-    cell: ({ row }) => h('div', { class: 'text-right' }, 
+    sortingFn: numericSortingFn,
+    cell: ({ row }) => h('div', { class: 'text-right' },
       renderValueWithGrade('燃煤使用量（公噸）', row.original['燃煤使用量（公噸）'], true)
     ),
     meta: {
