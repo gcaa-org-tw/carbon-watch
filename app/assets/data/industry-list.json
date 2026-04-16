@@ -1,58 +1,62 @@
 [
   {
     "industry": "石化業",
-    "count": 35
+    "count": 74
   },
   {
     "industry": "半導體業",
-    "count": 28
-  },
-  {
-    "industry": "電子業",
-    "count": 19
+    "count": 48
   },
   {
     "industry": "鋼鐵業",
-    "count": 16
-  },
-  {
-    "industry": "光電業",
-    "count": 10
+    "count": 32
   },
   {
     "industry": "紡織業",
-    "count": 10
+    "count": 29
   },
   {
-    "industry": "水泥業",
-    "count": 6
+    "industry": "電子業",
+    "count": 24
   },
   {
-    "industry": "食品業",
-    "count": 6
-  },
-  {
-    "industry": "造紙業",
-    "count": 4
+    "industry": "光電業",
+    "count": 14
   },
   {
     "industry": "非金屬製品加工業",
-    "count": 4
+    "count": 13
+  },
+  {
+    "industry": "食品業",
+    "count": 12
+  },
+  {
+    "industry": "造紙業",
+    "count": 11
+  },
+  {
+    "industry": "水泥業",
+    "count": 8
   },
   {
     "industry": "銅製造業",
-    "count": 2
-  },
-  {
-    "industry": "鋁製造業",
-    "count": 2
+    "count": 6
   },
   {
     "industry": "汽機車業",
+    "count": 4
+  },
+  {
+    "industry": "鋁製造業",
+    "count": 3
+  },
+  {
+    "industry": "電池製造業",
     "count": 2
   },
   {
-    "industry": "眼鏡製造業",
+    "industry": "金屬加工用機械設備製造業",
     "count": 1
   },
   {
@@ -60,7 +64,11 @@
     "count": 1
   },
   {
-    "industry": "金屬加工用機械設備製造業",
+    "industry": "自行車業",
+    "count": 1
+  },
+  {
+    "industry": "眼鏡製造業",
     "count": 1
   },
   {
@@ -69,10 +77,6 @@
   },
   {
     "industry": "航空業",
-    "count": 1
-  },
-  {
-    "industry": "自行車業",
     "count": 1
   }
 ]
