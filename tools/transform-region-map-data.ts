@@ -200,22 +200,20 @@ function transformRegionEmissions(rawData: Record<string, string>[]): RegionEmis
     }
   });
   
-  // Convert map to array and filter out regions with zero emissions
+  // Convert map to array, including all counties (zero-emission ones show as 0)
   const regionList: RegionEmission[] = [];
   regionMap.forEach((data, region) => {
-    if (data.totalEmissions > 0) {
-      const emissions = Math.round(data.totalEmissions);
-      const percentage = totalEmissions > 0 
-        ? Math.round((data.totalEmissions / totalEmissions) * 10000) / 100 
-        : 0;
-      
-      regionList.push({
-        縣市: region,
-        總排放量: emissions,
-        總排放量佔比: percentage,
-        企業數: data.companyCount,
-      });
-    }
+    const emissions = Math.round(data.totalEmissions);
+    const percentage = totalEmissions > 0 && data.totalEmissions > 0
+      ? Math.round((data.totalEmissions / totalEmissions) * 10000) / 100
+      : 0;
+
+    regionList.push({
+      縣市: region,
+      總排放量: emissions,
+      總排放量佔比: percentage,
+      企業數: data.companyCount,
+    });
   });
   
   // Sort by total emissions in descending order
