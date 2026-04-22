@@ -33,15 +33,23 @@ const closeMobileMenu = () => {
 
         <!-- Desktop Menu -->
         <div class="hidden md:flex items-center gap-12">
-          <NuxtLink 
+          <NuxtLink
             v-for="item in menuItems"
             :key="item.to"
-            :to="item.to" 
+            :to="item.to"
             class="text-earth-brown hover:text-green-spring font-medium transition-colors relative group"
           >
             {{ item.label }}
             <span class="absolute bottom-[-0.5rem] left-0 right-0 h-[2px] bg-green-spring scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
           </NuxtLink>
+          <UButton
+            to="https://gcaa.neticrm.tw/civicrm/contribute/transact?reset=1&id=41&utm_source=Web&utm_content=ESG&utm_campaign=HEAD"
+            target="_blank"
+            color="primary"
+            size="md"
+          >
+            捐款支持
+          </UButton>
         </div>
 
         <!-- Mobile Hamburger Button -->
@@ -77,11 +85,11 @@ const closeMobileMenu = () => {
     >
       <div 
         v-if="mobileMenuOpen"
-        class="md:hidden bg-gray-800 border-t border-gray-700 shadow-lg"
+        class="md:hidden bg-surface-mint border-t border-surface-warm shadow-lg"
       >
         <ContentContainer>
           <div class="flex flex-col py-4 gap-6">
-            <NuxtLink 
+            <NuxtLink
               v-for="item in menuItems"
               :key="item.to"
               :to="item.to"
@@ -90,6 +98,15 @@ const closeMobileMenu = () => {
             >
               {{ item.label }}
             </NuxtLink>
+            <UButton
+              to="https://gcaa.neticrm.tw/civicrm/contribute/transact?reset=1&id=41&utm_source=Web&utm_content=ESG&utm_campaign=HEAD"
+              target="_blank"
+              color="primary"
+              size="md"
+              class="w-full justify-center"
+            >
+              捐款支持
+            </UButton>
           </div>
         </ContentContainer>
       </div>

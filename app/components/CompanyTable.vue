@@ -439,10 +439,7 @@ const proColumns: TableColumn<CompanyData>[] = [
     accessorKey: '再生能源設置容量',
     header: ({ column }) => createSortableHeader(column, '再生能源設置容量'),
     enableSorting: true,
-    sortingFn: numericSortingFn,
-    cell: ({ row }) => h('div', { class: 'text-right' },
-      renderValueWithGrade('再生能源設置容量', row.original['再生能源設置容量'], true)
-    ),
+    cell: ({ row }) => h('div', { class: 'text-right' }, row.original['再生能源設置容量']),
     meta: {
       class: {
         th: 'text-right',

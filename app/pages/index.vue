@@ -70,7 +70,7 @@ const top10Companies = top10CompaniesData as CompanyData[]
           class="custom-hero"
           :ui="{container: 'gap-8 sm:gap-8'}"
         >
-          <CompanyTable :rows="top10Companies" :show-legend="false" />
+          <CompanyTable :rows="top10Companies"/>
         </UPageHero>
       </ContentContainer>
     </div>

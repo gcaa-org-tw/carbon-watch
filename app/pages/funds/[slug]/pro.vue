@@ -36,7 +36,7 @@ useHead({
     <!-- Header with title and view mode switch -->
     <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
       <div>
-        <h1 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white">
+        <h1 class="text-3xl sm:text-[2.5rem] font-bold text-green-deep mt-0 sm:mt-8 mb-2 leading-[1.2] pb-2">
           {{ fundData.meta.基金名稱 }}
         </h1>
         <p class="text-lg text-earth-brown mt-2">

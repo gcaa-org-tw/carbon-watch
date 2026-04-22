@@ -48,10 +48,17 @@ useHead({
   font-weight: 700;
   color: var(--color-green-deep);
   margin-top: 2rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
   line-height: 1.2;
   border-bottom: 3px solid var(--color-green-pure);
-  padding-bottom: 0.5rem;
+  padding-bottom: 2rem;
+}
+
+@media (max-width: 640px) {
+  .methodology-content :deep(h1) {
+    font-size: 1.875rem;
+    margin-top: 0rem;
+  }
 }
 
 .methodology-content :deep(h2) {

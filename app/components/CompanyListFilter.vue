@@ -66,7 +66,7 @@ const updateSearch = (value: string) => {
     <div class="hidden md:grid md:grid-cols-2 gap-4">
       <!-- Row 1, Column 1: Page title -->
       <div class="flex items-center">
-        <h1 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white">
+        <h1 class="text-3xl sm:text-[2.5rem] font-bold text-green-deep mt-0 sm:mt-8 mb-6 leading-[1.2] pb-4">
           排碳大戶觀測企業清單
         </h1>
       </div>
@@ -123,7 +123,7 @@ const updateSearch = (value: string) => {
           trailing-icon="i-heroicons-chevron-down"
           class="w-30"
           :ui="{
-            base: 'bg-surface-warm text-black'
+            base: 'text-black'
           }"
         />
         <USelect
@@ -134,7 +134,7 @@ const updateSearch = (value: string) => {
           trailing-icon="i-heroicons-chevron-down"
           class="w-30"
           :ui="{
-            base: 'bg-surface-warm text-black'
+            base: 'text-black'
           }"
         />
       </div>
@@ -144,7 +144,7 @@ const updateSearch = (value: string) => {
     <div class="md:hidden space-y-4">
       <!-- Page title with info icon -->
       <div class="flex items-center gap-2">
-        <h1 class="text-xl font-bold text-gray-900 dark:text-white">
+        <h1 class="text-3xl sm:text-[2.5rem] font-bold text-green-deep mt-0 sm:mt-2 mb-4 leading-[1.2] pb-4">
           排碳大戶觀測企業清單
         </h1>
       </div>
@@ -200,7 +200,7 @@ const updateSearch = (value: string) => {
           trailing-icon="i-heroicons-chevron-down"
           class="w-30"
           :ui="{
-            base: 'bg-surface-warm text-black'
+            base: 'text-black'
           }"
         />
         <USelect
@@ -211,7 +211,7 @@ const updateSearch = (value: string) => {
           trailing-icon="i-heroicons-chevron-down"
           class="w-30"
           :ui="{
-            base: 'bg-surface-warm text-black'
+            base: 'text-black'
           }"
         />
       </div>

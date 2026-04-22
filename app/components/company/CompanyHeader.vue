@@ -34,7 +34,7 @@ const isDecrease = computed(() => props.年度變化 !== undefined && props.年�
   <div>
     <!-- Header row: company name + net-zero year -->
     <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-      <h1 class="text-4xl font-bold text-earth-brown">
+      <h1 class="text-3xl sm:text-[2.5rem] font-bold text-green-deep mt-0 sm:mt-8 mb-8 leading-[1.2] pb-8">
         {{ 公司 }}
       </h1>
 

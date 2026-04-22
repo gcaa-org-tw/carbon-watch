@@ -98,6 +98,21 @@ const columns: TableColumn<FundData>[] = [
     accessorKey: '基金名稱',
     header: ({ column }) => createSortableHeader(column, '基金名稱'),
     enableSorting: true,
+    cell: ({ row }) => {
+      const fundPath = `/funds/${row.original.基金代號}${isPro.value ? '/pro' : ''}`
+      return h(
+        'a',
+        {
+          href: fundPath,
+          class: 'hover:underline cursor-pointer',
+          onClick: (e: MouseEvent) => {
+            e.preventDefault()
+            navigateTo(fundPath)
+          }
+        },
+        row.original.基金名稱
+      )
+    },
   },
   {
     accessorKey: '總市值',
@@ -185,8 +200,8 @@ const filteredFunds = computed(() => {
 <template>
   <div class="space-y-6">
     <div>
-      <h1 class="text-4xl font-bold mb-2">投資基金觀測表</h1>
-      <p class="text-earth-brown">
+      <h1 class="text-3xl sm:text-[2.5rem] font-bold text-green-deep mt-0 sm:mt-8 leading-[1.2] pb-2">投資基金觀測表</h1>
+      <p class="text-earth-brown mb-8">
         追蹤台灣投資基金的排碳大戶投資狀況
       </p>
     </div>
