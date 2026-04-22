@@ -98,6 +98,21 @@ const columns: TableColumn<FundData>[] = [
     accessorKey: '基金名稱',
     header: ({ column }) => createSortableHeader(column, '基金名稱'),
     enableSorting: true,
+    cell: ({ row }) => {
+      const fundPath = `/funds/${row.original.基金代號}${isPro.value ? '/pro' : ''}`
+      return h(
+        'a',
+        {
+          href: fundPath,
+          class: 'hover:underline cursor-pointer',
+          onClick: (e: MouseEvent) => {
+            e.preventDefault()
+            navigateTo(fundPath)
+          }
+        },
+        row.original.基金名稱
+      )
+    },
   },
   {
     accessorKey: '總市值',
