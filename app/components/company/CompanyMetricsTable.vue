@@ -7,6 +7,24 @@ interface Props {
 
 const props = defineProps<Props>()
 
+// Convert emoji status to text
+const CROSS = String.fromCodePoint(0x274C)
+const CHECK = String.fromCodePoint(0x2705)
+const statusText = (val: string | undefined, fallback = String.fromCodePoint(0x7121)): { value: string, isNegative: boolean } => {
+  if (!val) return { value: fallback, isNegative: true }
+  if (val === CROSS) return { value: fallback, isNegative: true }
+  if (val === CHECK) return { value: String.fromCodePoint(0x2713), isNegative: false }
+  return { value: val, isNegative: false }
+}
+
+// Format decimal as percentage
+const formatPercent = (value: string | undefined): string => {
+  if (!value || value === '-') return '-'
+  const num = parseFloat(value)
+  if (isNaN(num)) return value
+  return `${Math.round(num * 100)}%`
+}
+
 // Parse coal usage value
 const formatCoalUsage = (value: string | undefined): string => {
   if (!value) return '-'
@@ -24,20 +42,17 @@ const allMetrics = computed(() => [
   },
   {
     label: 'SBTi 承諾',
-    value: props.company['SBTi 承諾'] === '❌' ? '無' : props.company['SBTi 承諾'] || '無',
-    isNegative: props.company['SBTi 承諾'] === '❌',
+    ...statusText(props.company['SBTi 承諾']),
     isPositive: false
   },
   {
     label: '範疇三揭露',
-    value: props.company['範疇三揭露'] === '❌' ? '無' : props.company['範疇三揭露'] || '無',
-    isNegative: props.company['範疇三揭露'] === '❌',
+    ...statusText(props.company['範疇三揭露']),
     isPositive: false
   },
   {
     label: '範疇三減量規劃',
-    value: props.company['範疇三減量規劃'] === '❌' ? '無' : props.company['範疇三減量規劃'] || '無',
-    isNegative: props.company['範疇三減量規劃'] === '❌',
+    ...statusText(props.company['範疇三減量規劃']),
     isPositive: false
   },
   {
@@ -66,20 +81,18 @@ const allMetrics = computed(() => [
   },
   {
     label: '是否完成用電大戶再生能源設置義務',
-    value: props.company['是否完成用電大戶再生能源設置義務'] === '❌' ? '無' : props.company['是否完成用電大戶再生能源設置義務'] || '無',
-    isNegative: props.company['是否完成用電大戶再生能源設置義務'] === '❌',
+    ...statusText(props.company['是否完成用電大戶再生能源設置義務']),
     isPositive: false
   },
   {
     label: '中期再生能源目標設定',
-    value: props.company['中期再生能源目標設定'] || '-',
+    value: formatPercent(props.company['中期再生能源目標設定']),
     isNegative: false,
     isPositive: !!props.company['中期再生能源目標設定'] && props.company['中期再生能源目標設定'] !== '-'
   },
   {
     label: 'RE100 承諾',
-    value: props.company['RE100 承諾'] === '❌' ? '無' : props.company['RE100 承諾'] || '無',
-    isNegative: props.company['RE100 承諾'] === '❌',
+    ...statusText(props.company['RE100 承諾']),
     isPositive: false
   },
   {

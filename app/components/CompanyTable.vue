@@ -135,6 +135,22 @@ const renderRadarGrade = (value: string | number) => {
   })
 }
 
+// Helper function to render emoji-free boolean/status values
+const EMOJI_CHECK = String.fromCodePoint(0x2705)
+const EMOJI_CROSS = String.fromCodePoint(0x274C)
+const TEXT_CHECK = String.fromCodePoint(0x2713)
+const TEXT_CROSS = String.fromCodePoint(0x2717)
+const renderStatus = (value: string | undefined) => {
+  if (!value || value.trim() === '') return h('span', '')
+  if (value === EMOJI_CHECK) {
+    return h('span', { class: 'text-green-deep font-bold' }, TEXT_CHECK)
+  }
+  if (value === EMOJI_CROSS) {
+    return h('span', { class: 'text-accent-red font-bold' }, TEXT_CROSS)
+  }
+  return h('span', value)
+}
+
 // Helper function to render value with grade
 const renderValueWithGrade = (field: string, value: string | number, isNumeric: boolean = false) => {
   const grade = getGrade(field, value)
@@ -217,6 +233,12 @@ const nonProColumns: TableColumn<CompanyData>[] = [
     accessorKey: 'SBTi 承諾',
     header: ({ column }) => createSortableHeader(column, 'SBTi 承諾'),
     enableSorting: true,
+    cell: ({ row }) => h('div', { class: 'text-center' }, renderStatus(row.original['SBTi 承諾'])),
+    meta: {
+      class: {
+        th: 'text-center',
+      }
+    }
   },
   {
     accessorKey: '2030年溫室氣體絕對減量目標',
@@ -358,6 +380,12 @@ const proColumns: TableColumn<CompanyData>[] = [
     accessorKey: 'SBTi 承諾',
     header: ({ column }) => createSortableHeader(column, 'SBTi 承諾'),
     enableSorting: true,
+    cell: ({ row }) => h('div', { class: 'text-center' }, renderStatus(row.original['SBTi 承諾'])),
+    meta: {
+      class: {
+        th: 'text-center',
+      }
+    }
   },
   {
     accessorKey: '有具體減量策略',
@@ -365,11 +393,11 @@ const proColumns: TableColumn<CompanyData>[] = [
     enableSorting: true,
     cell: ({ row }) => {
       const hasStrategy = row.original['有具體減量策略']
-      const icon = hasStrategy && hasStrategy.trim() !== '' ? '✅' : '❌'
-      return h('div', { 
+      const has = hasStrategy && hasStrategy.trim() !== ''
+      return h('div', {
         class: 'text-center cursor-help',
         title: hasStrategy || '無資料'
-      }, icon)
+      }, h('span', { class: has ? 'text-green-deep font-bold' : 'text-accent-red font-bold' }, has ? '\u2713' : '\u2717'))
     },
     meta: {
       class: {
@@ -381,7 +409,7 @@ const proColumns: TableColumn<CompanyData>[] = [
     accessorKey: '範疇三揭露',
     header: ({ column }) => createSortableHeader(column, '範疇三揭露'),
     enableSorting: true,
-    cell: ({ row }) => h('div', { class: 'text-center' }, row.original['範疇三揭露']),
+    cell: ({ row }) => h('div', { class: 'text-center' }, renderStatus(row.original['範疇三揭露'])),
     meta: {
       class: {
         th: 'text-center',
@@ -392,7 +420,7 @@ const proColumns: TableColumn<CompanyData>[] = [
     accessorKey: '範疇三減量規劃',
     header: ({ column }) => createSortableHeader(column, '範疇三減量規劃'),
     enableSorting: true,
-    cell: ({ row }) => h('div', { class: 'text-center' }, row.original['範疇三減量規劃']),
+    cell: ({ row }) => h('div', { class: 'text-center' }, renderStatus(row.original['範疇三減量規劃'])),
     meta: {
       class: {
         th: 'text-center',
@@ -450,7 +478,7 @@ const proColumns: TableColumn<CompanyData>[] = [
     accessorKey: '是否完成用電大戶再生能源設置義務',
     header: ({ column }) => createSortableHeader(column, '是否完成用電大戶再生能源設置義務'),
     enableSorting: true,
-    cell: ({ row }) => h('div', { class: 'text-center' }, row.original['是否完成用電大戶再生能源設置義務']),
+    cell: ({ row }) => h('div', { class: 'text-center' }, renderStatus(row.original['是否完成用電大戶再生能源設置義務'])),
     meta: {
       class: {
         th: 'text-center',
@@ -462,7 +490,13 @@ const proColumns: TableColumn<CompanyData>[] = [
     header: ({ column }) => createSortableHeader(column, '中期再生能源目標設定'),
     enableSorting: true,
     sortingFn: numericSortingFn,
-    cell: ({ row }) => h('div', { class: 'text-right' }, row.original['中期再生能源目標設定']),
+    cell: ({ row }) => {
+      const val = row.original['中期再生能源目標設定']
+      if (!val) return h('div', { class: 'text-right' }, '')
+      const num = parseFloat(val)
+      if (isNaN(num)) return h('div', { class: 'text-right' }, val)
+      return h('div', { class: 'text-right' }, `${Math.round(num * 100)}%`)
+    },
     meta: {
       class: {
         th: 'text-right',
@@ -473,7 +507,7 @@ const proColumns: TableColumn<CompanyData>[] = [
     accessorKey: 'RE100 承諾',
     header: ({ column }) => createSortableHeader(column, 'RE100 承諾'),
     enableSorting: true,
-    cell: ({ row }) => h('div', { class: 'text-center' }, row.original['RE100 承諾']),
+    cell: ({ row }) => h('div', { class: 'text-center' }, renderStatus(row.original['RE100 承諾'])),
     meta: {
       class: {
         th: 'text-center',
