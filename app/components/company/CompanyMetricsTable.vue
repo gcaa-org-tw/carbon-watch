@@ -17,12 +17,15 @@ const statusText = (val: string | undefined, fallback = String.fromCodePoint(0x7
   return { value: val, isNegative: false }
 }
 
-// Format decimal as percentage
+// Format decimal as percentage; handle inputs that are already "X%" strings.
 const formatPercent = (value: string | undefined): string => {
   if (!value || value === '-') return '-'
-  const num = parseFloat(value)
-  if (isNaN(num)) return value
-  return `${Math.round(num * 100)}%`
+  const cleaned = value.replace(/[,\s]/g, '')
+  const decimal = cleaned.endsWith('%')
+    ? parseFloat(cleaned.slice(0, -1)) / 100
+    : parseFloat(cleaned)
+  if (isNaN(decimal)) return value
+  return `${Math.round(decimal * 100)}%`
 }
 
 // Parse coal usage value

@@ -486,7 +486,7 @@ const proColumns: TableColumn<CompanyData>[] = [
     cell: ({ row }) => {
       const val = row.original['中期再生能源目標設定']
       if (!val) return h('div', { class: 'text-right' }, '')
-      const num = parseFloat(val)
+      const num = parseValue(val)
       if (isNaN(num)) return h('div', { class: 'text-right' }, val)
       return h('div', { class: 'text-right' }, `${Math.round(num * 100)}%`)
     },
