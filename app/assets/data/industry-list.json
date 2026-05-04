@@ -5,7 +5,7 @@
   },
   {
     "industry": "半導體業",
-    "count": 48
+    "count": 49
   },
   {
     "industry": "鋼鐵業",
@@ -56,7 +56,7 @@
     "count": 2
   },
   {
-    "industry": "金屬加工用機械設備製造業",
+    "industry": "眼鏡製造業",
     "count": 1
   },
   {
@@ -64,11 +64,7 @@
     "count": 1
   },
   {
-    "industry": "自行車業",
-    "count": 1
-  },
-  {
-    "industry": "眼鏡製造業",
+    "industry": "金屬加工用機械設備製造業",
     "count": 1
   },
   {
@@ -77,6 +73,10 @@
   },
   {
     "industry": "航空業",
+    "count": 1
+  },
+  {
+    "industry": "自行車業",
     "count": 1
   }
 ]
