@@ -35,6 +35,13 @@ const formatCoalUsage = (value: string | undefined): string => {
   return isNaN(num) ? '-' : `${num.toLocaleString('zh-TW')} 公噸`
 }
 
+// Format renewable installed capacity (preserves decimals, adds thousand separator)
+const formatCapacity = (value: string | undefined): string => {
+  if (!value) return '-'
+  const num = parseFloat(value.replace(/,/g, ''))
+  return isNaN(num) ? '-' : `${num.toLocaleString('zh-TW')} kW`
+}
+
 // All metrics in display order
 const allMetrics = computed(() => [
   {
@@ -78,7 +85,7 @@ const allMetrics = computed(() => [
   },
   {
     label: '再生能源設置容量',
-    value: props.company['再生能源設置容量'] ? `${props.company['再生能源設置容量']} kW` : '-',
+    value: formatCapacity(props.company['再生能源設置容量']),
     isNegative: false,
     isPositive: false
   },

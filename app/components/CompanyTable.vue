@@ -460,7 +460,11 @@ const proColumns: TableColumn<CompanyData>[] = [
     accessorKey: '再生能源設置容量',
     header: ({ column }) => createSortableHeader(column, '再生能源設置容量'),
     enableSorting: true,
-    cell: ({ row }) => h('div', { class: 'text-right' }, row.original['再生能源設置容量']),
+    cell: ({ row }) => {
+      const v = row.original['再生能源設置容量']
+      const num = parseValue((v ?? '') as string)
+      return h('div', { class: 'text-right' }, isNaN(num) ? (v ?? '') : num.toLocaleString('zh-TW'))
+    },
     meta: {
       class: {
         th: 'text-right',
