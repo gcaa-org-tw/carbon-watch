@@ -97,8 +97,8 @@ const allMetrics = computed(() => [
   {
     label: '中期再生能源目標設定',
     value: formatPercent(props.company['中期再生能源目標設定']),
-    isNegative: false,
-    isPositive: !!props.company['中期再生能源目標設定'] && props.company['中期再生能源目標設定'] !== '-'
+    isNegative: props.company['中期再生能源目標設定'] === 'NA',
+    isPositive: !!props.company['中期再生能源目標設定'] && !['-', 'NA'].includes(props.company['中期再生能源目標設定'])
   },
   {
     label: 'RE100 承諾',
