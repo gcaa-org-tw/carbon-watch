@@ -49,24 +49,14 @@ const numericSortingFn = (rowA: Row<CompanyData>, rowB: Row<CompanyData>, column
   return a < b ? -1 : 1
 }
 
-// Helper function to split header with units
-const splitHeader = (text: string) => {
-  const match = text.match(/^(.+?)（(.+)）$/)
-  if (match) {
-    return { main: match[1], unit: `（${match[2]}）` }
-  }
-  return { main: text, unit: null }
-}
-
 // Helper function to create sortable header
 const createSortableHeader = (column: Column<CompanyData>, label: string, align: 'left' | 'right' = 'left') => {
   const isSorted = column.getIsSorted()
-  const { main, unit } = splitHeader(label)
-  
+
   return h(
     'button',
     {
-      class: `flex flex-col gap-0.5 ${align === 'right' ? 'items-end w-full' : 'items-start'} hover:opacity-80 transition-opacity cursor-pointer`,
+      class: `flex items-center gap-1 whitespace-nowrap ${align === 'right' ? 'w-full justify-end' : ''} hover:opacity-80 transition-opacity cursor-pointer`,
       onClick: () => {
         const currentSort = column.getIsSorted()
         if (currentSort === false) {
@@ -79,13 +69,8 @@ const createSortableHeader = (column: Column<CompanyData>, label: string, align:
       },
     },
     [
-      h('span', { class: 'flex items-center gap-1' }, [
-        h('span', main),
-        isSorted !== false && h('span', { class: 'text-xs' }, 
-          isSorted === 'asc' ? '↑' : '↓'
-        )
-      ]),
-      unit && h('span', { class: 'text-xs opacity-70' }, unit)
+      h('span', label),
+      isSorted !== false && h('span', { class: 'text-xs' }, isSorted === 'asc' ? '↑' : '↓'),
     ]
   )
 }
@@ -195,7 +180,7 @@ const nonProColumns: TableColumn<CompanyData>[] = [
         },
         () => companyName
       )
-    }
+    },
   },
   {
     accessorKey: '產業分類',
@@ -542,7 +527,7 @@ const sorting = ref([
 <template>
   <div class="space-y-4">
     <!-- Color Legend -->
-    <div v-if="showLegend" class="flex gap-4 items-center text-sm">
+    <div v-if="showLegend" class="flex gap-4 items-center text-sm mx-8">
       <div class="flex gap-3">
         <div class="flex items-center gap-1.5">
           <div class="w-3 h-3 rounded-full bg-green-pure border-2 border-green-pure/30" />
@@ -562,7 +547,7 @@ const sorting = ref([
         </div>
       </div>
     </div>
-    <div v-if="showLegend">
+    <div v-if="showLegend" class="mx-8">
       <NuxtLink to="/methodology" class="text-sm text-green-pure hover:underline">
         了解分級標準 →
       </NuxtLink>
@@ -574,12 +559,42 @@ const sorting = ref([
       sticky
       :columns="columns"
       :data="rows"
-      class="max-h-200 border-1 border-gray-300 dark:border-gray-600 -mx-4"
+      class="max-h-[40rem] border-1 border-gray-300 dark:border-gray-600 mx-8"
       :ui="{
-        th: 'bg-green-forest text-white min-w-20',
+        th: 'bg-green-forest text-white min-w-20 whitespace-nowrap py-2',
         tr: 'even:bg-surface-mint dark:even:bg-surface-mint/10 odd:bg-white dark:odd:bg-gray-900',
         td: 'text-black dark:text-white'
       }"
     />
   </div>
 </template>
+
+<style scoped>
+:deep(thead) {
+  position: sticky;
+  top: 0;
+  z-index: 25;
+}
+
+:deep(thead th:first-child) {
+  position: sticky;
+  left: 0;
+  z-index: 40;
+  background-color: var(--color-green-forest);
+}
+
+:deep(tbody td:first-child) {
+  position: sticky;
+  left: 0;
+  z-index: 10;
+  background-color: white;
+}
+
+:deep(tbody tr:nth-child(even) td:first-child) {
+  background-color: var(--color-surface-mint);
+}
+
+.dark :deep(tbody tr:nth-child(odd) td:first-child) {
+  background-color: rgb(17 24 39);
+}
+</style>

@@ -68,10 +68,12 @@ const top10Companies = top10CompaniesData as CompanyData[]
         <UPageHero
           title="前十大溫室氣體排放企業"
           class="custom-hero"
-          :ui="{container: 'gap-8 sm:gap-8'}"
+          :ui="{container: 'gap-8 lg:pb-8 md:pb-8 sm:gap-8 pb-8'}"
         >
-          <CompanyTable :rows="top10Companies"/>
         </UPageHero>
+        <div class="lg:mx-15 mb-20 sm:px-2">
+          <CompanyTable :rows="top10Companies"/>
+        </div>
       </ContentContainer>
     </div>
   </div>
