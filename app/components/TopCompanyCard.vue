@@ -24,14 +24,14 @@ const formatEmissions = (n: number) => n.toLocaleString('zh-TW')
         isActive
           ? 'border-green-pure bg-green-mint/20'
           : compact
-            ? 'bg-white dark:bg-gray-800 border-transparent'
-            : 'bg-white dark:bg-gray-800 border-transparent hover:shadow-xl hover:-translate-y-0.5'
+            ? 'bg-surface-warm border-transparent'
+            : 'bg-surface-warm border-transparent hover:shadow-xl hover:-translate-y-0.5'
       ]"
     >
       <p class="lg:text-xl sm:text-lg text-md font-semibold text-earth-brown leading-snug">{{ 公司全名 }}</p>
       <p class="font-bold text-green-forest mt-1" :class="compact ? 'text-base' : 'text-lg'">
         {{ formatEmissions(全台排放量) }}
-        <span class="font-normal text-gray-600 dark:text-gray-400" :class="compact ? 'text-xs' : 'text-sm'">
+        <span class="font-normal text-gray-400" :class="compact ? 'text-xs' : 'text-sm'">
           {{ compact ? '噸' : '噸總碳排' }}
         </span>
       </p>

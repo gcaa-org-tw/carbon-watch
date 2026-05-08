@@ -7,50 +7,25 @@
  */
 
 :root {
-  --ui-bg: white;
-  
-  /* Background & Surface Colors */
-  --color-surface-mint: #F0F4F2;
-  --color-surface-warm: #D9D7CA;
-  
-  /* Text & Neutral Colors */
-  --color-earth-brown: #5C573D;
-  --color-earth-brown-light: #D2691E;
-  
-  /* Green Scale - Primary Brand Colors */
-  --color-green-mint: #73FFAD;
-  --color-green-spring: #2FDB5D;
-  --color-green-pure: #04B300;
-  --color-green-deep: #207443;
-  --color-green-forest: #065705;
-  
-  /* Accent Colors */
-  --color-accent-blue : #5683FF;
-  --color-accent-yellow: #FFD52F;
-  --color-accent-red: #DF0C0C;
-}
+  --ui-bg: #1A2C1A;
 
-/* Dark Mode Color Variants */
-.dark {
-  --ui-bg: #1C2B23;
-  
-  /* Background & Surface Colors - darker, muted */
-  --color-surface-mint: #1C2B23;
-  --color-surface-warm: #2B2A24;
-  
-  /* Text & Neutral Colors - lighter for readability */
+  /* Background & Surface Colors */
+  --color-surface-mint: #1A2C1A;
+  --color-surface-warm: #213620;
+
+  /* Text & Neutral Colors */
   --color-earth-brown: #C4BE9A;
   --color-earth-brown-light: #E8A87C;
-  
-  /* Green Scale - adjusted for dark backgrounds */
+
+  /* Green Scale - Primary Brand Colors */
   --color-green-mint: #5AE694;
   --color-green-spring: #26C04F;
   --color-green-pure: #05D915;
   --color-green-deep: #3A9D63;
   --color-green-forest: #0A8F0A;
-  
-  /* Accent Colors - slightly adjusted brightness */
-  --color-accent-blue : #7A9CFF;
+
+  /* Accent Colors */
+  --color-accent-blue: #7A9CFF;
   --color-accent-yellow: #F5C71A;
   --color-accent-red: #FF4040;
 }

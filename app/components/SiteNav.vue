@@ -115,19 +115,7 @@ const closeMobileMenu = () => {
 </template>
 
 <style scoped>
-@media (min-width: 768px) {
-  .nav-bg {
-    background-image: url('~/assets/images/nav-bg.svg');
-    background-position: top;
-    background-repeat: repeat-x;
-  }
-}
-
-@media (prefers-color-scheme: dark) {
-  .nav-bg {
-    background-image: none;
-  }
-}
+/* nav-bg SVG removed: site uses dark forest green theme */
 
 /* Active route styling */
 a.router-link-active {

@@ -225,11 +225,11 @@ const filteredFunds = computed(() => {
       sticky
       :columns="columns"
       :data="filteredFunds"
-      class="max-h-200 border-1 border-gray-300 dark:border-gray-600"
+      class="max-h-200 border-1 border-gray-600"
       :ui="{
         th: 'bg-green-forest text-white',
-        tr: 'even:bg-surface-mint dark:even:bg-surface-mint/10 odd:bg-white dark:odd:bg-gray-900',
-        td: 'text-black dark:text-white'
+        tr: 'even:bg-surface-mint/10 odd:bg-surface-warm',
+        td: 'text-white'
       }"
     />
   </div>

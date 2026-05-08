@@ -11,7 +11,7 @@ defineProps<Props>()
     <h3 class="text-lg font-bold text-earth-brown mb-4">
       具體減量策略
     </h3>
-    <div class="bg-surface-warm/30 rounded-lg p-4">
+    <div class="bg-surface-warm rounded-lg p-4">
       <p class="text-sm text-earth-brown leading-relaxed whitespace-pre-wrap">
         {{ 策略內容 || '尚無資料' }}
       </p>

@@ -34,14 +34,14 @@ const isDecrease = computed(() => props.年度變化 !== undefined && props.年�
   <div>
     <!-- Header row: company name + net-zero year -->
     <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-      <h1 class="text-3xl sm:text-[2.5rem] font-bold text-green-deep mt-0 sm:mt-8 mb-8 leading-[1.2] pb-8">
+      <h1 class="text-3xl sm:text-[2.5rem] font-bold text-earth-brown mt-0 sm:mt-8 mb-8 leading-[1.2] pb-8">
         {{ 公司 }}
       </h1>
 
-      <div class="flex flex-wrap items-center gap-3">
+      <div class="flex flex-wrap items-center gap-3 pt-10">
         <div v-if="淨零目標年" class="flex items-baseline gap-2">
-          <span class="text-lg font-bold text-earth-brown/70">淨零承諾年度</span>
-          <span class="text-xl font-bold text-green-deep dark:text-green-mint">
+          <span class="text-lg font-bold text-earth-brown">淨零承諾年度</span>
+          <span class="text-xl font-bold text-green-mint">
             {{ 淨零目標年 }}
           </span>
         </div>
@@ -57,8 +57,8 @@ const isDecrease = computed(() => props.年度變化 !== undefined && props.年�
             年碳排 <span class="font-semibold">{{ formattedEmission }}</span> 噸
           </p>
           <div class="flex items-center gap-3 text-sm">
-            <span v-if="全台佔比 !== undefined" class="flex items-center gap-1.5 text-earth-brown/70">
-              <span class="inline-block w-2 h-2 rounded-full bg-earth-brown/50" />
+            <span v-if="全台佔比 !== undefined" class="flex items-center gap-1.5 text-earth-brown">
+              <span class="inline-block w-2 h-2 rounded-full bg-green-deep" />
               佔全台總碳排 {{ 全台佔比 }}%
             </span>
             <span
@@ -75,7 +75,7 @@ const isDecrease = computed(() => props.年度變化 !== undefined && props.年�
         </div>
         <div v-if="全台佔比 !== undefined" class="h-4 bg-surface-warm rounded mb-3 mt-3">
           <div
-            class="h-full bg-earth-brown dark:bg-earth-brown-light rounded transition-all duration-300"
+            class="h-full bg-earth-brown-light rounded transition-all duration-300"
             :style="{ width: `${Math.min(全台佔比, 100)}%` }"
           />
         </div>

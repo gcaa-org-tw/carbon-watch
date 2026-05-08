@@ -44,7 +44,7 @@ const top10Companies = top10CompaniesData as CompanyData[]
           title="氣候績效指標方法論"
           description="依據法規與國際標準，制定企業氣候表現檢核表"
           class="methodology-section"
-          :ui="{container: 'gap-6 sm:gap-6'}"
+          :ui="{container: 'gap-6 sm:gap-6', title: 'text-earth-brown'}"
         >
           <template #description>
             <p>綠盟參考台灣氣候法規及國際標準，</p>
@@ -71,7 +71,7 @@ const top10Companies = top10CompaniesData as CompanyData[]
         <UPageHero
           title="前十大溫室氣體排放企業"
           class="custom-hero text-4xl"
-          :ui="{container: 'gap-8 lg:pb-8 md:pb-8 sm:gap-8 pb-8'}"
+          :ui="{container: 'gap-8 lg:pb-8 md:pb-8 sm:gap-8 pb-8', title: 'text-earth-brown'}"
         >
         </UPageHero>
         <div class="lg:mx-15 mb-20 sm:px-2">

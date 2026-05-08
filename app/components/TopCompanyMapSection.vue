@@ -57,7 +57,7 @@ onUnmounted(() => { if (timer) clearInterval(timer) })
 <template>
   <section class="py-12 bg-surface-mint">
     <ContentContainer>
-      <h2 class="text-4xl font-bold text-green-deep dark:text-green-mint mb-8 text-center">
+      <h2 class="text-4xl font-bold text-green-mint mb-8 text-center">
         前十大碳排企業縣市分布
       </h2>
 

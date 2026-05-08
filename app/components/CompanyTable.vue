@@ -527,7 +527,7 @@ const sorting = ref([
 <template>
   <div class="space-y-4">
     <!-- Color Legend -->
-    <div v-if="showLegend" class="flex gap-4 items-center text-sm mx-8">
+    <div v-if="showLegend" class="flex gap-4 items-center text-sm mx-8 text-earth-brown">
       <div class="flex gap-3">
         <div class="flex items-center gap-1.5">
           <div class="w-3 h-3 rounded-full bg-green-pure border-2 border-green-pure/30" />
@@ -559,11 +559,11 @@ const sorting = ref([
       sticky
       :columns="columns"
       :data="rows"
-      class="max-h-[40rem] border-1 border-gray-300 dark:border-gray-600 mx-8"
+      class="max-h-[40rem] border-1 border-gray-600 mx-8"
       :ui="{
         th: 'bg-green-forest text-white min-w-20 whitespace-nowrap py-2',
-        tr: 'even:bg-surface-mint dark:even:bg-surface-mint/10 odd:bg-white dark:odd:bg-gray-900',
-        td: 'text-black dark:text-white'
+        tr: 'even:bg-surface-mint/10 odd:bg-surface-warm',
+        td: 'text-white'
       }"
     />
   </div>
@@ -587,14 +587,10 @@ const sorting = ref([
   position: sticky;
   left: 0;
   z-index: 10;
-  background-color: white;
+  background-color: var(--color-surface-warm);
 }
 
 :deep(tbody tr:nth-child(even) td:first-child) {
   background-color: var(--color-surface-mint);
-}
-
-.dark :deep(tbody tr:nth-child(odd) td:first-child) {
-  background-color: rgb(17 24 39);
 }
 </style>
