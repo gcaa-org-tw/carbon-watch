@@ -58,6 +58,12 @@ const handleModeClick = (mode: 'regular' | 'pro') => {
 const updateSearch = (value: string) => {
   localValue.value = { ...localValue.value, search: value }
 }
+
+const selectUi = {
+  base: 'text-earth-brown',
+  content: 'bg-surface-warm border border-green-deep/40',
+  item: 'text-earth-brown data-highlighted:bg-green-deep/30 data-highlighted:text-white',
+}
 </script>
 
 <template>
@@ -66,7 +72,7 @@ const updateSearch = (value: string) => {
     <div class="hidden md:grid md:grid-cols-2 gap-4">
       <!-- Row 1, Column 1: Page title -->
       <div class="flex items-center">
-        <h1 class="text-3xl sm:text-[2.5rem] font-bold text-green-deep mt-0 sm:mt-8 mb-6 leading-[1.2] pb-4">
+        <h1 class="text-3xl sm:text-[2.5rem] font-bold text-earth-brown mt-0 sm:mt-8 mb-6 leading-[1.2] pb-4">
           排碳大戶觀測企業清單
         </h1>
       </div>
@@ -80,7 +86,7 @@ const updateSearch = (value: string) => {
               'px-4 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer',
               !isPro
                 ? 'bg-green-pure text-white'
-                : 'bg-transparent text-gray-700 hover:bg-surface-mint/50'
+                : 'bg-transparent text-earth-brown hover:bg-surface-mint/50'
             ]"
             @click="handleModeClick('regular')"
           >
@@ -92,7 +98,7 @@ const updateSearch = (value: string) => {
               'px-4 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer',
               isPro
                 ? 'bg-green-pure text-white'
-                : 'bg-transparent text-gray-700 hover:bg-surface-mint/50'
+                : 'bg-transparent text-earth-brown hover:bg-surface-mint/50'
             ]"
             @click="handleModeClick('pro')"
           >
@@ -109,6 +115,9 @@ const updateSearch = (value: string) => {
           placeholder="搜尋你關注的企業..."
           size="lg"
           class="max-w-full w-80"
+          :ui="{
+            base: 'text-earth-brown placeholder:text-earth-brown/50'
+          }"
           @update:model-value="updateSearch"
         />
       </div>
@@ -122,9 +131,7 @@ const updateSearch = (value: string) => {
           size="md"
           trailing-icon="i-heroicons-chevron-down"
           class="w-30"
-          :ui="{
-            base: 'text-black'
-          }"
+          :ui="selectUi"
         />
         <USelect
           v-model="localValue.industry"
@@ -133,9 +140,7 @@ const updateSearch = (value: string) => {
           size="md"
           trailing-icon="i-heroicons-chevron-down"
           class="w-30"
-          :ui="{
-            base: 'text-black'
-          }"
+          :ui="selectUi"
         />
       </div>
     </div>
@@ -158,7 +163,7 @@ const updateSearch = (value: string) => {
               'flex-1 px-4 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer text-center',
               !isPro
                 ? 'bg-green-pure text-white'
-                : 'bg-transparent text-gray-700'
+                : 'bg-transparent text-earth-brown'
             ]"
             @click="handleModeClick('regular')"
           >
@@ -170,7 +175,7 @@ const updateSearch = (value: string) => {
               'flex-1 px-4 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer text-center',
               isPro
                 ? 'bg-green-pure text-white'
-                : 'bg-transparent text-gray-700'
+                : 'bg-transparent text-earth-brown'
             ]"
             @click="handleModeClick('pro')"
           >
@@ -187,6 +192,9 @@ const updateSearch = (value: string) => {
         size="lg"
         class="max-w-full w-full"
         style="min-width: 20rem;"
+        :ui="{
+          base: 'text-earth-brown placeholder:text-earth-brown/50'
+        }"
         @update:model-value="updateSearch"
       />
 
@@ -199,9 +207,7 @@ const updateSearch = (value: string) => {
           size="md"
           trailing-icon="i-heroicons-chevron-down"
           class="w-30"
-          :ui="{
-            base: 'text-black'
-          }"
+          :ui="selectUi"
         />
         <USelect
           v-model="localValue.industry"
@@ -210,9 +216,7 @@ const updateSearch = (value: string) => {
           size="md"
           trailing-icon="i-heroicons-chevron-down"
           class="w-30"
-          :ui="{
-            base: 'text-black'
-          }"
+          :ui="selectUi"
         />
       </div>
     </div>

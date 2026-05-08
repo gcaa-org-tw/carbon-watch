@@ -142,7 +142,7 @@ function drawChart() {
     .attr('x', xScale(props.基準年))
     .attr('y', yScale(props.基準年排放量) - 12)
     .attr('font-size', labelFontSize)
-    .attr('fill', '#5C573D')
+    .attr('fill', '#C4BE9A')
     .text('Start｜承諾當下現狀')
 
   // Current year label
@@ -151,7 +151,7 @@ function drawChart() {
     .attr('y', yScale(props.現狀排放量) - 12)
     .attr('text-anchor', 'middle')
     .attr('font-size', labelFontSize)
-    .attr('fill', '#5C573D')
+    .attr('fill', '#C4BE9A')
     .text(`${props.現狀年} 現狀`)
 
   // Mid-term target label
@@ -160,7 +160,7 @@ function drawChart() {
     .attr('y', yScale(props.中期目標排放量) - 12)
     .attr('text-anchor', 'middle')
     .attr('font-size', labelFontSize)
-    .attr('fill', '#5C573D')
+    .attr('fill', '#C4BE9A')
     .text(`${props.中期目標年} 目標`)
 
   // Goal label
@@ -169,7 +169,7 @@ function drawChart() {
     .attr('y', yScale(0) - 12)
     .attr('text-anchor', 'end')
     .attr('font-size', labelFontSize)
-    .attr('fill', '#5C573D')
+    .attr('fill', '#C4BE9A')
     .text(`Goal｜${props.淨零目標年} 承諾`)
 
 }

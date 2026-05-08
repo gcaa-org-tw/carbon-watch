@@ -90,11 +90,11 @@ useHead({
   width: 100%;
   border-collapse: collapse;
   margin: 1.5rem 0;
-  background-color: var(--ui-bg);
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  background-color: var(--color-surface-warm);
+  box-shadow: 0 3px 3px 0 rgba(0, 0, 0, 0.1);
   border-radius: 0.5rem;
   overflow: hidden;
-  border: 1px solid var(--color-surface-warm);
+  border: 1px solid var(--color-green-deep);
 }
 
 .methodology-content :deep(thead) {
@@ -113,14 +113,18 @@ useHead({
 
 .methodology-content :deep(td) {
   padding: 1rem;
-  border-top: 1px solid var(--color-surface-warm);
+  border-top: 1px solid rgba(58, 157, 99, 0.25);
   color: var(--color-earth-brown);
   font-size: 0.95rem;
   line-height: 1.6;
 }
 
+.methodology-content :deep(tbody tr:nth-child(even)) {
+  background-color: rgba(26, 44, 26, 0.5);
+}
+
 .methodology-content :deep(tbody tr:hover) {
-  background-color: var(--color-surface-mint);
+  background-color: var(--color-surface-warm);
 }
 
 .methodology-content :deep(ul),
@@ -155,29 +159,28 @@ useHead({
   font-weight: 600;
 }
 
-/* Dark mode specific adjustments */
-.dark .methodology-content :deep(h1) {
+.methodology-content :deep(h1) {
   color: var(--color-green-mint);
   border-bottom-color: var(--color-green-spring);
 }
 
-.dark .methodology-content :deep(h2) {
+.methodology-content :deep(h2) {
   border-left-color: var(--color-green-mint);
 }
 
-.dark .methodology-content :deep(thead) {
+.methodology-content :deep(thead) {
   background-color: var(--color-green-forest);
 }
 
-.dark .methodology-content :deep(tbody tr:hover) {
+.methodology-content :deep(tbody tr:hover) {
   background-color: var(--color-surface-warm);
 }
 
-.dark .methodology-content :deep(table) {
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3);
+.methodology-content :deep(table) {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.4);
 }
 
-.dark .methodology-content :deep(li::marker) {
+.methodology-content :deep(li::marker) {
   color: var(--color-green-spring);
 }
 </style>

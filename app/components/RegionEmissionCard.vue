@@ -17,27 +17,27 @@ const formattedEmissions = computed(() => {
 </script>
 
 <template>
-  <div 
-    class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-md transition-all duration-300 cursor-pointer border-2"
+  <div
+    class="bg-surface-mint rounded-xl p-4 shadow-md transition-all duration-300 cursor-pointer border-2"
     :class="[
-      isActive 
-        ? 'border-earth-brown dark:border-green-mint shadow-lg' 
-        : 'border-transparent hover:shadow-xl hover:-translate-y-0.5',
+      isActive
+        ? 'border-green-mint shadow-lg'
+        : 'border-green-deep/40 hover:border-green-mint/60 hover:shadow-xl hover:-translate-y-0.5',
       shouldBlink ? 'blink-animation' : ''
     ]"
   >
     <div class="flex justify-between items-center gap-4">
       <div class="flex-1 min-w-0">
-        <h3 class="text-xl sm:text-xl text-lg font-semibold text-green-deep dark:text-green-mint mb-2 flex items-baseline gap-2 flex-wrap">
-          {{ 縣市 }} 
-          <span class="text-sm sm:text-sm text-xs font-normal text-gray-600 dark:text-gray-400">| {{ 企業數 }} 家企業</span>
+        <h3 class="text-xl sm:text-xl text-lg font-bold font-semibold text-green-mint mb-2 flex items-baseline gap-2 flex-wrap">
+          {{ 縣市 }}
+          <span class="text-sm sm:text-sm text-xs font-normal text-gray-400">| {{ 企業數 }} 家企業</span>
         </h3>
-        <p class="text-base sm:text-base text-sm text-gray-800 dark:text-gray-200 m-0">
+        <p class="text-base sm:text-base text-sm text-earth-brown m-0">
           {{ formattedEmissions }} 公噸 CO<sub class="text-xs">2</sub>e
         </p>
       </div>
       <div class="flex-shrink-0">
-        <div class="sm:text-3xl text-2xl font-bold text-earth-brown dark:text-green-mint text-right leading-none">
+        <div class="sm:text-3xl text-2xl font-bold text-green-mint text-right leading-none">
           {{ 總排放量佔比 }}%
         </div>
       </div>
@@ -49,39 +49,20 @@ const formattedEmissions = computed(() => {
 /* Blink animation */
 @keyframes blink {
   0%, 100% {
-    background-color: white;
+    background-color: var(--color-surface-mint);
   }
   25% {
-    background-color: #f5deb3;
+    background-color: var(--color-green-forest);
   }
   50% {
-    background-color: white;
+    background-color: var(--color-surface-mint);
   }
   75% {
-    background-color: #f5deb3;
-  }
-}
-
-@keyframes blink-dark {
-  0%, 100% {
-    background-color: rgb(31, 41, 55);
-  }
-  25% {
-    background-color: rgb(16, 56, 48);
-  }
-  50% {
-    background-color: rgb(31, 41, 55);
-  }
-  75% {
-    background-color: rgb(16, 56, 48);
+    background-color: var(--color-green-forest);
   }
 }
 
 .blink-animation {
   animation: blink 3s ease-in-out;
-}
-
-.dark .blink-animation {
-  animation: blink-dark 3s ease-in-out;
 }
 </style>

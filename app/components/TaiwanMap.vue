@@ -7,6 +7,7 @@ import type { Topology, GeometryCollection } from 'topojson-specification'
 
 interface Props {
   highlightedRegion?: string | null
+  highlightedRegions?: string[]
   allowZoom?: boolean
   focusedRegion?: string | null
   validRegions?: string[]
@@ -19,6 +20,7 @@ interface RegionProperties {
 
 const props = withDefaults(defineProps<Props>(), {
   highlightedRegion: null,
+  highlightedRegions: () => [],
   allowZoom: true,
   focusedRegion: null,
   validRegions: () => [],
@@ -97,7 +99,8 @@ const initMap = async () => {
     .on('mouseenter', function(this: SVGPathElement, _event: any, d: any) {
       const regionName = d.properties?.name
       const isValid = props.validRegions.length === 0 || props.validRegions.includes(regionName)
-      if (!props.focusedRegion && isValid) {
+      const isMultiHighlighted = props.highlightedRegions.includes(regionName)
+      if (!props.focusedRegion && isValid && !isMultiHighlighted) {
         d3.select(this)
           .attr('fill', 'var(--color-earth-brown-light, #D2691E)')
           .attr('stroke-width', 2)
@@ -105,11 +108,19 @@ const initMap = async () => {
     })
     .on('mouseleave', function(this: SVGPathElement, _event: any, d: any) {
       const regionName = d.properties?.name
-      const isHighlighted = regionName === props.highlightedRegion || regionName === props.focusedRegion
-      
-      d3.select(this)
-        .attr('fill', isHighlighted ? 'var(--color-earth-brown, #8B4513)' : 'var(--color-surface-warm, #f5f5dc)')
-        .attr('stroke-width', isHighlighted ? 2 : 1)
+      if (regionName === props.highlightedRegion || regionName === props.focusedRegion) {
+        d3.select(this)
+          .attr('fill', 'var(--color-earth-brown, #8B4513)')
+          .attr('stroke-width', 2)
+      } else if (props.highlightedRegions.includes(regionName)) {
+        d3.select(this)
+          .attr('fill', 'var(--color-green-pure, #04B300)')
+          .attr('stroke-width', 2)
+      } else {
+        d3.select(this)
+          .attr('fill', 'var(--color-surface-warm, #f5f5dc)')
+          .attr('stroke-width', 1)
+      }
     })
 
   zoom = d3.zoom<SVGSVGElement, unknown>()
@@ -171,12 +182,19 @@ const updateHighlight = () => {
   g.selectAll<SVGPathElement, any>('path.county')
     .attr('fill', (d: any) => {
       const regionName = d.properties?.name
-      const isHighlighted = regionName === props.highlightedRegion || regionName === props.focusedRegion
-      return isHighlighted ? 'var(--color-earth-brown, #8B4513)' : 'var(--color-surface-warm, #f5f5dc)'
+      if (regionName === props.highlightedRegion || regionName === props.focusedRegion) {
+        return 'var(--color-earth-brown, #8B4513)'
+      }
+      if (props.highlightedRegions.includes(regionName)) {
+        return 'var(--color-green-pure, #04B300)'
+      }
+      return 'var(--color-surface-warm, #f5f5dc)'
     })
     .attr('stroke-width', (d: any) => {
       const regionName = d.properties?.name
-      const isHighlighted = regionName === props.highlightedRegion || regionName === props.focusedRegion
+      const isHighlighted = regionName === props.highlightedRegion ||
+        regionName === props.focusedRegion ||
+        props.highlightedRegions.includes(regionName)
       return isHighlighted ? 2 : 1
     })
 }
@@ -231,6 +249,10 @@ const resetZoom = () => {
     .duration(750)
     .call(zoom.transform as any, d3.zoomIdentity)
 }
+
+watch(() => props.highlightedRegions, () => {
+  updateHighlight()
+}, { deep: true })
 
 watch(() => props.highlightedRegion, async (newRegion) => {
   updateHighlight()

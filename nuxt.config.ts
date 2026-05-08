@@ -16,6 +16,10 @@ export default defineNuxtConfig({
   typescript: {
     typeCheck: true,
   },
+  colorMode: {
+    preference: 'light',
+    fallback: 'light',
+  },
   compatibilityDate: '2024-04-03',
   nitro: {
     preset: 'static',

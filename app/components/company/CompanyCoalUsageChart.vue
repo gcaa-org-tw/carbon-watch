@@ -125,7 +125,7 @@ function drawChart() {
     .attr('transform', `translate(0, ${innerHeight})`)
     .call(xAxis)
     .selectAll('text')
-    .attr('fill', '#5C573D')
+    .attr('fill', '#C4BE9A')
     .attr('font-size', '12px')
 
   g.selectAll('.domain, .tick line')
@@ -139,7 +139,7 @@ function drawChart() {
   g.append('g')
     .call(yAxis)
     .selectAll('text')
-    .attr('fill', '#5C573D')
+    .attr('fill', '#C4BE9A')
     .attr('font-size', '12px')
 
   g.selectAll('.domain, .tick line')

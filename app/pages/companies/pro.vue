@@ -30,7 +30,7 @@ useHead({
     </div>
 
     <div v-if="filteredCompanies.length === 0" class="text-center py-12">
-      <p class="text-gray-500 dark:text-gray-400">
+      <p class="text-gray-400">
         找不到符合條件的企業
       </p>
     </div>

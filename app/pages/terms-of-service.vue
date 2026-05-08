@@ -120,17 +120,16 @@ useHead({
   font-weight: 600;
 }
 
-/* Dark mode specific adjustments */
-.dark .terms-content :deep(h1) {
+.terms-content :deep(h1) {
   color: var(--color-green-mint);
   border-bottom-color: var(--color-green-spring);
 }
 
-.dark .terms-content :deep(h2) {
+.terms-content :deep(h2) {
   border-left-color: var(--color-green-mint);
 }
 
-.dark .terms-content :deep(li::marker) {
+.terms-content :deep(li::marker) {
   color: var(--color-green-spring);
 }
 </style>

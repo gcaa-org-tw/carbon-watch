@@ -119,7 +119,7 @@ const allMetrics = computed(() => [
     <div
       v-for="item in allMetrics"
       :key="item.label"
-      class="flex items-baseline justify-between gap-4 py-1"
+      class="flex items-baseline justify-between gap-4 py-1 text-earth-brown" 
     >
       <span class="text-sm">{{ item.label }}</span>
       <span

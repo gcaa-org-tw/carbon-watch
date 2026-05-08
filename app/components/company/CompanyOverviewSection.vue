@@ -101,7 +101,7 @@ const 淨零年預估排放量 = computed(() => {
 </script>
 
 <template>
-  <UCard>
+  <UCard :ui="{ root: 'ring-0 border-0' }">
     <CompanyHeader
       :公司="company.公司"
       :淨零目標年="company.淨零目標年"

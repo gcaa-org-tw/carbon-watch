@@ -84,7 +84,7 @@ useHead({
     </div>
 
     <div v-if="companies.length === 0" class="text-center py-12">
-      <p class="text-gray-500 dark:text-gray-400">
+      <p class="text-gray-400">
         此基金無排碳大戶企業資料
       </p>
     </div>

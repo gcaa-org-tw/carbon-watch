@@ -173,7 +173,7 @@ function drawRadarChart() {
       .attr('y', y)
       .attr('text-anchor', textAnchor)
       .attr('dominant-baseline', 'middle')
-      .attr('fill', '#5C573D')
+      .attr('fill', '#C4BE9A')
       .attr('font-size', fontSize)
 
     lines.forEach((line, li) => {

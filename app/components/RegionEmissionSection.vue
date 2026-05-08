@@ -136,9 +136,9 @@ const showMobileCarousel = computed(() => {
 </script>
 
 <template>
-  <section class="bg-surface-warm py-8 min-h-[80vh]">
+  <section class="bg-surface-warm py-35 min-h-[80vh]">
     <div class="mx-auto w-full px-4" :class="isPhone ? 'max-w-[90rem]' : 'max-w-[80rem]'">
-      <h2 class="text-4xl font-bold text-green-deep dark:text-green-mint mb-8 text-center">
+      <h2 class="text-4xl font-bold text-green-mint dark:text-green-mint mb-8 text-center">
         排碳縣市分佈
       </h2>
       
@@ -252,7 +252,7 @@ const showMobileCarousel = computed(() => {
   }
   
   section {
-    padding: 1rem 0;
+    padding: 5rem 0;
   }
 }
 

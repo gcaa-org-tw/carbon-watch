@@ -94,7 +94,7 @@ const scoreLegend = [
             <span class="md:text-sm text-xs text-earth-brown">{{ companyName }}</span>
           </div>
           <div class="flex items-center gap-2">
-            <span class="w-4 h-4 rounded-full bg-gray-400" />
+            <span class="w-4 h-4 rounded-full bg-earth-brown" />
             <span class="md:text-sm text-xs text-earth-brown">{{ industryName }}</span>
           </div>
         </div>
@@ -114,7 +114,7 @@ const scoreLegend = [
             class="flex items-center gap-2"
           >
             <span class="w-6 h-0.5" :style="{ backgroundColor: `var(${item.color})` }" />
-            <span class="md:text-sm text-xs text-earth-brown/70">
+            <span class="md:text-sm text-xs text-earth-brown">
               {{ item.score }}：{{ item.label }}
             </span>
           </div>
