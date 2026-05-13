@@ -66,8 +66,16 @@ const industryEntry = computed(() =>
   industryList.find(e => e.industry === props.company.產業分類)
 )
 
+// Hide the industry-average polygon and legend when the scored sample is too small
+// to be meaningful (e.g., singleton industries where the average equals the company itself).
+const INDUSTRY_MIN_SCORED = 10
+const showIndustryAverage = computed(
+  () => (industryEntry.value?.scoredCount ?? 0) >= INDUSTRY_MIN_SCORED
+)
+
 const industryRadarData = computed(() => {
-  const scores = industryEntry.value?.avgScores ?? [0, 0, 0, 0, 0, 0]
+  if (!showIndustryAverage.value) return []
+  const scores = industryEntry.value!.avgScores
   return radarAxesWithPrefix.map((axis, i) => ({
     axis,
     value: scores[i] ?? 0
@@ -75,12 +83,11 @@ const industryRadarData = computed(() => {
 })
 
 const companyName = computed(() => props.company.公司)
-const industryName = computed(() => {
-  if (!industryEntry.value) {
-    return `${props.company.產業分類 ?? ''}平均（無資料）`
-  }
-  return `${industryEntry.value.industry}平均（${industryEntry.value.scoredCount} 間）`
-})
+const industryName = computed(() =>
+  showIndustryAverage.value
+    ? `${industryEntry.value!.industry}平均（${industryEntry.value!.scoredCount} 間）`
+    : ''
+)
 
 // Score legend items
 const scoreLegend = [
@@ -104,7 +111,7 @@ const scoreLegend = [
             <span class="w-4 h-4 rounded-full bg-red-400" />
             <span class="md:text-sm text-xs text-earth-brown">{{ companyName }}</span>
           </div>
-          <div class="flex items-center gap-2">
+          <div v-if="showIndustryAverage" class="flex items-center gap-2">
             <span class="w-4 h-4 rounded-full bg-earth-brown" />
             <span class="md:text-sm text-xs text-earth-brown">{{ industryName }}</span>
           </div>

@@ -126,12 +126,15 @@ function drawRadarChart() {
   }
 
   // -------- INDUSTRY --------
-  g.append('path')
-    .attr('d', generateRadarPath(props.industryData))
-    .attr('fill', '#C5C9D1')
-    .attr('fill-opacity', 0.4)
-    .attr('stroke', '#9CA3AF')
-    .attr('stroke-width', 2)
+  // Skip when the parent hides the industry-average baseline (sample too small).
+  if (props.industryData.length > 0) {
+    g.append('path')
+      .attr('d', generateRadarPath(props.industryData))
+      .attr('fill', '#C5C9D1')
+      .attr('fill-opacity', 0.4)
+      .attr('stroke', '#9CA3AF')
+      .attr('stroke-width', 2)
+  }
 
   // -------- COMPANY --------
   g.append('path')
