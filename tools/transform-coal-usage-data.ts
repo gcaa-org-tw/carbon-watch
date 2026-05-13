@@ -125,8 +125,11 @@ async function transformCoalUsageData() {
     logger.info(`Parsed ${rawData.length} records`);
 
     // 2. Detect year columns from CSV headers (any header that is a 4-digit number)
+    //    Skip pre-2021: 2020 only covers ~46% of coal-using companies in the source,
+    //    causing inconsistent chart start points across companies.
+    const MIN_YEAR = 2021;
     const headers = rawData.length > 0 ? Object.keys(rawData[0]) : [];
-    const yearColumns = headers.filter(h => /^\d{4}$/.test(h)).sort();
+    const yearColumns = headers.filter(h => /^\d{4}$/.test(h) && parseInt(h) >= MIN_YEAR).sort();
     logger.info(`Detected year columns: ${yearColumns.join(', ')}`);
 
     // 3. Transform to map keyed by 公司
