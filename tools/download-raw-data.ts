@@ -24,6 +24,22 @@ const __dirname = dirname(__filename);
 const API_KEY = process.env.GOOGLE_SHEETS_API_KEY;
 const SPREADSHEET_ID = process.env.GOOGLE_SHEETS_ID;
 
+// Whitelist of Sheet B tabs the build actually consumes. Sheet B has ~34 tabs;
+// downloading every tab created ~24 orphan CSVs in raw-data/ that nothing read,
+// drowning out the signal. Add a row here when a new transform / analyze
+// script picks up a Sheet B tab; remove a row when no consumer is left.
+const CONSUMED_TABS: { tab: string; consumer: string }[] = [
+  { tab: 'I. 總表（易讀版）', consumer: 'tools/transform-company-data.ts' },
+  { tab: 'I. 總表（進階版）', consumer: 'tools/transform-company-data.ts' },
+  { tab: 'I. 總表各欄數值分級', consumer: 'tools/transform-company-data.ts' },
+  { tab: 'II. 公司總表（原始值）', consumer: 'tools/transform-company-data.ts' },
+  { tab: 'IV. 企業縣市排放絕對值（公式）', consumer: 'tools/analyze-regional-emissions.ts (standalone, not in build)' },
+  { tab: 'VIII. 歷年燃煤數據', consumer: 'tools/transform-coal-usage-data.ts' },
+  { tab: 'XII. 基金排碳量資訊', consumer: 'tools/transform-fund-data.ts' },
+  { tab: '排碳大戶表_Data', consumer: 'tools/transform-company-data.ts' },
+  { tab: '雷達圖_Data', consumer: 'tools/transform-company-data.ts' },
+];
+
 // 排放 / 能源歷年趨勢 spreadsheet (排碳大戶 168 間 SOT). Hardcoded because it
 // is a stable, public source-of-truth for the trend charts on the company page.
 // If the sheet is not publicly readable with the API key, the trend fetch is
@@ -88,21 +104,7 @@ async function downloadRawData() {
     // Initialize Google Sheets API
     const sheets = google.sheets({ version: 'v4', auth: API_KEY });
 
-    // Get spreadsheet metadata to retrieve sheet names
-    logger.info('Fetching spreadsheet metadata...');
-    const spreadsheet = await sheets.spreadsheets.get({
-      spreadsheetId: SPREADSHEET_ID,
-    });
-
-    const sheetNames = spreadsheet.data.sheets?.map(
-      sheet => sheet.properties?.title
-    ).filter(Boolean) as string[];
-
-    if (!sheetNames || sheetNames.length === 0) {
-      throw new Error('No sheets found in the spreadsheet');
-    }
-
-    logger.info(`Found ${sheetNames.length} sheets: ${sheetNames.join(', ')}`);
+    logger.info(`Downloading ${CONSUMED_TABS.length} whitelisted Sheet B tabs`);
 
     // Create raw-data directory if it doesn't exist
     try {
@@ -113,43 +115,42 @@ async function downloadRawData() {
       throw error;
     }
 
-    // Download data from each sheet
+    // Download data from each whitelisted tab
     let successCount = 0;
     let failureCount = 0;
 
-    for (const sheetName of sheetNames) {
+    for (const { tab, consumer } of CONSUMED_TABS) {
       try {
-        logger.info(`Fetching data from sheet: "${sheetName}"`);
+        logger.info(`Fetching tab: "${tab}" (consumed by ${consumer})`);
 
-        // Fetch all data from the sheet
         const response = await sheets.spreadsheets.values.get({
           spreadsheetId: SPREADSHEET_ID,
-          range: sheetName,
+          range: tab,
         });
 
         const values = response.data.values;
 
         if (!values || values.length === 0) {
-          logger.info(`Sheet "${sheetName}" is empty, skipping...`);
+          logger.info(`Tab "${tab}" is empty, skipping...`);
           continue;
         }
 
         // Convert to CSV
         const csv = arrayToCSV(values);
 
-        // Use sheet name as filename (UTF-8 encoding supports non-ASCII characters)
-        const fileName = `${sheetName}.csv`;
+        // Use tab name as filename (UTF-8 encoding supports non-ASCII characters)
+        const fileName = `${tab}.csv`;
         const filePath = join(RAW_DATA_DIR, fileName);
 
         // Write CSV file with UTF-8 encoding
         writeFileSync(filePath, csv, 'utf-8');
 
         logger.success(
-          `Saved "${sheetName}" to ${fileName} (${values.length} rows, ${values[0]?.length || 0} columns)`
+          `Saved "${tab}" to ${fileName} (${values.length} rows, ${values[0]?.length || 0} columns)`
         );
         successCount++;
       } catch (error) {
-        logger.error(`Failed to download sheet "${sheetName}"`, error);
+        logger.error(`Failed to download tab "${tab}"`, error);
         failureCount++;
       }
     }
