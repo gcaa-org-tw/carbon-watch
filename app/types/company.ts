@@ -24,6 +24,9 @@ export interface CompanyData {
   '中期再生能源目標設定': string
   'RE100 承諾': string
   '燃煤使用量（公噸）': string
+  '中期減量基準年'?: string
+  '中期減量基準年排放量'?: string
+  '中期減量目標年'?: string
   '代表縣市'?: string
   '事業統編'?: string
   '公司全名'?: string
