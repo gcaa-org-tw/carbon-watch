@@ -382,25 +382,31 @@ function applyLatestEmissionFromTrend(
     return isNaN(n) ? null : n;
   };
 
-  // Build 公司全名 → {2023, 2024} map from the SOT 溫室氣體排放 CSV.
-  const byFullName = new Map<string, { e2023: number | null; e2024: number | null }>();
+  // Build 事業統編 (8-digit, zero-padded) → {2023, 2024} map. UBN is more
+  // reliable than 公司全名 — name matching misses 臺/台 variants (台泥, 台紙,
+  // 台鹽, 台群, 湯淺電池) and corporate renames (中華凸版電子 → 中華科盛德光罩,
+  // same UBN).
+  const padUbn = (raw: string | undefined): string =>
+    (raw || '').trim().padStart(8, '0');
+
+  const byUbn = new Map<string, { e2023: number | null; e2024: number | null }>();
   for (const row of trendCsvData) {
-    const name = row['公司']?.trim();
-    if (!name) continue;
-    byFullName.set(name, {
+    const ubn = padUbn(row['事業統編']);
+    if (!ubn) continue;
+    byUbn.set(ubn, {
       e2023: parseNum(row['2023總排放']),
       e2024: parseNum(row['2024總排放']),
     });
   }
-  logger.info(`Loaded latest-year emissions for ${byFullName.size} companies from 溫室氣體排放.csv`);
+  logger.info(`Loaded latest-year emissions for ${byUbn.size} companies from 溫室氣體排放.csv`);
 
   let updatedEmission = 0;
   let updatedDelta = 0;
   let missingMatch = 0;
 
   for (const company of companyList) {
-    const fullName = company['公司全名'];
-    const entry = fullName ? byFullName.get(fullName) : undefined;
+    const ubn = padUbn(company['事業統編']);
+    const entry = ubn ? byUbn.get(ubn) : undefined;
 
     if (!entry) {
       // Keep existing 易讀版 value; null out 年度變化 unless already computed elsewhere.
@@ -432,7 +438,7 @@ function applyLatestEmissionFromTrend(
     `Computed 年度變化 from SOT 2023→2024: ${updatedDelta}/${companyList.length}`
   );
   if (missingMatch > 0) {
-    logger.info(`  ${missingMatch} companies fell through (公司全名 not in SOT tab)`);
+    logger.info(`  ${missingMatch} companies fell through (事業統編 not in SOT tab)`);
   }
 
   return companyList;

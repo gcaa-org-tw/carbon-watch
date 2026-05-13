@@ -37,7 +37,7 @@ const totalTaiwanEmissions = computed(() => {
 
 const taiwanPercentage = computed(() => {
   if (totalTaiwanEmissions.value === 0) return 0
-  return Math.round((companyEmission.value / totalTaiwanEmissions.value) * 100)
+  return (companyEmission.value / totalTaiwanEmissions.value) * 100
 })
 
 //  Mock data Calculate expected carbon fee (emission * rate per ton) 
