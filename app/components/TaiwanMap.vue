@@ -11,6 +11,8 @@ interface Props {
   allowZoom?: boolean
   focusedRegion?: string | null
   validRegions?: string[]
+  regionColors?: Record<string, string>
+  dimNonHovered?: boolean
 }
 
 interface RegionProperties {
@@ -24,7 +26,60 @@ const props = withDefaults(defineProps<Props>(), {
   allowZoom: true,
   focusedRegion: null,
   validRegions: () => [],
+  regionColors: () => ({}),
+  dimNonHovered: false,
 })
+
+const hoveredRegion = ref<string | null>(null)
+
+const DEFAULT_FILL = 'var(--color-surface-warm, #213620)'
+const HIGHLIGHT_FILL = 'var(--color-earth-brown, #C4BE9A)'
+const HOVER_FLASH_FILL = 'var(--color-earth-brown-light, #E8A87C)'
+const MULTI_HIGHLIGHT_FILL = 'var(--color-green-pure, #05D915)'
+
+const getFillForRegion = (regionName: string): string => {
+  if (!regionName) return DEFAULT_FILL
+
+  if (props.dimNonHovered) {
+    const activeRegion = hoveredRegion.value || props.highlightedRegion || props.focusedRegion
+    if (activeRegion) {
+      return regionName === activeRegion
+        ? (props.regionColors[regionName] || HIGHLIGHT_FILL)
+        : DEFAULT_FILL
+    }
+    return props.regionColors[regionName] || DEFAULT_FILL
+  }
+
+  if (hoveredRegion.value === regionName
+      && !props.focusedRegion
+      && !props.highlightedRegions.includes(regionName)) {
+    const isValid = props.validRegions.length === 0 || props.validRegions.includes(regionName)
+    if (isValid) return HOVER_FLASH_FILL
+  }
+
+  if (regionName === props.highlightedRegion || regionName === props.focusedRegion) {
+    return HIGHLIGHT_FILL
+  }
+  if (props.highlightedRegions.includes(regionName)) {
+    return MULTI_HIGHLIGHT_FILL
+  }
+  return props.regionColors[regionName] || DEFAULT_FILL
+}
+
+const getStrokeWidthForRegion = (regionName: string): number => {
+  if (!regionName) return 1
+  const activeRegion = hoveredRegion.value || props.highlightedRegion || props.focusedRegion
+  if (regionName === activeRegion) return 2
+  if (props.highlightedRegions.includes(regionName)) return 2
+  return 1
+}
+
+const updateAllFills = () => {
+  if (!g) return
+  g.selectAll<SVGPathElement, any>('path.county')
+    .attr('fill', (d: any) => getFillForRegion(d.properties?.name || ''))
+    .attr('stroke-width', (d: any) => getStrokeWidthForRegion(d.properties?.name || ''))
+}
 
 const emit = defineEmits<{
   regionClick: [regionName: string]
@@ -83,9 +138,9 @@ const initMap = async () => {
     .attr('d', path as any)
     .attr('class', 'county')
     .attr('data-name', (d: any) => d.properties?.name || '')
-    .attr('fill', 'var(--color-surface-warm, #f5f5dc)')
-    .attr('stroke', 'var(--color-earth-brown, #8B4513)')
-    .attr('stroke-width', 1)
+    .attr('fill', (d: any) => getFillForRegion(d.properties?.name || ''))
+    .attr('stroke', 'var(--color-earth-brown, #C4BE9A)')
+    .attr('stroke-width', (d: any) => getStrokeWidthForRegion(d.properties?.name || ''))
     .style('cursor', (d: any) => {
       const regionName = d.properties?.name
       const isValid = props.validRegions.length === 0 || props.validRegions.includes(regionName)
@@ -100,14 +155,11 @@ const initMap = async () => {
     })
     .on('mouseenter', function(this: SVGPathElement, event: MouseEvent, d: any) {
       const regionName = d.properties?.name
-      const isValid = props.validRegions.length === 0 || props.validRegions.includes(regionName)
-      const isMultiHighlighted = props.highlightedRegions.includes(regionName)
-      if (!props.focusedRegion && isValid && !isMultiHighlighted) {
-        d3.select(this)
-          .attr('fill', 'var(--color-earth-brown-light, #D2691E)')
-          .attr('stroke-width', 2)
+      if (regionName) {
+        hoveredRegion.value = regionName
+        updateAllFills()
+        emit('regionHover', regionName, event.clientX, event.clientY)
       }
-      if (regionName) emit('regionHover', regionName, event.clientX, event.clientY)
     })
     .on('mousemove', function(this: SVGPathElement, event: MouseEvent, d: any) {
       const regionName = d.properties?.name
@@ -115,19 +167,8 @@ const initMap = async () => {
     })
     .on('mouseleave', function(this: SVGPathElement, _event: any, d: any) {
       const regionName = d.properties?.name
-      if (regionName === props.highlightedRegion || regionName === props.focusedRegion) {
-        d3.select(this)
-          .attr('fill', 'var(--color-earth-brown, #8B4513)')
-          .attr('stroke-width', 2)
-      } else if (props.highlightedRegions.includes(regionName)) {
-        d3.select(this)
-          .attr('fill', 'var(--color-green-pure, #04B300)')
-          .attr('stroke-width', 2)
-      } else {
-        d3.select(this)
-          .attr('fill', 'var(--color-surface-warm, #f5f5dc)')
-          .attr('stroke-width', 1)
-      }
+      hoveredRegion.value = null
+      updateAllFills()
       if (regionName) emit('regionLeave', regionName)
     })
 
@@ -184,28 +225,6 @@ const initMap = async () => {
   emit('mapLoaded')
 }
 
-const updateHighlight = () => {
-  if (!g) return
-
-  g.selectAll<SVGPathElement, any>('path.county')
-    .attr('fill', (d: any) => {
-      const regionName = d.properties?.name
-      if (regionName === props.highlightedRegion || regionName === props.focusedRegion) {
-        return 'var(--color-earth-brown, #8B4513)'
-      }
-      if (props.highlightedRegions.includes(regionName)) {
-        return 'var(--color-green-pure, #04B300)'
-      }
-      return 'var(--color-surface-warm, #f5f5dc)'
-    })
-    .attr('stroke-width', (d: any) => {
-      const regionName = d.properties?.name
-      const isHighlighted = regionName === props.highlightedRegion ||
-        regionName === props.focusedRegion ||
-        props.highlightedRegions.includes(regionName)
-      return isHighlighted ? 2 : 1
-    })
-}
 
 const zoomToRegion = async (regionName: string) => {
   if (!g || !svg || !svgRef.value || !containerRef.value) return
@@ -259,24 +278,31 @@ const resetZoom = () => {
 }
 
 watch(() => props.highlightedRegions, () => {
-  updateHighlight()
+  updateAllFills()
 }, { deep: true })
 
-watch(() => props.highlightedRegion, async (newRegion) => {
-  updateHighlight()
+watch(() => props.regionColors, () => {
+  updateAllFills()
+}, { deep: true })
 
-  // Zoom to highlighted region on desktop/tablet
-  if (newRegion) {
+watch(() => props.dimNonHovered, () => {
+  updateAllFills()
+})
+
+watch(() => props.highlightedRegion, async (newRegion) => {
+  updateAllFills()
+
+  if (newRegion && props.allowZoom) {
     await nextTick()
     await zoomToRegion(newRegion)
-  } else {
+  } else if (!newRegion && props.allowZoom) {
     resetZoom()
   }
 })
 
 watch(() => props.focusedRegion, async (newRegion) => {
-  updateHighlight()
-  
+  updateAllFills()
+
   if (newRegion && props.allowZoom) {
     await nextTick()
     await zoomToRegion(newRegion)

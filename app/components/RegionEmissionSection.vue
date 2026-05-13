@@ -11,6 +11,8 @@ interface RegionEmission {
 
 const regions = regionEmissionList as RegionEmission[]
 
+const { setMode } = useViewMode()
+
 const activeCardIndex = ref(0)
 const highlightedRegion = ref<string | null>(null)
 const carouselRef = ref<HTMLDivElement | null>(null)
@@ -19,8 +21,27 @@ const isPhone = ref(false)
 const blinkingRegion = ref<string | null>(null)
 const mapLoaded = ref(false)
 
-// Get list of valid region names
 const validRegionNames = computed(() => regions.map(r => r.縣市))
+
+// Choropleth: shades of washed-out red, sqrt-scaled so mid/low counties stay visible
+// against 高雄/雲林 which are 5–10× higher than the next tier.
+const RED_LIGHT: [number, number, number] = [0xF5, 0xDA, 0xDA]
+const RED_DARK: [number, number, number] = [0xA0, 0x3A, 0x3A]
+
+const regionColors = computed<Record<string, string>>(() => {
+  const maxEmission = Math.max(...regions.map(r => r.總排放量))
+  if (maxEmission <= 0) return {}
+  const maxSqrt = Math.sqrt(maxEmission)
+  const colors: Record<string, string> = {}
+  for (const region of regions) {
+    const t = Math.sqrt(Math.max(0, region.總排放量)) / maxSqrt
+    const r = Math.round(RED_LIGHT[0] + (RED_DARK[0] - RED_LIGHT[0]) * t)
+    const g = Math.round(RED_LIGHT[1] + (RED_DARK[1] - RED_LIGHT[1]) * t)
+    const b = Math.round(RED_LIGHT[2] + (RED_DARK[2] - RED_LIGHT[2]) * t)
+    colors[region.縣市] = `rgb(${r}, ${g}, ${b})`
+  }
+  return colors
+})
 
 // Check if device is mobile
 onMounted(() => {
@@ -74,12 +95,13 @@ const handleScroll = () => {
   }
 }
 
-// Handle card click
+// Handle card click — always land on 易讀版 with region filter.
+// setMode('regular') prevents /companies/index.vue from auto-redirecting
+// to /companies/pro (which would drop the ?region= query) for visitors
+// whose viewMode cookie is left on 'pro' from prior browsing.
 const handleCardClick = (region: string) => {
-  const baseUrl = '/companies'
-  // Note: You can add logic here to determine if user has pro access
-  // For now, just go to basic companies page with region filter
-  const url = `${baseUrl}?region=${encodeURIComponent(region)}`
+  setMode('regular')
+  const url = `/companies?region=${encodeURIComponent(region)}`
   navigateTo(url)
 }
 
@@ -145,9 +167,11 @@ const showMobileCarousel = computed(() => {
       <!-- Mobile Layout -->
       <div v-if="isPhone" class="flex flex-col gap-4" style="height: calc(80vh - 6rem);">
         <div :class="showMobileCarousel ? 'flex-1 min-h-0' : 'flex-1'">
-          <TaiwanMap 
+          <TaiwanMap
             :focused-region="focusedRegion"
             :allow-zoom="true"
+            :region-colors="regionColors"
+            :dim-non-hovered="true"
             @map-loaded="handleMapLoaded"
           />
         </div>
@@ -181,10 +205,12 @@ const showMobileCarousel = computed(() => {
       <!-- Desktop/Tablet Layout -->
       <div v-else class="grid grid-cols-2 gap-16" style="height: calc(80vh - 6rem);">
         <div class="h-full">
-          <TaiwanMap 
+          <TaiwanMap
             :highlighted-region="highlightedRegion"
             :allow-zoom="false"
             :valid-regions="validRegionNames"
+            :region-colors="regionColors"
+            :dim-non-hovered="true"
             @region-click="handleMapClick"
           />
         </div>
