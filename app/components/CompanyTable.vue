@@ -125,6 +125,7 @@ const EMOJI_CHECK = String.fromCodePoint(0x2705)
 const EMOJI_CROSS = String.fromCodePoint(0x274C)
 const TEXT_CHECK = String.fromCodePoint(0x2713)
 const TEXT_CROSS = String.fromCodePoint(0x2717)
+const SBTI_TIER_VALUES = new Set(['遠低於2°C', '符合1.5°C目標', '承諾設定科學基礎目標'])
 const renderStatus = (value: string | undefined) => {
   if (!value || value.trim() === '') return h('span', '')
   if (value === EMOJI_CHECK) {
@@ -132,6 +133,9 @@ const renderStatus = (value: string | undefined) => {
   }
   if (value === EMOJI_CROSS) {
     return h('span', { class: 'text-accent-red font-bold' }, TEXT_CROSS)
+  }
+  if (SBTI_TIER_VALUES.has(value)) {
+    return h('span', { class: 'inline-block px-2 py-0.5 rounded-full bg-green-pure text-white text-xs whitespace-nowrap' }, value)
   }
   return h('span', value)
 }
