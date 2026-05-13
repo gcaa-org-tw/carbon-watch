@@ -601,6 +601,54 @@ function applyRadarScoresFromSource(
   return companyList;
 }
 
+interface IndustryAggregate {
+  count: number;
+  scoredCount: number;
+  totals: number[];
+}
+
+/**
+ * Build per-industry aggregates from 雷達圖_Data rows.
+ *
+ * Scoring is binary at the row level: every row either has all 6 axes filled
+ * (integers 0-3) or all 6 axes blank. We exclude blank rows entirely from the
+ * average, so `scoredCount` is a single per-industry number (not per-axis).
+ */
+function computeIndustryAverages(
+  radarData: Record<string, string>[]
+): Map<string, { count: number; scoredCount: number; avgScores: number[] }> {
+  const agg = new Map<string, IndustryAggregate>();
+
+  for (const row of radarData) {
+    const industry = row['產業類別']?.trim();
+    if (!industry) continue;
+
+    const entry = agg.get(industry) ?? { count: 0, scoredCount: 0, totals: [0, 0, 0, 0, 0, 0] };
+    entry.count += 1;
+
+    const first = row[RADAR_SCORE_FIELDS[0]];
+    const isScored = first !== undefined && first !== '' && first !== null;
+    if (isScored) {
+      entry.scoredCount += 1;
+      RADAR_SCORE_FIELDS.forEach((field, i) => {
+        const v = Number(row[field]);
+        entry.totals[i] += Number.isFinite(v) ? v : 0;
+      });
+    }
+
+    agg.set(industry, entry);
+  }
+
+  const out = new Map<string, { count: number; scoredCount: number; avgScores: number[] }>();
+  for (const [industry, e] of agg) {
+    const avgScores = e.scoredCount > 0
+      ? e.totals.map(t => Math.round((t / e.scoredCount) * 100) / 100)
+      : [0, 0, 0, 0, 0, 0];
+    out.set(industry, { count: e.count, scoredCount: e.scoredCount, avgScores });
+  }
+  return out;
+}
+
 /**
  * Main transformation function
  */
@@ -699,6 +747,9 @@ async function transformCompanyData() {
 
     companyList = applyRadarScoresFromSource(companyList, hubData, radarData, logger);
 
+    const industryAverages = computeIndustryAverages(radarData);
+    logger.info(`Computed averages for ${industryAverages.size} industries`);
+
     // Create output directory if it doesn't exist
     mkdirSync(OUTPUT_DIR, { recursive: true });
     logger.info(`Output directory: ${OUTPUT_DIR}`);
@@ -781,7 +832,18 @@ async function transformCompanyData() {
     
     const industryList = Array.from(industryCount.entries())
       .sort((a, b) => b[1] - a[1]) // Sort by count descending
-      .map(([industry, count]) => ({ industry, count }));
+      .map(([industry, count]) => {
+        const agg = industryAverages.get(industry);
+        if (!agg) {
+          logger.info(`No radar aggregate for industry: ${industry} (falling back to zeros)`);
+        }
+        return {
+          industry,
+          count,
+          scoredCount: agg?.scoredCount ?? 0,
+          avgScores: agg?.avgScores ?? [0, 0, 0, 0, 0, 0],
+        };
+      });
     
     logger.info(`Found ${industryList.length} unique industries`);
     
