@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { CompanyData } from '~/types/company'
+import industryList from '~/assets/data/industry-list.json'
 
 interface Props {
   company: CompanyData
@@ -60,16 +61,25 @@ const companyRadarData = computed(() => {
   })
 })
 
-// Industry average radar data (mock data - typically around 1.5-2)
+// Industry-average lookup (by 產業分類 string match — both data sources use the same 20 strings)
+const industryEntry = computed(() =>
+  industryList.find(e => e.industry === props.company.產業分類)
+)
+
 const industryRadarData = computed(() => {
-  return radarAxesWithPrefix.map(axis => ({
+  const scores = industryEntry.value?.avgScores ?? [0, 0, 0, 0, 0, 0]
+  return radarAxesWithPrefix.map((axis, i) => ({
     axis,
-    value: 0
+    value: scores[i] ?? 0
   }))
 })
 
 const companyName = computed(() => props.company.公司)
-const industryName = computed(() => `${props.company.產業分類}業平均`)
+const industryName = computed(() => {
+  const ind = props.company.產業分類 ?? ''
+  const n = industryEntry.value?.scoredCount ?? 0
+  return `${ind}平均（${n} 間）`
+})
 
 // Score legend items
 const scoreLegend = [
