@@ -22,6 +22,7 @@ import { readFileSync, writeFileSync, mkdirSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { Logger } from './lib/logger.js';
+import { normalizeCounty, normalizeUBN } from './lib/normalize.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -87,17 +88,6 @@ function parseAmount(raw: string | undefined): number {
   const cleaned = raw.replace(/[,\s]/g, '');
   const num = parseFloat(cleaned);
   return isNaN(num) ? 0 : num;
-}
-
-// Normalize to the topojson convention (台 not 臺) and post-2014 桃園市,
-// so 排放縣市 strings match TaiwanMap highlighting.
-function normalizeCounty(county: string): string {
-  const taSwapped = county.replace(/臺/g, '台');
-  return taSwapped === '桃園縣' ? '桃園市' : taSwapped;
-}
-
-function normalizeUBN(raw: string | undefined): string {
-  return (raw || '').replace(/\t/g, '').trim();
 }
 
 async function transformTopCompanyRegionData() {

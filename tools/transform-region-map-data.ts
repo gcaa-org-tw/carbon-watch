@@ -34,6 +34,7 @@ import { readFileSync, writeFileSync, mkdirSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { Logger } from './lib/logger.js';
+import { normalizeCounty, normalizeUBN } from './lib/normalize.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -96,18 +97,6 @@ function parseAmount(raw: string | undefined): number {
   const cleaned = raw.replace(/[,\s]/g, '');
   const num = parseFloat(cleaned);
   return isNaN(num) ? 0 : num;
-}
-
-// Normalize county names to the topojson convention (台, not 臺) and the
-// post-2014 桃園市. The topojson at app/assets/tw-counties.json uses 台北/台中/
-// 台南/台東; any 臺-form upstream values must collapse for map highlighting.
-function normalizeCounty(county: string): string {
-  const taSwapped = county.replace(/臺/g, '台');
-  return taSwapped === '桃園縣' ? '桃園市' : taSwapped;
-}
-
-function normalizeUBN(raw: string | undefined): string {
-  return (raw || '').replace(/\t/g, '').trim();
 }
 
 async function transformRegionMapData() {
