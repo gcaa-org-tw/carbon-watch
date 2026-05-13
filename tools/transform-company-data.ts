@@ -39,8 +39,13 @@
  * ```
  * 
  * ### Region List (`app/assets/data/region-list.json`)
- * 
- * Array of unique 代表縣市 values, ordered by geographic location (north to south, west to east).
+ *
+ * Array of counties where at least one of the 287 排碳大戶 operates a factory
+ * (year 113), ordered north-to-south. Sourced from each company's
+ * factoryCounties so the /companies?region=XX dropdown matches the home page
+ * map's 排碳縣市分佈 — clicking the map and selecting from the dropdown both
+ * include the same set of companies (any UBN with a factory in that county,
+ * not just UBNs whose HQ 代表縣市 matches).
  * 
  * ### Industry List (`app/assets/data/industry-list.json`)
  * 
@@ -515,17 +520,25 @@ function addRegionEmissionsFromFactorySOT(
     const ubnMap = byUBN.get(ubn);
     if (!ubnMap) { noMatch++; continue; }
 
-    const items = Array.from(ubnMap.entries())
+    const sortedEntries = Array.from(ubnMap.entries())
       .map(([county, amt]) => {
         const total = countyTotals[county] || 0;
         const share = total > 0 ? Math.round((amt / total) * 1000) / 10 : 0;
         return { 縣市: county, 排放量: Math.round(amt), 縣市佔比: share };
       })
-      .sort((a, b) => b.排放量 - a.排放量)
-      .slice(0, 3);
+      .sort((a, b) => b.排放量 - a.排放量);
+
+    const items = sortedEntries.slice(0, 3);
+
+    // factoryCounties is the FULL set of counties this UBN operates factories
+    // in (year 113) — no top-3 slice. The county filter on /companies must
+    // match the map's 企業數 aggregation in region-emission-list.json, which
+    // counts a UBN in every county it has a factory in.
+    const factoryCounties = sortedEntries.map(e => e.縣市);
 
     if (items.length > 0) {
       (company as Record<string, unknown>)['regionEmissions'] = items;
+      (company as Record<string, unknown>)['factoryCounties'] = factoryCounties;
       attached++;
     }
   }
@@ -778,42 +791,57 @@ async function transformCompanyData() {
     logger.success(`Saved grade map to: company-grade-map.json`);
 
     // Generate region list (ordered by geographic location: north to south, west to east)
+    // Source: union of factoryCounties across all 287 companies. This matches
+    // the home page map's 17-county set in region-emission-list.json, so the
+    // dropdown contains every county a user can click on the map.
     logger.info('Step 4: Generating region list');
     const regionSet = new Set<string>();
     companyList.forEach(company => {
-      const region = company['代表縣市'];
-      if (region && region.trim()) {
-        regionSet.add(region.trim());
+      const factoryCounties = (company as Record<string, unknown>)['factoryCounties'] as string[] | undefined;
+      if (factoryCounties) {
+        factoryCounties.forEach(c => {
+          if (c && c.trim()) regionSet.add(c.trim());
+        });
       }
     });
-    
-    // Manual ordering: north to south, west to east
+
+    // Manual ordering: north to south, west to east. Use 台 form (not 臺) to
+    // match the factory SOT after normalizeCounty — see
+    // addRegionEmissionsFromFactorySOT and transform-region-map-data.ts.
     const taiwanRegionOrder = [
       '基隆市',
-      '臺北市',
+      '台北市',
       '新北市',
       '桃園市',
       '新竹市',
       '新竹縣',
       '苗栗縣',
-      '臺中市',
+      '台中市',
       '彰化縣',
       '雲林縣',
       '嘉義市',
       '嘉義縣',
-      '臺南市',
+      '台南市',
       '高雄市',
       '屏東縣',
       '南投縣',
       '宜蘭縣',
       '花蓮縣',
-      '臺東縣',
+      '台東縣',
       '澎湖縣',
       '金門縣',
       '連江縣',
     ];
-    
+
     const regionList = taiwanRegionOrder.filter(region => regionSet.has(region));
+    // Surface any factory counties not in the manual order so the dropdown
+    // never silently drops a clickable map county.
+    regionSet.forEach(region => {
+      if (!taiwanRegionOrder.includes(region)) {
+        logger.info(`Region not in manual order, appending: ${region}`);
+        regionList.push(region);
+      }
+    });
     logger.info(`Found ${regionList.length} unique regions`);
     
     const regionListPath = join(OUTPUT_DIR, 'region-list.json');

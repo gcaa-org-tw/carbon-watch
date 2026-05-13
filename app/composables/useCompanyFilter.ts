@@ -46,10 +46,13 @@ export const useCompanyFilter = () => {
       )
     }
 
-    // Apply region filter
+    // Apply region filter — match the home page map's 排碳縣市分佈 logic:
+    // a company belongs to a county if it operates at least one factory there.
+    // Using 代表縣市 (single HQ county) would diverge from the map's 企業數
+    // because many UBNs have factories outside their registered HQ county.
     if (filters.value.region && filters.value.region !== '全部地區') {
-      companies = companies.filter(company => 
-        company['代表縣市'] === filters.value.region
+      companies = companies.filter(company =>
+        (company.factoryCounties ?? []).includes(filters.value.region)
       )
     }
 
