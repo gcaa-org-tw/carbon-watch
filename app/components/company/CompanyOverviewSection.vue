@@ -40,8 +40,9 @@ const taiwanPercentage = computed(() => {
   return (companyEmission.value / totalTaiwanEmissions.value) * 100
 })
 
-//  Mock data Calculate expected carbon fee (emission * rate per ton) 
-const CARBON_FEE_RATE = 300 // NTD per ton
+// Advocacy framing: 300 NTD/tonne without 25,000 t/factory exemption or
+// 自主減量 discounts. Diverges from 環境部 payable amount on purpose.
+const CARBON_FEE_RATE = 300 // NTD per tonne
 const expectedCarbonFee = computed(() => {
   return companyEmission.value * CARBON_FEE_RATE
 })
