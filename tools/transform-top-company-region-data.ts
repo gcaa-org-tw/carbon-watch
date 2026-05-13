@@ -32,6 +32,13 @@ const ASSETS_DATA_DIR = join(__dirname, '..', 'app', 'assets', 'data');
 
 const FACTORY_SOT_YEAR = '113'; // ROC = 2024
 
+interface FactoryEmission {
+  名稱: string;
+  範疇一: number;
+  範疇二: number;
+  總排放: number;
+}
+
 interface CompanyRegionEmission {
   公司全名: string;
   公司: string;
@@ -39,6 +46,17 @@ interface CompanyRegionEmission {
   全台佔比: number;
   縣市排放: Record<string, number>;
   排放縣市: string[];
+  縣市工廠: Record<string, FactoryEmission[]>;
+}
+
+// Strip the company-name prefix from 事業名稱 to get a short facility label.
+// 「台灣積體電路製造股份有限公司十八廠一期」→「十八廠一期」
+// 「台灣中油股份有限公司大林煉油廠」→「大林煉油廠」
+// Falls back to the raw name if no 公司 boundary is found.
+function stripCompanyPrefix(fullName: string): string {
+  const m = fullName.match(/^.*?(?:股份|股分)?有限公司(.+)$/);
+  if (m && m[1]) return m[1].trim();
+  return fullName.trim();
 }
 
 function parseCSVLine(line: string): string[] {
@@ -135,6 +153,7 @@ async function transformTopCompanyRegionData() {
     const factoryPath = join(RAW_DATA_DIR, '工廠縣市排放_歷年.csv');
     const factoryRows = parseCSV(readFileSync(factoryPath, 'utf-8'));
     const byUBN = new Map<string, Map<string, number>>();
+    const factoriesByUBN = new Map<string, Map<string, FactoryEmission[]>>();
     for (const row of factoryRows) {
       if (row['年度'] !== FACTORY_SOT_YEAR) continue;
       const ubn = normalizeUBN(row['事業統編']);
@@ -143,8 +162,17 @@ async function transformTopCompanyRegionData() {
       const amt = parseAmount(row['合計排放量(公噸CO2e)']);
       if (!county || amt <= 0) continue;
       if (!byUBN.has(ubn)) byUBN.set(ubn, new Map());
-      const m = byUBN.get(ubn)!;
-      m.set(county, (m.get(county) || 0) + amt);
+      byUBN.get(ubn)!.set(county, (byUBN.get(ubn)!.get(county) || 0) + amt);
+
+      if (!factoriesByUBN.has(ubn)) factoriesByUBN.set(ubn, new Map());
+      const countyMap = factoriesByUBN.get(ubn)!;
+      if (!countyMap.has(county)) countyMap.set(county, []);
+      countyMap.get(county)!.push({
+        名稱: stripCompanyPrefix(row['事業名稱'] || ''),
+        範疇一: Math.round(parseAmount(row['直接排放量(公噸CO2e)'])),
+        範疇二: Math.round(parseAmount(row['能源間接排放量(公噸CO2e)'])),
+        總排放: Math.round(amt),
+      });
     }
     logger.info(`Loaded factory SOT year ${FACTORY_SOT_YEAR}: ${byUBN.size} 事業統編`);
 
@@ -153,9 +181,11 @@ async function transformTopCompanyRegionData() {
     for (const c of top10) {
       const ubn = ((c['事業統編'] as string) || '').trim();
       const ubnMap = ubn ? byUBN.get(ubn) : undefined;
+      const factoryCountyMap = ubn ? factoriesByUBN.get(ubn) : undefined;
 
       const 縣市排放: Record<string, number> = {};
       const 排放縣市: string[] = [];
+      const 縣市工廠: Record<string, FactoryEmission[]> = {};
       if (ubnMap) {
         for (const [county, amt] of ubnMap.entries()) {
           縣市排放[county] = Math.round(amt);
@@ -163,6 +193,12 @@ async function transformTopCompanyRegionData() {
         }
       } else {
         logger.info(`  ${c['公司']}: no 事業統編 match in factory SOT — counties empty`);
+      }
+      if (factoryCountyMap) {
+        for (const [county, factories] of factoryCountyMap.entries()) {
+          const sorted = [...factories].sort((a, b) => b.總排放 - a.總排放);
+          縣市工廠[county] = sorted;
+        }
       }
 
       const total = c._amount;
@@ -177,6 +213,7 @@ async function transformTopCompanyRegionData() {
         全台佔比: percentage,
         縣市排放,
         排放縣市,
+        縣市工廠,
       });
     }
 

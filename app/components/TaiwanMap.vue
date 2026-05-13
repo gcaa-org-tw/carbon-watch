@@ -28,6 +28,8 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<{
   regionClick: [regionName: string]
+  regionHover: [regionName: string, clientX: number, clientY: number]
+  regionLeave: [regionName: string]
   mapLoaded: []
 }>()
 
@@ -96,7 +98,7 @@ const initMap = async () => {
         emit('regionClick', regionName)
       }
     })
-    .on('mouseenter', function(this: SVGPathElement, _event: any, d: any) {
+    .on('mouseenter', function(this: SVGPathElement, event: MouseEvent, d: any) {
       const regionName = d.properties?.name
       const isValid = props.validRegions.length === 0 || props.validRegions.includes(regionName)
       const isMultiHighlighted = props.highlightedRegions.includes(regionName)
@@ -105,6 +107,11 @@ const initMap = async () => {
           .attr('fill', 'var(--color-earth-brown-light, #D2691E)')
           .attr('stroke-width', 2)
       }
+      if (regionName) emit('regionHover', regionName, event.clientX, event.clientY)
+    })
+    .on('mousemove', function(this: SVGPathElement, event: MouseEvent, d: any) {
+      const regionName = d.properties?.name
+      if (regionName) emit('regionHover', regionName, event.clientX, event.clientY)
     })
     .on('mouseleave', function(this: SVGPathElement, _event: any, d: any) {
       const regionName = d.properties?.name
@@ -121,6 +128,7 @@ const initMap = async () => {
           .attr('fill', 'var(--color-surface-warm, #f5f5dc)')
           .attr('stroke-width', 1)
       }
+      if (regionName) emit('regionLeave', regionName)
     })
 
   zoom = d3.zoom<SVGSVGElement, unknown>()
