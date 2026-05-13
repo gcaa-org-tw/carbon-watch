@@ -389,19 +389,37 @@ function applyLatestEmissionFromTrend(
   const padUbn = (raw: string | undefined): string =>
     (raw || '').trim().padStart(8, '0');
 
-  const byUbn = new Map<string, { e2023: number | null; e2024: number | null }>();
+  const byUbn = new Map<
+    string,
+    { e2022: number | null; e2023: number | null; e2024: number | null }
+  >();
   for (const row of trendCsvData) {
     const ubn = padUbn(row['事業統編']);
     if (!ubn) continue;
     byUbn.set(ubn, {
+      e2022: parseNum(row['2022總排放']),
       e2023: parseNum(row['2023總排放']),
       e2024: parseNum(row['2024總排放']),
     });
   }
   logger.info(`Loaded latest-year emissions for ${byUbn.size} companies from 溫室氣體排放.csv`);
 
+  // Pick the most recent year that has a non-zero report. Trend SOT
+  // occasionally has 0 for the latest year when the company hasn't published
+  // its sustainability report yet; "0 噸" displayed on the website would
+  // misrepresent that as actual zero emission.
+  const pickLatest = (
+    e: { e2022: number | null; e2023: number | null; e2024: number | null }
+  ): { value: number; year: 2022 | 2023 | 2024 } | null => {
+    if (e.e2024 !== null && e.e2024 > 0) return { value: e.e2024, year: 2024 };
+    if (e.e2023 !== null && e.e2023 > 0) return { value: e.e2023, year: 2023 };
+    if (e.e2022 !== null && e.e2022 > 0) return { value: e.e2022, year: 2022 };
+    return null;
+  };
+
   let updatedEmission = 0;
   let updatedDelta = 0;
+  let fallbackToOlder = 0;
   let missingMatch = 0;
 
   for (const company of companyList) {
@@ -417,11 +435,16 @@ function applyLatestEmissionFromTrend(
       continue;
     }
 
-    if (entry.e2024 !== null && entry.e2024 > 0) {
-      company['溫室氣體排放量（公噸二氧化碳當量）'] = Math.round(entry.e2024).toLocaleString('en-US');
+    const latest = pickLatest(entry);
+    if (latest) {
+      company['溫室氣體排放量（公噸二氧化碳當量）'] = Math.round(latest.value).toLocaleString('en-US');
       updatedEmission++;
+      if (latest.year !== 2024) fallbackToOlder++;
     }
 
+    // 年度變化 stays strict: only show when both 2023 and 2024 actual values
+    // are present and positive. For companies whose 2024 fell back to an
+    // earlier year, hide the delta (no meaningful YoY).
     if (entry.e2023 !== null && entry.e2023 > 0 && entry.e2024 !== null && entry.e2024 > 0) {
       const delta = ((entry.e2024 - entry.e2023) / entry.e2023) * 100;
       (company as Record<string, unknown>)['年度變化'] = Math.round(delta * 10) / 10;
@@ -432,7 +455,8 @@ function applyLatestEmissionFromTrend(
   }
 
   logger.success(
-    `Overrode 年碳排 from SOT 溫室氣體排放: ${updatedEmission}/${companyList.length}`
+    `Overrode 年碳排 from SOT 溫室氣體排放: ${updatedEmission}/${companyList.length}` +
+      (fallbackToOlder > 0 ? ` (${fallbackToOlder} fell back to 2023 or 2022 because 2024 was 0/null)` : '')
   );
   logger.success(
     `Computed 年度變化 from SOT 2023→2024: ${updatedDelta}/${companyList.length}`
