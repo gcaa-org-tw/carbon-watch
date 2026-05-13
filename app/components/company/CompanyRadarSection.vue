@@ -76,9 +76,10 @@ const industryRadarData = computed(() => {
 
 const companyName = computed(() => props.company.公司)
 const industryName = computed(() => {
-  const ind = props.company.產業分類 ?? ''
-  const n = industryEntry.value?.scoredCount ?? 0
-  return `${ind}平均（${n} 間）`
+  if (!industryEntry.value) {
+    return `${props.company.產業分類 ?? ''}平均（無資料）`
+  }
+  return `${industryEntry.value.industry}平均（${industryEntry.value.scoredCount} 間）`
 })
 
 // Score legend items
