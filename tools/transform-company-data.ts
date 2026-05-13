@@ -602,7 +602,6 @@ function applyRadarScoresFromSource(
 }
 
 interface IndustryAggregate {
-  count: number;
   scoredCount: number;
   totals: number[];
 }
@@ -613,38 +612,44 @@ interface IndustryAggregate {
  * Scoring is binary at the row level: every row either has all 6 axes filled
  * (integers 0-3) or all 6 axes blank. We exclude blank rows entirely from the
  * average, so `scoredCount` is a single per-industry number (not per-axis).
+ * Partial rows (some axes filled, some blank) are skipped with a warning.
  */
 function computeIndustryAverages(
-  radarData: Record<string, string>[]
-): Map<string, { count: number; scoredCount: number; avgScores: number[] }> {
+  radarData: Record<string, string>[],
+  logger: Logger
+): Map<string, { scoredCount: number; avgScores: number[] }> {
   const agg = new Map<string, IndustryAggregate>();
 
   for (const row of radarData) {
     const industry = row['產業類別']?.trim();
     if (!industry) continue;
 
-    const entry = agg.get(industry) ?? { count: 0, scoredCount: 0, totals: [0, 0, 0, 0, 0, 0] };
-    entry.count += 1;
+    const entry = agg.get(industry) ?? { scoredCount: 0, totals: [0, 0, 0, 0, 0, 0] };
 
-    const first = row[RADAR_SCORE_FIELDS[0]];
-    const isScored = first !== undefined && first !== '' && first !== null;
-    if (isScored) {
+    const filledCount = RADAR_SCORE_FIELDS.filter(f => {
+      const v = row[f];
+      return v !== undefined && v !== '' && v !== null;
+    }).length;
+
+    if (filledCount === RADAR_SCORE_FIELDS.length) {
       entry.scoredCount += 1;
       RADAR_SCORE_FIELDS.forEach((field, i) => {
         const v = Number(row[field]);
         entry.totals[i] += Number.isFinite(v) ? v : 0;
       });
+    } else if (filledCount > 0) {
+      logger.info(`Partial radar row skipped: industry=${industry} filled=${filledCount}/6`);
     }
 
     agg.set(industry, entry);
   }
 
-  const out = new Map<string, { count: number; scoredCount: number; avgScores: number[] }>();
+  const out = new Map<string, { scoredCount: number; avgScores: number[] }>();
   for (const [industry, e] of agg) {
     const avgScores = e.scoredCount > 0
       ? e.totals.map(t => Math.round((t / e.scoredCount) * 100) / 100)
       : [0, 0, 0, 0, 0, 0];
-    out.set(industry, { count: e.count, scoredCount: e.scoredCount, avgScores });
+    out.set(industry, { scoredCount: e.scoredCount, avgScores });
   }
   return out;
 }
@@ -747,7 +752,7 @@ async function transformCompanyData() {
 
     companyList = applyRadarScoresFromSource(companyList, hubData, radarData, logger);
 
-    const industryAverages = computeIndustryAverages(radarData);
+    const industryAverages = computeIndustryAverages(radarData, logger);
     logger.info(`Computed averages for ${industryAverages.size} industries`);
 
     // Create output directory if it doesn't exist
@@ -846,7 +851,21 @@ async function transformCompanyData() {
       });
     
     logger.info(`Found ${industryList.length} unique industries`);
-    
+
+    // Cross-check: warn if any industry exists in one source but not the other.
+    const radarIndustries = new Set(industryAverages.keys());
+    const companyIndustries = new Set(industryCount.keys());
+    for (const ind of radarIndustries) {
+      if (!companyIndustries.has(ind)) {
+        logger.info(`Industry in radar CSV but not company list: ${ind}`);
+      }
+    }
+    for (const ind of companyIndustries) {
+      if (!radarIndustries.has(ind)) {
+        logger.info(`Industry in company list but not radar CSV: ${ind}`);
+      }
+    }
+
     const industryListPath = join(OUTPUT_DIR, 'industry-list.json');
     writeFileSync(
       industryListPath,
