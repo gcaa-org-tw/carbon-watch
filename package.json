@@ -14,7 +14,8 @@
     "transform-region-map-data": "tsx tools/transform-region-map-data.ts",
     "transform-coal-usage-data": "tsx tools/transform-coal-usage-data.ts",
     "transform-trend-data": "tsx tools/transform-trend-data.ts",
-    "transform-top-company-region-data": "tsx tools/transform-top-company-region-data.ts"
+    "transform-top-company-region-data": "tsx tools/transform-top-company-region-data.ts",
+    "rebuild-data": "npm run transform-company-data && npm run transform-fund-data && npm run transform-coal-usage-data && npm run transform-trend-data && npm run transform-region-map-data && npm run transform-top-company-region-data"
   },
   "dependencies": {
     "@nuxt/content": "^3.8.0",
