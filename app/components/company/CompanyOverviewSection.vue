@@ -52,15 +52,18 @@ const expectedCarbonFee = computed(() => {
 const regionEmissions = computed(() => props.company.regionEmissions ?? [])
 
 // Coal usage historical data from coal-usage-map.json (keyed by 公司全名)
+const normalizeName = (raw: string | undefined): string =>
+  (raw || '').replace(/臺/g, '台').trim()
+
 const coalUsageData = computed(() => {
-  const fullName = props.company['公司全名']
+  const fullName = normalizeName(props.company['公司全名'])
   if (!fullName) return []
   return (coalUsageMap as Record<string, Array<{ year: number; value: number }>>)[fullName] || []
 })
 
-// Trend data (排放量、密集度、能源、能源密集度) keyed by 公司全名
+// Trend data (排放量、密集度、能源、能源密集度) keyed by 公司全名（臺→台 normalized）
 const trendEntry = computed<TrendEntry>(() => {
-  const fullName = props.company['公司全名']
+  const fullName = normalizeName(props.company['公司全名'])
   if (!fullName) return {}
   return (trendMap as Record<string, TrendEntry>)[fullName] || {}
 })

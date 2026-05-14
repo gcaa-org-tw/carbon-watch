@@ -23,11 +23,13 @@
  * Record<string, Array<{ year: number; value: number }>>
  * ```
  *
- * Keyed by 公司 (company name). Each entry is an array of yearly data points
- * sorted by year ascending, with only non-zero values included.
+ * Keyed by 公司全名 (full company name, 臺→台 normalized to match hub). Each
+ * entry is an array of yearly data points sorted by year ascending, with only
+ * non-zero values included.
  */
 
 import { readFileSync, writeFileSync, mkdirSync } from 'fs';
+import { normalizeCompanyName } from './lib/normalize.js';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { Logger } from './lib/logger.js';
@@ -139,7 +141,7 @@ async function transformCoalUsageData() {
     let skippedCount = 0;
 
     for (const row of rawData) {
-      const companyName = row['公司']?.trim();
+      const companyName = normalizeCompanyName(row['公司']);
 
       if (!companyName) {
         skippedCount++;

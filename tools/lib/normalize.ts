@@ -10,3 +10,10 @@ export function normalizeCounty(county: string): string {
 export function normalizeUBN(raw: string | undefined): string {
   return (raw || '').replace(/\t/g, '').trim();
 }
+
+// Company-name 異體字 collapse: upstream SOT CSVs (溫室氣體排放, 燃煤) write
+// 臺 while hub 排碳大戶表_Data writes 台. Both sides must normalize before join,
+// otherwise 5 companies (南紡 台紙 台鹽 台群 湯淺電池) silently drop out.
+export function normalizeCompanyName(raw: string | undefined): string {
+  return (raw || '').replace(/臺/g, '台').trim();
+}

@@ -5,7 +5,8 @@
  *  - 溫室氣體排放.csv (keyed by 事業統編): emissions + intensity 2022-2024
  *  - 能源消耗.csv (keyed by 證券代號): energy use + energy intensity 2022-2024
  *
- * Outputs `app/assets/data/trend-map.json` keyed by 公司全名 (full company name).
+ * Outputs `app/assets/data/trend-map.json` keyed by 公司全名 (full company name,
+ * 臺→台 normalized to match hub).
  *
  * ## Output shape
  *
@@ -26,6 +27,7 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'fs'
 import { join, dirname } from 'path'
 import { fileURLToPath } from 'url'
 import { Logger } from './lib/logger.js'
+import { normalizeCompanyName } from './lib/normalize.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -133,7 +135,7 @@ async function transformTrendData() {
 
     let ghgCount = 0
     for (const row of ghgData) {
-      const name = row['公司']?.trim()
+      const name = normalizeCompanyName(row['公司'])
       if (!name) continue
 
       const ghg = buildSeries(row, {
@@ -157,7 +159,7 @@ async function transformTrendData() {
 
     let energyCount = 0
     for (const row of energyData) {
-      const name = row['公司名稱']?.trim()
+      const name = normalizeCompanyName(row['公司名稱'])
       if (!name) continue
 
       const energy = buildSeries(row, {
