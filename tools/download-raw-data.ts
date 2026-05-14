@@ -33,7 +33,6 @@ const CONSUMED_TABS: { tab: string; consumer: string }[] = [
   { tab: 'I. 總表（進階版）', consumer: 'tools/transform-company-data.ts' },
   { tab: 'I. 總表各欄數值分級', consumer: 'tools/transform-company-data.ts' },
   { tab: 'II. 公司總表（原始值）', consumer: 'tools/transform-company-data.ts' },
-  { tab: 'IV. 企業縣市排放絕對值（公式）', consumer: 'tools/analyze-regional-emissions.ts (standalone, not in build)' },
   { tab: 'VIII. 歷年燃煤數據', consumer: 'tools/transform-coal-usage-data.ts' },
   { tab: 'XII. 基金排碳量資訊', consumer: 'tools/transform-fund-data.ts' },
   { tab: '排碳大戶表_Data', consumer: 'tools/transform-company-data.ts' },
