@@ -40,6 +40,7 @@ const CONSUMED_TABS: { tab: string; consumer: string }[] = [
   { tab: '雷達圖_Data', consumer: 'tools/transform-company-data.ts' },
   { tab: '溫室氣體排放', consumer: 'tools/transform-trend-data.ts' },
   { tab: '能源消耗', consumer: 'tools/transform-trend-data.ts' },
+  { tab: 'VI. 所有基金與排碳大戶對照', consumer: 'tools/transform-fund-data.ts' },
 ];
 
 // 工廠縣市排放歷年 SOT — factory-level emissions by year and county.

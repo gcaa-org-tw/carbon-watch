@@ -27,21 +27,13 @@ jobs:
           GOOGLE_SHEETS_API_KEY: ${{ secrets.GOOGLE_SHEETS_API_KEY }}
           GOOGLE_SHEETS_ID: ${{ secrets.GOOGLE_SHEETS_ID }}
         run: npm run download-data
-      
-      - name: Transform company data
-        run: npm run transform-company-data
-      
-      - name: Transform fund data
-        run: npm run transform-fund-data
-      
-      - name: Transform region map data
-        run: npm run transform-region-map-data
 
-      - name: Transform trend data
-        run: npm run transform-trend-data
-
-      - name: Transform top-10 company region data
-        run: npm run transform-top-company-region-data
+      - name: Rebuild all derived JSON
+        # rebuild-data chains all 6 transforms (company, fund, coal, trend,
+        # region-map, top-company-region). Calling it here keeps CI and local
+        # runs in sync — when a new transform is added to package.json's
+        # rebuild-data chain, CI picks it up automatically.
+        run: npm run rebuild-data
       
       - name: Commit and push changes
         run: |
