@@ -38,14 +38,9 @@ const CONSUMED_TABS: { tab: string; consumer: string }[] = [
   { tab: 'XII. 基金排碳量資訊', consumer: 'tools/transform-fund-data.ts' },
   { tab: '排碳大戶表_Data', consumer: 'tools/transform-company-data.ts' },
   { tab: '雷達圖_Data', consumer: 'tools/transform-company-data.ts' },
+  { tab: '溫室氣體排放', consumer: 'tools/transform-trend-data.ts' },
+  { tab: '能源消耗', consumer: 'tools/transform-trend-data.ts' },
 ];
-
-// 排放 / 能源歷年趨勢 spreadsheet (排碳大戶 168 間 SOT). Hardcoded because it
-// is a stable, public source-of-truth for the trend charts on the company page.
-// If the sheet is not publicly readable with the API key, the trend fetch is
-// skipped and the existing committed CSVs remain in place.
-const TREND_SPREADSHEET_ID = '1JK7KAFMJ_gTychIg4ce5X5EffIjFu9-55rCncQzxtEI';
-const TREND_TABS = ['能源消耗', '溫室氣體排放'];
 
 // 工廠縣市排放歷年 SOT — factory-level emissions by year and county.
 // Powers the regional emission cards (currently filtered to ROC 113 / 2024 in
@@ -154,36 +149,6 @@ async function downloadRawData() {
         failureCount++;
       }
     }
-
-    // Fetch trend spreadsheet tabs (best-effort; non-fatal on failure)
-    logger.info(`Fetching trend spreadsheet tabs from ${TREND_SPREADSHEET_ID}`);
-    let trendSuccess = 0;
-    for (const tab of TREND_TABS) {
-      try {
-        const response = await sheets.spreadsheets.values.get({
-          spreadsheetId: TREND_SPREADSHEET_ID,
-          range: tab,
-        });
-        const values = response.data.values;
-        if (!values || values.length === 0) {
-          logger.info(`Trend tab "${tab}" is empty, skipping`);
-          continue;
-        }
-        const csv = arrayToCSV(values);
-        const filePath = join(RAW_DATA_DIR, `${tab}.csv`);
-        writeFileSync(filePath, csv, 'utf-8');
-        logger.success(
-          `Saved trend "${tab}" to ${tab}.csv (${values.length} rows, ${values[0]?.length || 0} columns)`
-        );
-        trendSuccess++;
-      } catch (error) {
-        logger.info(
-          `Could not refresh trend tab "${tab}" (likely the sheet is not public to this API key). Existing CSV is retained.`
-        );
-        logger.info(`  ${error instanceof Error ? error.message : String(error)}`);
-      }
-    }
-    logger.info(`Trend tabs refreshed: ${trendSuccess}/${TREND_TABS.length}`);
 
     // Fetch factory-level region SOT (best-effort; non-fatal on failure)
     logger.info(`Fetching factory SOT tab "${FACTORY_SOT_TAB}" from ${FACTORY_SOT_SPREADSHEET_ID}`);
