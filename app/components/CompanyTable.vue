@@ -140,28 +140,6 @@ const renderStatus = (value: string | undefined) => {
   return h('span', value)
 }
 
-// Render the 2030 年減量目標設定 cell: graded pill + optional info icon when
-// the value is linearly derived (target year ≠ 2030).
-const render2030Cell = (row: CompanyData) => {
-  const value = row['2030 年減量目標設定']
-  const tooltip = row['2030 年減量目標設定_推估說明']
-  const pill = renderValueWithGrade('2030 年減量目標設定', value, false)
-  if (!tooltip) return pill
-  const UIconCmp = resolveComponent('UIcon')
-  const UTooltipCmp = resolveComponent('UTooltip')
-  return h('span', { class: 'inline-flex items-center gap-1' }, [
-    pill,
-    h(UTooltipCmp, { text: tooltip, delayDuration: 100 }, () =>
-      h(UIconCmp, {
-        name: 'i-heroicons-information-circle',
-        class: 'w-3.5 h-3.5 text-earth-brown/60 cursor-help shrink-0',
-        'aria-label': '說明',
-        tabindex: 0,
-      })
-    ),
-  ])
-}
-
 // Helper function to render value with grade
 const renderValueWithGrade = (field: string, value: string | number, isNumeric: boolean = false) => {
   const grade = getGrade(field, value)
@@ -236,7 +214,9 @@ const nonProColumns: TableColumn<CompanyData>[] = [
     header: ({ column }) => createSortableHeader(column, '2030 年減量目標設定'),
     enableSorting: true,
     sortingFn: numericSortingFn,
-    cell: ({ row }) => h('div', { class: 'text-right' }, render2030Cell(row.original)),
+    cell: ({ row }) => h('div', { class: 'text-right' },
+      renderValueWithGrade('2030 年減量目標設定', row.original['2030 年減量目標設定'], false)
+    ),
   },
   {
     accessorKey: 'SBTi 承諾',
@@ -381,7 +361,9 @@ const proColumns: TableColumn<CompanyData>[] = [
     header: ({ column }) => createSortableHeader(column, '2030 年減量目標設定'),
     enableSorting: true,
     sortingFn: numericSortingFn,
-    cell: ({ row }) => h('div', { class: 'text-right' }, render2030Cell(row.original)),
+    cell: ({ row }) => h('div', { class: 'text-right' },
+      renderValueWithGrade('2030 年減量目標設定', row.original['2030 年減量目標設定'], false)
+    ),
   },
   {
     accessorKey: 'SBTi 承諾',
