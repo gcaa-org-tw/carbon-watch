@@ -138,7 +138,7 @@ const allMetrics = computed(() => [
           :text="item.tooltip"
           :delay-duration="0"
           :ui="{
-            content: 'h-auto !max-w-[130px] !text-white bg-gray-900 px-3 py-2.5 ring-0 shadow-md',
+            content: 'h-auto !max-w-[150px] !text-white bg-gray-900 px-3 py-2.5 ring-0 shadow-md',
             text: '!whitespace-normal !text-white leading-relaxed text-xs block'
           }"
         >

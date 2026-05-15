@@ -140,6 +140,29 @@ const renderStatus = (value: string | undefined) => {
   return h('span', value)
 }
 
+// Render the 2030 年減量目標設定 cell. When the value is linearly derived
+// (target year ≠ 2030) the pill itself becomes the hover trigger for the
+// derivation explainer — no separate icon, so the % column stays vertically
+// aligned with neighbouring numeric columns.
+const render2030Cell = (row: CompanyData) => {
+  const value = row['2030 年減量目標設定']
+  const tooltip = row['2030 年減量目標設定_推估說明']
+  const pill = renderValueWithGrade('2030 年減量目標設定', value, false)
+  if (!tooltip) return pill
+  return h(
+    resolveComponent('UTooltip'),
+    {
+      text: tooltip,
+      delayDuration: 0,
+      ui: {
+        content: 'h-auto !max-w-[150px] !text-white bg-gray-900 px-3 py-2.5 ring-0 shadow-md',
+        text: '!whitespace-normal !text-white leading-relaxed text-xs block',
+      },
+    },
+    () => h('span', { class: 'cursor-help' }, [pill])
+  )
+}
+
 // Helper function to render value with grade
 const renderValueWithGrade = (field: string, value: string | number, isNumeric: boolean = false) => {
   const grade = getGrade(field, value)
@@ -214,9 +237,7 @@ const nonProColumns: TableColumn<CompanyData>[] = [
     header: ({ column }) => createSortableHeader(column, '2030 年減量目標設定'),
     enableSorting: true,
     sortingFn: numericSortingFn,
-    cell: ({ row }) => h('div', { class: 'text-right' },
-      renderValueWithGrade('2030 年減量目標設定', row.original['2030 年減量目標設定'], false)
-    ),
+    cell: ({ row }) => h('div', { class: 'text-right' }, render2030Cell(row.original)),
   },
   {
     accessorKey: 'SBTi 承諾',
@@ -361,9 +382,7 @@ const proColumns: TableColumn<CompanyData>[] = [
     header: ({ column }) => createSortableHeader(column, '2030 年減量目標設定'),
     enableSorting: true,
     sortingFn: numericSortingFn,
-    cell: ({ row }) => h('div', { class: 'text-right' },
-      renderValueWithGrade('2030 年減量目標設定', row.original['2030 年減量目標設定'], false)
-    ),
+    cell: ({ row }) => h('div', { class: 'text-right' }, render2030Cell(row.original)),
   },
   {
     accessorKey: 'SBTi 承諾',
