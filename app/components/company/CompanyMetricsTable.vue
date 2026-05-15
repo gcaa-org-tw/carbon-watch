@@ -133,13 +133,14 @@ const allMetrics = computed(() => [
     >
       <span class="text-sm flex items-center gap-1">
         {{ item.label }}
-        <UIcon
-          v-if="item.tooltip"
-          name="i-heroicons-information-circle"
-          class="w-3.5 h-3.5 text-earth-brown/60 cursor-help shrink-0"
-          :title="item.tooltip"
-          aria-label="說明"
-        />
+        <UTooltip v-if="item.tooltip" :text="item.tooltip" :delay-duration="100">
+          <UIcon
+            name="i-heroicons-information-circle"
+            class="w-3.5 h-3.5 text-earth-brown/60 cursor-help shrink-0"
+            aria-label="說明"
+            tabindex="0"
+          />
+        </UTooltip>
       </span>
       <span
         class="text-sm font-medium text-right"

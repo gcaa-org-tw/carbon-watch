@@ -147,14 +147,18 @@ const render2030Cell = (row: CompanyData) => {
   const tooltip = row['2030 年減量目標設定_推估說明']
   const pill = renderValueWithGrade('2030 年減量目標設定', value, false)
   if (!tooltip) return pill
+  const UIconCmp = resolveComponent('UIcon')
+  const UTooltipCmp = resolveComponent('UTooltip')
   return h('span', { class: 'inline-flex items-center gap-1' }, [
     pill,
-    h(resolveComponent('UIcon'), {
-      name: 'i-heroicons-information-circle',
-      class: 'w-3.5 h-3.5 text-earth-brown/60 cursor-help shrink-0',
-      title: tooltip,
-      'aria-label': '說明',
-    }),
+    h(UTooltipCmp, { text: tooltip, delayDuration: 100 }, () =>
+      h(UIconCmp, {
+        name: 'i-heroicons-information-circle',
+        class: 'w-3.5 h-3.5 text-earth-brown/60 cursor-help shrink-0',
+        'aria-label': '說明',
+        tabindex: 0,
+      })
+    ),
   ])
 }
 
