@@ -4,6 +4,9 @@ export interface CompanyData {
   '溫室氣體排放量（公噸二氧化碳當量）': string
   '淨零目標年': string
   '2030 年減量目標設定': string
+  // Present only when the value is linearly derived (mid-term target year ≠ 2030).
+  // Tooltip text explaining baseline year + target year + target % used.
+  '2030 年減量目標設定_推估說明'?: string
   'SBTi 承諾': string
   '>> 雷達圖數據': string
   '2030年溫室氣體絕對減量目標': string

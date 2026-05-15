@@ -48,51 +48,60 @@ const allMetrics = computed(() => [
     label: '2030 減量目標設定',
     value: props.company['2030 年減量目標設定'] || '-',
     isNegative: false,
-    isPositive: false
+    isPositive: false,
+    tooltip: props.company['2030 年減量目標設定_推估說明']
   },
   {
     label: 'SBTi 承諾',
     ...statusText(props.company['SBTi 承諾']),
-    isPositive: false
+    isPositive: false,
+    tooltip: undefined
   },
   {
     label: '範疇三揭露',
     ...statusText(props.company['範疇三揭露']),
-    isPositive: false
+    isPositive: false,
+    tooltip: undefined
   },
   {
     label: '範疇三減量規劃',
     ...statusText(props.company['範疇三減量規劃']),
-    isPositive: false
+    isPositive: false,
+    tooltip: undefined
   },
   {
     label: '近三年能效進步率',
     value: props.company['近三年能效進步率'] || '-',
     isNegative: props.company['近三年能效進步率']?.startsWith('-'),
-    isPositive: false
+    isPositive: false,
+    tooltip: undefined
   },
   {
     label: '節能目標設定',
     value: props.company['節能目標設定'] || '無',
     isNegative: props.company['節能目標設定'] === '無' || !props.company['節能目標設定'],
-    isPositive: false
+    isPositive: false,
+    tooltip: undefined
   },
   {
     label: '再生能源使用率',
     value: props.company['再生能源使用率'] || '-',
     isNegative: false,
-    isPositive: false
+    isPositive: false,
+    tooltip: undefined
   },
   {
     label: '再生能源設置容量',
     value: formatCapacity(props.company['再生能源設置容量']),
     isNegative: false,
-    isPositive: false
+    isPositive: false,
+    tooltip: undefined
   },
   {
     label: '是否完成用電大戶再生能源設置義務',
     ...statusText(props.company['是否完成用電大戶再生能源設置義務']),
-    isPositive: false
+    isPositive: false,
+    tooltip: undefined
   },
   {
     label: '中期再生能源目標設定',
@@ -103,7 +112,8 @@ const allMetrics = computed(() => [
   {
     label: 'RE100 承諾',
     ...statusText(props.company['RE100 承諾']),
-    isPositive: false
+    isPositive: false,
+    tooltip: undefined
   },
   {
     label: '燃煤使用量（公噸）',
@@ -119,9 +129,18 @@ const allMetrics = computed(() => [
     <div
       v-for="item in allMetrics"
       :key="item.label"
-      class="flex items-baseline justify-between gap-4 py-1 text-earth-brown" 
+      class="flex items-baseline justify-between gap-4 py-1 text-earth-brown"
     >
-      <span class="text-sm">{{ item.label }}</span>
+      <span class="text-sm flex items-center gap-1">
+        {{ item.label }}
+        <UIcon
+          v-if="item.tooltip"
+          name="i-heroicons-information-circle"
+          class="w-3.5 h-3.5 text-earth-brown/60 cursor-help shrink-0"
+          :title="item.tooltip"
+          aria-label="說明"
+        />
+      </span>
       <span
         class="text-sm font-medium text-right"
         :class="{

@@ -596,6 +596,126 @@ function applyRadarScoresFromSource(
   return companyList;
 }
 
+/**
+ * Resolve 「2030 年減量目標設定」 for the website.
+ *
+ * Two paths depending on the company's mid-term target year (hub K):
+ *   - K = 2030: trust volunteer's raw % (hub L), no derivation, no tooltip.
+ *   - K ≠ 2030: linearly derive a 2030-equivalent reading from the company's
+ *     own trajectory (baseline year/emission → mid-term target year/%),
+ *     attach a per-company tooltip explaining the derivation:
+ *       「若無 2030 年減量目標，則自基準年 {M} 之排放量以及中期目標年 {K} 減量設定 {L}% 線性推估」
+ *
+ * Formula:
+ *   implied_2030_pct = (2030 - 基準年) / (中期目標年 - 基準年) × 中期目標 %
+ *
+ * Inputs from hub `排碳大戶表_Data.csv`:
+ *   K = 中期減量目標年設定
+ *   L = 中期溫室氣體絕對減量目標值（百分比）  ('28%' or '0.28')
+ *   M = 中期減量基準年設定
+ *
+ * Edge cases:
+ *   - Any of K / L / M missing or out of range → blank (no value, no tooltip)
+ *   - 中期目標年 == 基準年 → blank (division by zero)
+ *   - 中期目標年 < 2030 → linearly extrapolate (no cap)
+ *   - L outside [0, 1] (after %-stripping) → blank
+ *
+ * The volunteer-set radar score for the 2030 axis is left unchanged.
+ */
+function applyDerivedMidTermTarget(
+  companyList: Record<string, string>[],
+  hubData: Record<string, string>[],
+  logger: Logger
+): Record<string, string>[] {
+  const TARGET_YEAR_COL = '中期減量目標年設定';
+  const TARGET_PCT_COL = '中期溫室氣體絕對減量目標值（百分比）';
+  const BASELINE_YEAR_COL = '中期減量基準年設定';
+  const OUTPUT_FIELD = '2030 年減量目標設定';
+  const TOOLTIP_FIELD = '2030 年減量目標設定_推估說明';
+
+  const padUbn = (raw: string | undefined): string =>
+    (raw || '').trim().padStart(8, '0');
+
+  const hubByUbn = new Map<string, Record<string, string>>();
+  for (const row of hubData) {
+    const ubn = padUbn(row['統一編號']);
+    if (ubn) hubByUbn.set(ubn, row);
+  }
+
+  const isValidYear = (n: number): boolean =>
+    Number.isFinite(n) && n >= 2000 && n <= 2100;
+
+  // CSV cells may carry the value as '28%' (string with %) or '0.28' (decimal).
+  // Both forms collapse to the same decimal in [0, 1].
+  const parsePct = (raw: string | undefined): number | null => {
+    const trimmed = (raw || '').trim();
+    if (!trimmed) return null;
+    if (trimmed.endsWith('%')) {
+      const n = parseFloat(trimmed.slice(0, -1));
+      return Number.isFinite(n) && n >= 0 && n <= 100 ? n / 100 : null;
+    }
+    const n = parseFloat(trimmed);
+    if (!Number.isFinite(n) || n < 0) return null;
+    if (n > 1 && n <= 100) return n / 100;
+    if (n <= 1) return n;
+    return null;
+  };
+
+  let kept = 0;
+  let derived = 0;
+  let blanked = 0;
+  let extrapolated = 0;
+
+  for (const company of companyList) {
+    const ubn = padUbn(company['事業統編']);
+    const hub = hubByUbn.get(ubn);
+
+    // Always clear stale tooltip; will set if derivation runs.
+    delete (company as Record<string, unknown>)[TOOLTIP_FIELD];
+
+    if (!hub) {
+      company[OUTPUT_FIELD] = '';
+      blanked++;
+      continue;
+    }
+
+    const targetYear = parseInt((hub[TARGET_YEAR_COL] || '').trim(), 10);
+    const targetPct = parsePct(hub[TARGET_PCT_COL]);
+    const baselineYear = parseInt((hub[BASELINE_YEAR_COL] || '').trim(), 10);
+
+    // K = 2030: trust volunteer's raw %, no derivation needed.
+    if (targetYear === 2030 && targetPct !== null) {
+      company[OUTPUT_FIELD] = `${(targetPct * 100).toFixed(1)}%`;
+      kept++;
+      continue;
+    }
+
+    // K ≠ 2030: need K, L, M all valid to derive.
+    if (
+      !isValidYear(targetYear) ||
+      !isValidYear(baselineYear) ||
+      targetPct === null ||
+      targetYear === baselineYear
+    ) {
+      company[OUTPUT_FIELD] = '';
+      blanked++;
+      continue;
+    }
+
+    const implied = ((2030 - baselineYear) / (targetYear - baselineYear)) * targetPct;
+    company[OUTPUT_FIELD] = `${(implied * 100).toFixed(1)}%`;
+    (company as Record<string, unknown>)[TOOLTIP_FIELD] =
+      `若無 2030 年減量目標，則自基準年 ${baselineYear} 之排放量以及中期目標年 ${targetYear} 減量設定 ${(targetPct * 100).toFixed(0)}% 線性推估`;
+    derived++;
+    if (targetYear < 2030) extrapolated++;
+  }
+
+  logger.success(
+    `2030 mid-term target: ${kept} kept (K=2030), ${derived} derived (${extrapolated} extrapolated from sub-2030 K), ${blanked} blanked`
+  );
+  return companyList;
+}
+
 interface IndustryAggregate {
   scoredCount: number;
   totals: number[];
@@ -737,6 +857,11 @@ async function transformCompanyData() {
     logger.info(`Parsed ${radarData.length} records from 雷達圖_Data.csv`);
 
     companyList = applyRadarScoresFromSource(companyList, hubData, radarData, logger);
+
+    // Override 「2030 年減量目標設定」 with linear-derived value from hub K/L/M.
+    // The raw 進階版 value is volunteer's mid-term % (may be 2040 etc); we project
+    // along the company's own trajectory to give a 2030-comparable reading.
+    companyList = applyDerivedMidTermTarget(companyList, hubData, logger);
 
     const industryAverages = computeIndustryAverages(radarData, logger);
     logger.info(`Computed averages for ${industryAverages.size} industries`);
