@@ -604,7 +604,7 @@ function applyRadarScoresFromSource(
  *   - K ≠ 2030: linearly derive a 2030-equivalent reading from the company's
  *     own trajectory (baseline year/emission → mid-term target year/%),
  *     attach a per-company tooltip explaining the derivation:
- *       「若無 2030 年減量目標，則自基準年 {M} 之排放量以及中期目標年 {K} 減量設定 {L}% 線性推估」
+ *       「無明確 2030 減量目標，自基準年 {M} 之排放量以及中期目標年 {K} 減量設定 {L}% 線性推估」
  *
  * Formula:
  *   implied_2030_pct = (2030 - 基準年) / (中期目標年 - 基準年) × 中期目標 %
@@ -705,7 +705,7 @@ function applyDerivedMidTermTarget(
     const implied = ((2030 - baselineYear) / (targetYear - baselineYear)) * targetPct;
     company[OUTPUT_FIELD] = `${(implied * 100).toFixed(1)}%`;
     (company as Record<string, unknown>)[TOOLTIP_FIELD] =
-      `若無 2030 年減量目標，則自基準年 ${baselineYear} 之排放量以及中期目標年 ${targetYear} 減量設定 ${(targetPct * 100).toFixed(0)}% 線性推估`;
+      `無明確 2030 減量目標，自基準年 ${baselineYear} 之排放量以及中期目標年 ${targetYear} 減量設定 ${(targetPct * 100).toFixed(0)}% 線性推估`;
     derived++;
     if (targetYear < 2030) extrapolated++;
   }
