@@ -1,16 +1,6 @@
 <script setup lang="ts">
-// Initialize view mode composable
-const { mode } = useViewMode()
-
 // Use shared company filter logic
 const { filters, filteredCompanies } = useCompanyFilter()
-
-// Watch for mode changes and redirect if needed
-watch(mode, (newMode) => {
-  if (newMode === 'regular') {
-    navigateTo('/companies')
-  }
-})
 
 // SEO metadata
 useHead({

@@ -2,7 +2,6 @@
 import type { CompanyData } from '~/types/company'
 
 const route = useRoute()
-const { mode } = useViewMode()
 
 // Get fund code from route params
 const fundCode = computed(() => route.params.slug as string)
@@ -13,13 +12,6 @@ const fundData = await import(`~/assets/data/funds/${fundCode.value}.json`).then
 // Convert fund companies to CompanyData format
 const companies = computed<CompanyData[]>(() => {
   return fundData.companies as CompanyData[]
-})
-
-// Watch for mode changes and redirect if needed
-watch(mode, (newMode) => {
-  if (newMode === 'regular') {
-    navigateTo(`/funds/${fundCode.value}`)
-  }
 })
 
 // SEO metadata

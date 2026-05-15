@@ -17,8 +17,11 @@ interface Emits {
 const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
 
-const { isPro, setMode } = useViewMode()
+const { setMode } = useViewMode()
 const route = useRoute()
+
+// Highlight follows the URL — the viewMode cookie can desync from the route
+const isPro = computed(() => route.path.endsWith('/pro'))
 
 // Local state
 const localValue = computed({
