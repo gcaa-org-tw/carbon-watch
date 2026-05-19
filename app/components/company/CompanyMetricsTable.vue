@@ -120,6 +120,12 @@ const allMetrics = computed(() => [
     value: formatCoalUsage(props.company['燃煤使用量（公噸）']),
     isNegative: false,
     isPositive: false
+  },
+  {
+    label: '用煤佔全台製造業比例',
+    value: props.company['用煤佔全台製造業比例'] || '-',
+    isNegative: false,
+    isPositive: false
   }
 ])
 </script>
