@@ -17,6 +17,14 @@ const statusText = (val: string | undefined, fallback = String.fromCodePoint(0x7
   return { value: val, isNegative: false }
 }
 
+// 能源密集度變化率: + = intensity rose (worse → red), − = fell (improved → green)
+const intensityChange = (val: string | undefined): { value: string, isNegative: boolean, isPositive: boolean } => {
+  if (!val || val === '-') return { value: '-', isNegative: false, isPositive: false }
+  const num = parseFloat(val.replace(/[%,\s]/g, ''))
+  if (isNaN(num)) return { value: val, isNegative: false, isPositive: false }
+  return { value: val, isNegative: num > 0, isPositive: num < 0 }
+}
+
 // Format decimal as percentage; handle inputs that are already "X%" strings.
 const formatPercent = (value: string | undefined): string => {
   if (!value || value === '-') return '-'
@@ -70,10 +78,8 @@ const allMetrics = computed(() => [
     tooltip: undefined
   },
   {
-    label: '近三年能效進步率',
-    value: props.company['近三年能效進步率'] || '-',
-    isNegative: props.company['近三年能效進步率']?.startsWith('-'),
-    isPositive: false,
+    label: '能源密集度變化率',
+    ...intensityChange(props.company['近三年能效進步率']),
     tooltip: undefined
   },
   {
