@@ -430,7 +430,7 @@ const proColumns: TableColumn<CompanyData>[] = [
   },
   {
     accessorKey: '近三年能效進步率',
-    header: ({ column }) => createSortableHeader(column, '近三年能效進步率'),
+    header: ({ column }) => createSortableHeader(column, '能源密集度變化率'),
     enableSorting: true,
     sortingFn: numericSortingFn,
     cell: ({ row }) => h('div', { class: 'text-right' }, row.original['近三年能效進步率']),
