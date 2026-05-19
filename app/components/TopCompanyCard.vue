@@ -36,7 +36,7 @@ const formatEmissions = (n: number) => n.toLocaleString('zh-TW')
         </span>
       </p>
       <p class="text-green-deep mt-0.5" :class="compact ? 'text-xs' : 'text-sm'">
-        佔全台 {{ 全台佔比.toFixed(1) }}%
+        佔全台製造業 {{ 全台佔比.toFixed(1) }}%
       </p>
     </div>
   </button>
