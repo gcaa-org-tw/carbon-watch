@@ -716,6 +716,39 @@ function applyDerivedMidTermTarget(
   return companyList;
 }
 
+/**
+ * Add 用煤佔全台製造業比例 to each company: the company's 燃煤使用量（公噸）
+ * as a share of the summed coal of all companies in this 287-company list.
+ * Electricity industry is excluded automatically — it is not in the list.
+ * Companies with no coal get '' (the metrics table renders that as "-").
+ */
+function applyCoalShare(
+  companyList: Record<string, string>[],
+  logger: Logger
+): Record<string, string>[] {
+  const coalOf = (c: Record<string, string>): number =>
+    parseNumber(c['燃煤使用量（公噸）']) ?? 0;
+
+  const total = companyList.reduce((sum, c) => sum + coalOf(c), 0);
+
+  let assigned = 0;
+  for (const company of companyList) {
+    const coal = coalOf(company);
+    if (total > 0 && coal > 0) {
+      company['用煤佔全台製造業比例'] = `${Math.round((coal / total) * 1000) / 10}%`;
+      assigned++;
+    } else {
+      company['用煤佔全台製造業比例'] = '';
+    }
+  }
+
+  logger.success(
+    `用煤佔全台製造業比例: ${assigned}/${companyList.length} companies ` +
+      `(total coal ${Math.round(total).toLocaleString('en-US')} 公噸)`
+  );
+  return companyList;
+}
+
 interface IndustryAggregate {
   scoredCount: number;
   totals: number[];
@@ -862,6 +895,9 @@ async function transformCompanyData() {
     // The raw 進階版 value is volunteer's mid-term % (may be 2040 etc); we project
     // along the company's own trajectory to give a 2030-comparable reading.
     companyList = applyDerivedMidTermTarget(companyList, hubData, logger);
+
+    // Add 用煤佔全台製造業比例 — each company's 燃煤使用量 over the 287-company total.
+    companyList = applyCoalShare(companyList, logger);
 
     const industryAverages = computeIndustryAverages(radarData, logger);
     logger.info(`Computed averages for ${industryAverages.size} industries`);
