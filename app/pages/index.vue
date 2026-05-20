@@ -72,8 +72,7 @@ const top10Companies = top10CompaniesData as CompanyData[]
           title="前十大溫室氣體排放企業"
           class="custom-hero text-4xl"
           :ui="{container: 'gap-8 lg:pb-8 md:pb-8 sm:gap-8 pb-8', title: 'text-earth-brown'}"
-        >
-        </UPageHero>
+        />
         <div class="lg:mx-15 mb-20 sm:px-2">
           <CompanyTable :rows="top10Companies"/>
         </div>
