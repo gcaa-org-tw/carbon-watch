@@ -6,7 +6,7 @@ const { isPro } = useViewMode()
 
 const menuItems = computed(() => [
   { to: isPro.value ? '/companies/pro' : '/companies', label: '依企業查詢' },
-  // { to: '/funds', label: '依基金持股查詢' }, // 暫時隱藏，待基金資料更新後復原
+  { to: '/funds', label: '依基金持股查詢' },
   { to: '/methodology', label: '氣候績效指標方法論' }
 ])
 
