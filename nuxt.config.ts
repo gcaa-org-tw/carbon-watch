@@ -23,10 +23,6 @@ export default defineNuxtConfig({
   compatibilityDate: '2024-04-03',
   nitro: {
     preset: 'static',
-    prerender: {
-      // see https://github.com/gcaa-org-tw/carbon-watch/issues/4 for details
-      ignore: ['/funds/0055', '/funds/0055/pro'],
-    },
   },
   srcDir: 'app/',
 })

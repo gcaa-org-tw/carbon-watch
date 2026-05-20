@@ -93,11 +93,18 @@ const 中期減量目標 = computed(() => {
   const parsed = parseFloat(raw.replace('%', ''))
   return isNaN(parsed) ? 0.2 : parsed / 100
 })
+// Note: the next 5 consts are wired to CompanyNetZeroPathChart in the
+// template below, which is currently commented out (淨零路徑模擬器 is
+// hidden until SOT data + design are finalized). ESLint can't see template
+// references inside HTML comments, so it flags the consts as unused. The
+// disable comments preserve the names for when the chart un-comments.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const 中期預估排放量 = computed(() => {
   return Math.round(基準年排放量.value * (1 - 0.15))
 })
 
 // Interpolate current year target: linear between base year and mid-term target
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const 現狀目標排放量 = computed(() => {
   const totalYears = 中期目標年 - 基準年
   const elapsed = 現狀年 - 基準年
@@ -106,15 +113,18 @@ const 現狀目標排放量 = computed(() => {
   return Math.round(基準年排放量.value * (1 - targetReduction))
 })
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const 中期目標排放量 = computed(() => {
   return Math.round(基準年排放量.value * (1 - 中期減量目標.value))
 })
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const 淨零目標年 = computed(() => {
   const year = parseInt(props.company['淨零目標年'], 10)
   return isNaN(year) ? 2050 : year
 })
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const 淨零年預估排放量 = computed(() => {
  return Math.round(基準年排放量.value * (1 - 0.7))
 })

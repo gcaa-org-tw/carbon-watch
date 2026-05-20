@@ -73,7 +73,7 @@
  * - Generates per-fund company lists by filtering company-list.json based on fund mappings
  */
 
-import { readFileSync, writeFileSync, mkdirSync } from 'fs';
+import { readFileSync, writeFileSync, mkdirSync, readdirSync, unlinkSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { Logger } from './lib/logger.js';
@@ -213,21 +213,27 @@ interface FundData {
  * Transform fund list data
  */
 function transformFundList(rawData: Record<string, string>[]): FundData[] {
-  return rawData.map(row => {
-    const 投資價值萬 = parseNumber(row['投資價值（萬）']);
-    const 持股企業數 = parseNumber(row['持股企業數']);
-    const 排碳大戶家數 = parseNumber(row['排碳大戶家數']);
-    
-    return {
-      基金代號: row['基金代號'] || '',
-      基金名稱: row['基金名稱'] || '',
-      總市值: Math.round(投資價值萬 / 100), // Convert 萬 to million
-      排碳大戶家數,
-      排碳大戶佔比: 持股企業數 > 0 ? Math.round((排碳大戶家數 / 持股企業數) * 10000) / 100 : 0, // Percentage with 2 decimal places
-      排碳大戶總碳排量: parseNumber(row['大戶總碳排量']),
-      使用燃煤家數: parseNumber(row['總燃煤企業數']),
-    };
-  });
+  // Drop rows with an empty 基金代號. Sheet A's 基金總體表現 has per-row
+  // formulas filled down past the SORT(UNIQUE(...)) spill range; when the
+  // spill shrinks (e.g. after the Phase 3 Taiwan-equity filter), those
+  // trailing rows surface as fund_code="" + #N/A artifacts in this CSV.
+  return rawData
+    .filter(row => (row['基金代號'] || '').trim())
+    .map(row => {
+      const 投資價值萬 = parseNumber(row['投資價值（萬）']);
+      const 持股企業數 = parseNumber(row['持股企業數']);
+      const 排碳大戶家數 = parseNumber(row['排碳大戶家數']);
+
+      return {
+        基金代號: row['基金代號'] || '',
+        基金名稱: row['基金名稱'] || '',
+        總市值: Math.round(投資價值萬 / 100), // Convert 萬 to million
+        排碳大戶家數,
+        排碳大戶佔比: 持股企業數 > 0 ? Math.round((排碳大戶家數 / 持股企業數) * 10000) / 100 : 0, // Percentage with 2 decimal places
+        排碳大戶總碳排量: parseNumber(row['大戶總碳排量']),
+        使用燃煤家數: parseNumber(row['總燃煤企業數']),
+      };
+    });
 }
 
 /**
@@ -377,6 +383,23 @@ async function transformFundData() {
     });
 
     // Write per-fund company list JSONs with metadata
+    // Remove stale per-fund JSON files from previous runs so the directory
+    // mirrors the current fund universe. Without this, a fund dropped from
+    // /funds (e.g. by the Phase 3 Taiwan-equity filter) leaves orphan JSON
+    // behind and the nav can still resolve a now-invalid /funds/<code> URL.
+    const validFundCodes = new Set(fundList.map(f => f.基金代號));
+    let removedStaleFiles = 0;
+    for (const entry of readdirSync(FUNDS_OUTPUT_DIR)) {
+      if (!entry.endsWith('.json')) continue;
+      const code = entry.slice(0, -'.json'.length);
+      if (validFundCodes.has(code)) continue;
+      unlinkSync(join(FUNDS_OUTPUT_DIR, entry));
+      removedStaleFiles++;
+    }
+    if (removedStaleFiles > 0) {
+      logger.info(`Removed ${removedStaleFiles} stale per-fund JSON file(s)`);
+    }
+
     let savedFundFiles = 0;
     fundCompanyLists.forEach((companies, fundCode) => {
       const fundMeta = fundMetaMap.get(fundCode);

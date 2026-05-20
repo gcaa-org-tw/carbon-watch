@@ -671,7 +671,9 @@ function applyDerivedMidTermTarget(
     const hub = hubByUbn.get(ubn);
 
     // Always clear stale tooltip; will set if derivation runs.
-    delete (company as Record<string, unknown>)[TOOLTIP_FIELD];
+    // Reflect.deleteProperty is the lint-clean form for a dynamic key
+    // (semantically identical to ``delete obj[KEY]``).
+    Reflect.deleteProperty(company, TOOLTIP_FIELD);
 
     if (!hub) {
       company[OUTPUT_FIELD] = '';

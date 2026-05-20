@@ -1,13 +1,44 @@
 <script setup lang="ts">
 import type { CompanyData } from '~/types/company'
+import fundListData from '~/assets/data/fund-list.json'
+
+interface FundMeta {
+  基金代號: string
+  基金名稱: string
+  總市值: number
+  排碳大戶家數: number
+  排碳大戶佔比: number
+  排碳大戶總碳排量: number
+  使用燃煤家數: number
+}
+
+interface FundData {
+  meta: FundMeta
+  companies: CompanyData[]
+}
 
 const route = useRoute()
 
 // Get fund code from route params
 const fundCode = computed(() => route.params.slug as string)
 
-// Load fund data
-const fundData = await import(`~/assets/data/funds/${fundCode.value}.json`).then(m => m.default)
+// Same fallback as /funds/[slug]/index.vue: when no detail JSON exists (0-排碳大戶
+// fund), use the fund-list.json row + empty companies. See index.vue for the
+// full rationale.
+let fundData: FundData
+try {
+  fundData = await import(`~/assets/data/funds/${fundCode.value}.json`).then(m => m.default)
+} catch {
+  const meta = (fundListData as FundMeta[]).find(f => f['基金代號'] === fundCode.value)
+  if (!meta) {
+    throw createError({
+      statusCode: 404,
+      statusMessage: '找不到此基金',
+      message: `基金代號 ${fundCode.value} 不存在`,
+    })
+  }
+  fundData = { meta, companies: [] }
+}
 
 // Convert fund companies to CompanyData format
 const companies = computed<CompanyData[]>(() => {

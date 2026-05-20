@@ -1,16 +1,19 @@
 <script setup lang="ts">
 import type { CompanyData } from '~/types/company'
+import fundListData from '~/assets/data/fund-list.json'
+
+interface FundMeta {
+  基金代號: string
+  基金名稱: string
+  總市值: number
+  排碳大戶家數: number
+  排碳大戶佔比: number
+  排碳大戶總碳排量: number
+  使用燃煤家數: number
+}
 
 interface FundData {
-  meta: {
-    基金代號: string
-    基金名稱: string
-    總市值: number
-    排碳大戶家數: number
-    排碳大戶佔比: number
-    排碳大戶總碳排量: number
-    使用燃煤家數: number
-  }
+  meta: FundMeta
   companies: CompanyData[]
 }
 
@@ -19,24 +22,25 @@ const route = useRoute()
 // Get fund code from route params
 const fundCode = computed(() => route.params.slug as string)
 
-// Load fund data with error handling
-let fundData: FundData | null = null
-let loadError = false
-
+// Try the per-fund detail JSON first. transform-fund-data.ts only writes a
+// detail file when a fund has at least one 排碳大戶 holding; pure 0-排碳大戶
+// funds (e.g. 0055 元大金融) appear in fund-list.json but have no detail
+// file. For those we fall back to the meta row + an empty companies list,
+// and the existing v-if='companies.length === 0' empty state takes over.
+// Only a genuinely-unknown 基金代號 (not in fund-list.json either) 404s.
+let fundData: FundData
 try {
   fundData = await import(`~/assets/data/funds/${fundCode.value}.json`).then(m => m.default)
-} catch (error) {
-  loadError = true
-  console.error(`Fund code ${fundCode.value} not found`, error)
-}
-
-// If fund not found, show 404
-if (loadError || !fundData) {
-  throw createError({
-    statusCode: 404,
-    statusMessage: '找不到此基金',
-    message: `基金代號 ${fundCode.value} 不存在`,
-  })
+} catch {
+  const meta = (fundListData as FundMeta[]).find(f => f['基金代號'] === fundCode.value)
+  if (!meta) {
+    throw createError({
+      statusCode: 404,
+      statusMessage: '找不到此基金',
+      message: `基金代號 ${fundCode.value} 不存在`,
+    })
+  }
+  fundData = { meta, companies: [] }
 }
 
 // Convert fund companies to CompanyData format
