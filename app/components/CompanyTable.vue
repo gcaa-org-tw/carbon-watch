@@ -523,7 +523,7 @@ const proColumns: TableColumn<CompanyData>[] = [
   },
   {
     accessorKey: '燃煤使用量（公噸）',
-    header: ({ column }) => createSortableHeader(column, '燃煤使用量（公噸）', 'right'),
+    header: ({ column }) => createSortableHeader(column, '2024 燃煤使用量（公噸）', 'right'),
     enableSorting: true,
     sortingFn: numericSortingFn,
     cell: ({ row }) => h('div', { class: 'text-right' },

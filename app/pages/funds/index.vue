@@ -199,8 +199,11 @@ const filteredFunds = computed(() => {
   <div class="space-y-6">
     <div>
       <h1 class="text-3xl sm:text-[2.5rem] font-bold text-green-deep mt-0 sm:mt-8 leading-[1.2] pb-2">投資基金觀測表</h1>
-      <p class="text-earth-brown mb-8">
+      <p class="text-earth-brown mb-2">
         追蹤台灣投資基金的排碳大戶投資狀況
+      </p>
+      <p class="text-sm text-earth-brown/80 mb-8">
+        資料說明：基金持股快照為 2024 Q4（SITCA 季報），燃煤量與排碳量為 2024 全年（環境部年度申報），口徑時點一致。2025 年後新發行的 ETF 暫不納入；待 2025 完整年度資料釋出再更新。
       </p>
     </div>
 

@@ -74,6 +74,11 @@ useHead({
       </div>
     </div>
 
+    <!-- Data note -->
+    <p class="text-sm text-earth-brown/80 mt-2">
+      持股快照為 2024 Q4（SITCA 季報）；下表企業排放、用電、燃煤等指標為 2024 全年（環境部年度申報），口徑時點一致。
+    </p>
+
     <!-- Company Table -->
     <div class="mt-8">
       <CompanyTable :rows="companies" :is-pro="false" />
