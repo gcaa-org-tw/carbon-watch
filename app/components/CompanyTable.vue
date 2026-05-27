@@ -540,12 +540,14 @@ const proColumns: TableColumn<CompanyData>[] = [
 // Select columns based on isPro prop. coalFirst reorders proColumns to place
 // 燃煤使用量 right after 產業分類, matching the advocacy framing used in fund
 // detail pages.
-const columns = computed(() => {
+const columns = computed<TableColumn<CompanyData>[]>(() => {
   if (!props.isPro) return nonProColumns
   if (!props.coalFirst) return proColumns
-  const coalIdx = proColumns.findIndex(c => c.accessorKey === '燃煤使用量（公噸）')
-  if (coalIdx < 0) return proColumns
-  const coalCol = proColumns[coalIdx]
+  const coalIdx = proColumns.findIndex(
+    c => 'accessorKey' in c && c.accessorKey === '燃煤使用量（公噸）'
+  )
+  const coalCol = coalIdx >= 0 ? proColumns[coalIdx] : undefined
+  if (!coalCol) return proColumns
   const rest = proColumns.filter((_, i) => i !== coalIdx)
   return [...rest.slice(0, 2), coalCol, ...rest.slice(2)]
 })
