@@ -62,9 +62,7 @@ const createSortableHeader = (column: Column<FundData>, label: string, align: 'l
     },
     [
       h('span', label),
-      h('span', { class: 'text-xs' }, 
-        isSorted === 'asc' ? '↑' : isSorted === 'desc' ? '↓' : '↕'
-      )
+      isSorted !== false && h('span', { class: 'text-xs' }, isSorted === 'asc' ? '↑' : '↓'),
     ]
   )
 }
@@ -115,6 +113,17 @@ const columns: TableColumn<FundData>[] = [
     },
   },
   {
+    accessorKey: '使用燃煤家數',
+    header: ({ column }) => createSortableHeader(column, '使用燃煤家數', 'right'),
+    enableSorting: true,
+    cell: ({ row }) => h('div', { class: 'text-right' }, row.original.使用燃煤家數.toLocaleString('zh-TW')),
+    meta: {
+      class: {
+        th: 'text-right',
+      }
+    }
+  },
+  {
     accessorKey: '總市值',
     header: ({ column }) => createSortableHeader(column, '總市值（百萬新台幣）', 'right'),
     enableSorting: true,
@@ -158,23 +167,12 @@ const columns: TableColumn<FundData>[] = [
       }
     }
   },
-  {
-    accessorKey: '使用燃煤家數',
-    header: ({ column }) => createSortableHeader(column, '使用燃煤家數', 'right'),
-    enableSorting: true,
-    cell: ({ row }) => h('div', { class: 'text-right' }, row.original.使用燃煤家數.toLocaleString('zh-TW')),
-    meta: {
-      class: {
-        th: 'text-right',
-      }
-    }
-  },
 ]
 
 // Default sort using Nuxt UI v4 sorting format
 const sorting = ref([
   {
-    id: '排碳大戶總碳排量',
+    id: '使用燃煤家數',
     desc: true,
   }
 ])
@@ -213,6 +211,7 @@ const filteredFunds = computed(() => {
         icon="i-heroicons-magnifying-glass-20-solid"
         placeholder="搜尋基金代號或名稱..."
         class="flex-1 max-w-md"
+        :ui="{ base: 'text-earth-brown placeholder:text-earth-brown/50' }"
       />
       <div class="text-sm text-earth-brown">
         共 {{ filteredFunds.length }} 筆基金

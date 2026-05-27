@@ -9,11 +9,13 @@ interface Props {
   rows: CompanyData[]
   isPro?: boolean
   showLegend?: boolean
+  coalFirst?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
   isPro: false,
-  showLegend: true
+  showLegend: true,
+  coalFirst: false
 })
 
 // Helper function to parse value (handle commas and percentages)
@@ -535,16 +537,32 @@ const proColumns: TableColumn<CompanyData>[] = [
   },
 ]
 
-// Select columns based on isPro prop
-const columns = computed(() => props.isPro ? proColumns : nonProColumns)
+// Select columns based on isPro prop. coalFirst reorders proColumns to place
+// 燃煤使用量 right after 產業分類, matching the advocacy framing used in fund
+// detail pages.
+const columns = computed(() => {
+  if (!props.isPro) return nonProColumns
+  if (!props.coalFirst) return proColumns
+  const coalIdx = proColumns.findIndex(c => c.accessorKey === '燃煤使用量（公噸）')
+  if (coalIdx < 0) return proColumns
+  const coalCol = proColumns[coalIdx]
+  const rest = proColumns.filter((_, i) => i !== coalIdx)
+  return [...rest.slice(0, 2), coalCol, ...rest.slice(2)]
+})
 
-// Default sort
-const sorting = ref([
-  {
-    id: '溫室氣體排放量（公噸二氧化碳當量）',
-    desc: true,
-  }
-])
+// Default sort. coalFirst sorts by 燃煤使用量 desc with 溫室氣體排放量 desc as
+// secondary, so coal-heavy companies float to the top while emission ties break
+// in the expected direction.
+const sorting = ref(
+  props.isPro && props.coalFirst
+    ? [
+        { id: '燃煤使用量（公噸）', desc: true },
+        { id: '溫室氣體排放量（公噸二氧化碳當量）', desc: true },
+      ]
+    : [
+        { id: '溫室氣體排放量（公噸二氧化碳當量）', desc: true },
+      ]
+)
 </script>
 
 <template>
