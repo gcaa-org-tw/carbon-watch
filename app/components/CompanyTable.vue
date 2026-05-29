@@ -522,6 +522,20 @@ const proColumns: TableColumn<CompanyData>[] = [
     }
   },
   {
+    accessorKey: '燃煤使用量_2026（公噸）',
+    header: ({ column }) => createSortableHeader(column, '2026 燃煤使用量（公噸）*', 'right'),
+    enableSorting: true,
+    sortingFn: numericSortingFn,
+    cell: ({ row }) => h('div', { class: 'text-right' },
+      renderValueWithGrade('燃煤使用量（公噸）', row.original['燃煤使用量_2026（公噸）'] ?? '', true)
+    ),
+    meta: {
+      class: {
+        th: 'text-right',
+      }
+    }
+  },
+  {
     accessorKey: '燃煤使用量（公噸）',
     header: ({ column }) => createSortableHeader(column, '2024 燃煤使用量（公噸）', 'right'),
     enableSorting: true,
@@ -543,13 +557,15 @@ const proColumns: TableColumn<CompanyData>[] = [
 const columns = computed<TableColumn<CompanyData>[]>(() => {
   if (!props.isPro) return nonProColumns
   if (!props.coalFirst) return proColumns
-  const coalIdx = proColumns.findIndex(
-    c => 'accessorKey' in c && c.accessorKey === '燃煤使用量（公噸）'
+  // Move both coal columns (2026 first, then 2024) to just after 公司 + 產業分類.
+  const coalKeys = ['燃煤使用量_2026（公噸）', '燃煤使用量（公噸）']
+  const coalCols = coalKeys
+    .map(k => proColumns.find(c => 'accessorKey' in c && c.accessorKey === k))
+    .filter((c): c is TableColumn<CompanyData> => Boolean(c))
+  const rest = proColumns.filter(
+    c => !('accessorKey' in c && coalKeys.includes(c.accessorKey as string))
   )
-  const coalCol = coalIdx >= 0 ? proColumns[coalIdx] : undefined
-  if (!coalCol) return proColumns
-  const rest = proColumns.filter((_, i) => i !== coalIdx)
-  return [...rest.slice(0, 2), coalCol, ...rest.slice(2)]
+  return [...rest.slice(0, 2), ...coalCols, ...rest.slice(2)]
 })
 
 // Default sort. coalFirst sorts by 燃煤使用量 desc with 溫室氣體排放量 desc as
@@ -558,7 +574,7 @@ const columns = computed<TableColumn<CompanyData>[]>(() => {
 const sorting = ref(
   props.isPro && props.coalFirst
     ? [
-        { id: '燃煤使用量（公噸）', desc: true },
+        { id: '燃煤使用量_2026（公噸）', desc: true },
         { id: '溫室氣體排放量（公噸二氧化碳當量）', desc: true },
       ]
     : [
