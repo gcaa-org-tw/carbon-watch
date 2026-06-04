@@ -75,14 +75,14 @@ const createSortableHeader = (column: Column<FundData>, label: string, align: 'l
 const columns: TableColumn<FundData>[] = [
   {
     accessorKey: '基金代號',
-    header: ({ column }) => createSortableHeader(column, '基金代號'),
+    header: ({ column }) => createSortableHeader(column, '代號 / 統編'),
     enableSorting: true,
     cell: ({ row }) => {
       const fundPath = `/funds/${row.original.fundKey}${isPro.value ? '/pro' : ''}`
-      // Show 基金代號 / 基金統編 — both when present, otherwise whichever exists
-      // (10 code-less ESG funds have only 統編; 2 umbrella funds only 代號). The
-      // link always routes by fundKey regardless of what is displayed.
-      const codeLabel = [row.original.基金代號, row.original.基金統編].filter(Boolean).join(' / ')
+      // Header reads 代號 / 統編; each row shows its 代號 if present, otherwise
+      // its 統編 (10 code-less ESG funds), otherwise blank. The link always
+      // routes by fundKey regardless of what is displayed.
+      const codeLabel = row.original.基金代號 || row.original.基金統編 || ''
       return h(
         'a',
         {
