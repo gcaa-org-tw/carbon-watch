@@ -20,7 +20,7 @@ useHead({
   link: [
     {
       rel: 'canonical',
-      href: 'https://carbon-watch.gcaa.org.tw/methodology'
+      href: 'https://thaubing-esg.gcaa.org.tw/methodology'
     }
   ]
 })
