@@ -4,6 +4,7 @@ import type { Column, Row } from '@tanstack/vue-table'
 import { RouterLink } from 'vue-router'
 import type { CompanyData } from '~/types/company'
 import companyGradeMap from '~/assets/data/company-grade-map.json'
+import { segmentHeader } from '~/utils/headerSegments'
 
 interface Props {
   rows: CompanyData[]
@@ -51,14 +52,24 @@ const numericSortingFn = (rowA: Row<CompanyData>, rowB: Row<CompanyData>, column
   return a < b ? -1 : 1
 }
 
-// Helper function to create sortable header
-const createSortableHeader = (column: Column<CompanyData>, label: string, align: 'left' | 'right' = 'left') => {
+// Helper function to create sortable header.
+// align defaults to the column's own th alignment (text-center / text-right via
+// meta) so centred columns get centred headers without per-column wiring. The
+// label wraps only at the phrase boundaries segmentHeader() injects (break-keep
+// + text-balance), and the sort arrow shows only on the PRIMARY sort column
+// (getSortIndex 0) so a secondary tie-break sort never paints a second,
+// confusing arrow.
+const createSortableHeader = (column: Column<CompanyData>, label: string, align?: 'left' | 'right' | 'center') => {
+  const thClass = (column.columnDef.meta as { class?: { th?: string } } | undefined)?.class?.th ?? ''
+  const resolvedAlign = align ?? (thClass.includes('text-center') ? 'center' : thClass.includes('text-right') ? 'right' : 'left')
+  const justify = resolvedAlign === 'center' ? 'w-full justify-center' : resolvedAlign === 'right' ? 'w-full justify-end' : ''
   const isSorted = column.getIsSorted()
+  const isPrimarySort = column.getSortIndex() === 0
 
   return h(
     'button',
     {
-      class: `flex items-center gap-1 whitespace-normal break-words ${align === 'right' ? 'w-full justify-end' : ''} hover:opacity-80 transition-opacity cursor-pointer`,
+      class: `flex items-center gap-1 ${justify} hover:opacity-80 transition-opacity cursor-pointer`,
       onClick: () => {
         const currentSort = column.getIsSorted()
         if (currentSort === false) {
@@ -71,8 +82,8 @@ const createSortableHeader = (column: Column<CompanyData>, label: string, align:
       },
     },
     [
-      h('span', label),
-      isSorted !== false && h('span', { class: 'text-xs' }, isSorted === 'asc' ? '↑' : '↓'),
+      h('span', { class: 'break-keep text-balance' }, segmentHeader(label)),
+      isPrimarySort && isSorted !== false && h('span', { class: 'text-xs' }, isSorted === 'asc' ? '↑' : '↓'),
     ]
   )
 }

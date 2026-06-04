@@ -2,7 +2,8 @@
 import type { TableColumn } from '@nuxt/ui'
 import type { Column } from '@tanstack/vue-table'
 import fundListData from '~/assets/data/fund-list.json'
-import { Icon, EsgLeaf } from '#components'
+import { EsgLeaf } from '#components'
+import { segmentHeader } from '~/utils/headerSegments'
 
 interface FundData {
   基金代號: string
@@ -64,7 +65,7 @@ const createSortableHeader = (column: Column<FundData>, label: string, align: 'l
       },
     },
     [
-      h('span', label),
+      h('span', { class: 'break-keep text-balance' }, segmentHeader(label)),
       isSorted !== false && h('span', { class: 'text-xs' }, isSorted === 'asc' ? '↑' : '↓'),
     ]
   )
@@ -78,23 +79,21 @@ const columns: TableColumn<FundData>[] = [
     enableSorting: true,
     cell: ({ row }) => {
       const fundPath = `/funds/${row.original.fundKey}${isPro.value ? '/pro' : ''}`
-      // Display rule: 基金代號 if present, else 基金統編 (the 10 code-less ESG
-      // funds), else blank — but the link always uses fundKey.
-      const codeLabel = row.original.基金代號 || row.original.基金統編 || ''
+      // Show 基金代號 / 基金統編 — both when present, otherwise whichever exists
+      // (10 code-less ESG funds have only 統編; 2 umbrella funds only 代號). The
+      // link always routes by fundKey regardless of what is displayed.
+      const codeLabel = [row.original.基金代號, row.original.基金統編].filter(Boolean).join(' / ')
       return h(
         'a',
         {
           href: fundPath,
-          class: 'flex items-center gap-1.5 hover:underline cursor-pointer group',
+          class: 'hover:underline cursor-pointer',
           onClick: (e: MouseEvent) => {
             e.preventDefault()
             navigateTo(fundPath)
           }
         },
-        [
-          h(Icon, { name: 'heroicons:link-20-solid', class: 'text-sm text-gray-400 group-hover:text-green-pure transition-colors' }),
-          h('span', codeLabel)
-        ]
+        codeLabel
       )
     },
   },
