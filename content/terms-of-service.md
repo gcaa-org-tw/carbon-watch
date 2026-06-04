@@ -45,6 +45,7 @@ title: 免責聲明與資料來源
 *  <a href="https://mopsov.twse.com.tw/mops/web/t78sb35_new" target="_blank">國內成分股ETF每季持股明細表🔗</a>
 
 ### 基金資訊觀測站資料：
+本網站之基金持股明細以投信投顧公會（中華民國證券投資信託暨顧問商業同業公會）季報為準，ESG 基金名單則取自 FundClear 基金資訊觀測站；各企業碳排放與燃煤用量另以前述環境部年度申報資料計算。
 *  <a href="https://www.fundclear.com.tw/etf/product" target="_blank">基金營運資料－國內成分股ETF名單🔗</a>
 
 
