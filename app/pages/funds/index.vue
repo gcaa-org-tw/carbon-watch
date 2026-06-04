@@ -2,16 +2,19 @@
 import type { TableColumn } from '@nuxt/ui'
 import type { Column } from '@tanstack/vue-table'
 import fundListData from '~/assets/data/fund-list.json'
-import { Icon } from '#components'
+import { Icon, EsgLeaf } from '#components'
 
 interface FundData {
   基金代號: string
   基金名稱: string
+  基金統編: string
   總市值: number
   排碳大戶家數: number
   排碳大戶佔比: number
   排碳大戶總碳排量: number
   使用燃煤家數: number
+  是否ESG基金: boolean
+  fundKey: string
 }
 
 // SEO metadata
@@ -74,7 +77,10 @@ const columns: TableColumn<FundData>[] = [
     header: ({ column }) => createSortableHeader(column, '基金代號'),
     enableSorting: true,
     cell: ({ row }) => {
-      const fundPath = `/funds/${row.original.基金代號}${isPro.value ? '/pro' : ''}`
+      const fundPath = `/funds/${row.original.fundKey}${isPro.value ? '/pro' : ''}`
+      // Display rule: 基金代號 if present, else 基金統編 (the 10 code-less ESG
+      // funds), else blank — but the link always uses fundKey.
+      const codeLabel = row.original.基金代號 || row.original.基金統編 || ''
       return h(
         'a',
         {
@@ -87,7 +93,7 @@ const columns: TableColumn<FundData>[] = [
         },
         [
           h(Icon, { name: 'heroicons:link-20-solid', class: 'text-sm text-gray-400 group-hover:text-green-pure transition-colors' }),
-          h('span', row.original.基金代號)
+          h('span', codeLabel)
         ]
       )
     },
@@ -97,7 +103,7 @@ const columns: TableColumn<FundData>[] = [
     header: ({ column }) => createSortableHeader(column, '基金名稱'),
     enableSorting: true,
     cell: ({ row }) => {
-      const fundPath = `/funds/${row.original.基金代號}${isPro.value ? '/pro' : ''}`
+      const fundPath = `/funds/${row.original.fundKey}${isPro.value ? '/pro' : ''}`
       return h(
         'a',
         {
@@ -108,7 +114,10 @@ const columns: TableColumn<FundData>[] = [
             navigateTo(fundPath)
           }
         },
-        row.original.基金名稱
+        [
+          row.original.基金名稱,
+          row.original.是否ESG基金 ? h(EsgLeaf) : null,
+        ]
       )
     },
   },
@@ -233,5 +242,11 @@ const filteredFunds = computed(() => {
         td: 'text-white'
       }"
     />
+
+    <!-- ESG leaf legend -->
+    <div class="flex items-center gap-1.5 text-sm text-earth-brown">
+      <EsgLeaf />
+      <span>：屬於境內發行之 ESG 基金</span>
+    </div>
   </div>
 </template>
