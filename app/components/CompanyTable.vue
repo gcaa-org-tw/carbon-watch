@@ -58,7 +58,7 @@ const createSortableHeader = (column: Column<CompanyData>, label: string, align:
   return h(
     'button',
     {
-      class: `flex items-center gap-1 whitespace-nowrap ${align === 'right' ? 'w-full justify-end' : ''} hover:opacity-80 transition-opacity cursor-pointer`,
+      class: `flex items-center gap-1 whitespace-normal break-words ${align === 'right' ? 'w-full justify-end' : ''} hover:opacity-80 transition-opacity cursor-pointer`,
       onClick: () => {
         const currentSort = column.getIsSorted()
         if (currentSort === false) {
@@ -193,6 +193,31 @@ const renderValueWithGrade = (field: string, value: string | number, isNumeric: 
   ])
 }
 
+// Render a coal-usage cell. 0 or blank shows as empty (no pill / no colour
+// block), per the 燃煤 0 → 空白 decision; non-zero keeps the graded number.
+const renderCoal = (value: string | number | undefined) => {
+  const n = parseValue((value ?? '') as string | number)
+  if (!value || isNaN(n) || n === 0) return h('div', { class: 'text-right' }, '')
+  return h('div', { class: 'text-right' }, renderValueWithGrade('燃煤使用量（公噸）', value, true))
+}
+
+// Single coal column, shared by pro mode and the coalFirst injection in the
+// columns computed below. Deliberately NOT part of nonProColumns so the
+// homepage and /companies (which never pass coalFirst) stay coal-free; it
+// only surfaces on fund pages.
+const coalColumn: TableColumn<CompanyData> = {
+  accessorKey: '燃煤使用量（公噸）',
+  header: ({ column }) => createSortableHeader(column, '燃煤使用量（公噸）', 'right'),
+  enableSorting: true,
+  sortingFn: numericSortingFn,
+  cell: ({ row }) => renderCoal(row.original['燃煤使用量（公噸）']),
+  meta: {
+    class: {
+      th: 'text-right',
+    }
+  }
+}
+
 // Define columns for non-pro mode
 const nonProColumns: TableColumn<CompanyData>[] = [
   {
@@ -224,7 +249,7 @@ const nonProColumns: TableColumn<CompanyData>[] = [
     cell: ({ row }) => h('div', { class: 'text-right' }, row.original['溫室氣體排放量（公噸二氧化碳當量）']),
     meta: {
       class: {
-        th: 'text-right',
+        th: 'text-right max-w-[7rem]',
       }
     }
   },
@@ -369,7 +394,7 @@ const proColumns: TableColumn<CompanyData>[] = [
     cell: ({ row }) => h('div', { class: 'text-right' }, row.original['溫室氣體排放量（公噸二氧化碳當量）']),
     meta: {
       class: {
-        th: 'text-right',
+        th: 'text-right max-w-[7rem]',
       }
     }
   },
@@ -521,60 +546,28 @@ const proColumns: TableColumn<CompanyData>[] = [
       }
     }
   },
-  {
-    accessorKey: '燃煤使用量_2026（公噸）',
-    header: ({ column }) => createSortableHeader(column, '2026 燃煤使用量（公噸）*', 'right'),
-    enableSorting: true,
-    sortingFn: numericSortingFn,
-    cell: ({ row }) => h('div', { class: 'text-right' },
-      renderValueWithGrade('燃煤使用量（公噸）', row.original['燃煤使用量_2026（公噸）'] ?? '', true)
-    ),
-    meta: {
-      class: {
-        th: 'text-right',
-      }
-    }
-  },
-  {
-    accessorKey: '燃煤使用量（公噸）',
-    header: ({ column }) => createSortableHeader(column, '2024 燃煤使用量（公噸）', 'right'),
-    enableSorting: true,
-    sortingFn: numericSortingFn,
-    cell: ({ row }) => h('div', { class: 'text-right' },
-      renderValueWithGrade('燃煤使用量（公噸）', row.original['燃煤使用量（公噸）'], true)
-    ),
-    meta: {
-      class: {
-        th: 'text-right',
-      }
-    }
-  },
+  coalColumn,
 ]
 
-// Select columns based on isPro prop. coalFirst reorders proColumns to place
-// 燃煤使用量 right after 產業分類, matching the advocacy framing used in fund
-// detail pages.
+// Select columns based on isPro prop. coalFirst inserts the single 燃煤使用量
+// column right after 公司 + 產業分類 (i.e. before emissions), matching the
+// advocacy framing on fund pages. Pages without coalFirst (homepage,
+// /companies) are returned unchanged — non-pro never carries a coal column.
 const columns = computed<TableColumn<CompanyData>[]>(() => {
-  if (!props.isPro) return nonProColumns
-  if (!props.coalFirst) return proColumns
-  // Move both coal columns (2026 first, then 2024) to just after 公司 + 產業分類.
-  const coalKeys = ['燃煤使用量_2026（公噸）', '燃煤使用量（公噸）']
-  const coalCols = coalKeys
-    .map(k => proColumns.find(c => 'accessorKey' in c && c.accessorKey === k))
-    .filter((c): c is TableColumn<CompanyData> => Boolean(c))
-  const rest = proColumns.filter(
-    c => !('accessorKey' in c && coalKeys.includes(c.accessorKey as string))
-  )
-  return [...rest.slice(0, 2), ...coalCols, ...rest.slice(2)]
+  const base = props.isPro ? proColumns : nonProColumns
+  if (!props.coalFirst) return base
+  const coalKey = '燃煤使用量（公噸）'
+  const without = base.filter(c => !('accessorKey' in c && c.accessorKey === coalKey))
+  return [...without.slice(0, 2), coalColumn, ...without.slice(2)]
 })
 
 // Default sort. coalFirst sorts by 燃煤使用量 desc with 溫室氣體排放量 desc as
 // secondary, so coal-heavy companies float to the top while emission ties break
 // in the expected direction.
 const sorting = ref(
-  props.isPro && props.coalFirst
+  props.coalFirst
     ? [
-        { id: '燃煤使用量_2026（公噸）', desc: true },
+        { id: '燃煤使用量（公噸）', desc: true },
         { id: '溫室氣體排放量（公噸二氧化碳當量）', desc: true },
       ]
     : [
@@ -620,7 +613,7 @@ const sorting = ref(
       :data="rows"
       class="max-h-[40rem] border-1 border-gray-600 mx-8"
       :ui="{
-        th: 'bg-green-forest text-white min-w-20 whitespace-nowrap py-2',
+        th: 'bg-green-forest text-white min-w-20 py-2 align-bottom',
         tr: 'even:bg-surface-mint/10 odd:bg-surface-warm',
         td: 'text-white'
       }"
