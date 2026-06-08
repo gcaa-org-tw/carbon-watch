@@ -92,7 +92,7 @@ useHead({
 
     <!-- Company Table -->
     <div class="mt-8">
-      <CompanyTable :rows="companies" :is-pro="true" :coal-first="true" />
+      <CompanyTable :rows="companies" :is-pro="true" :coal-first="true" :flush="true" />
     </div>
 
     <div v-if="companies.length === 0" class="text-center py-12">

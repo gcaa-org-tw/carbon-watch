@@ -11,13 +11,23 @@ interface Props {
   isPro?: boolean
   showLegend?: boolean
   coalFirst?: boolean
+  // When true, drop the default horizontal margin so the legend + table align
+  // flush with the page heading. /funds and /companies put their heading at the
+  // container edge, so the table must sit there too; the homepage keeps the
+  // default inset (its own wrapper supplies the section inset on top).
+  flush?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
   isPro: false,
   showLegend: true,
-  coalFirst: false
+  coalFirst: false,
+  flush: false
 })
+
+// Horizontal margin for the legend rows + table. Flush pages align to the
+// container edge (no margin); everything else keeps the mx-8 inset.
+const marginX = computed(() => (props.flush ? '' : 'mx-8'))
 
 // Helper function to parse value (handle commas and percentages)
 const parseValue = (value: string | number): number => {
@@ -260,7 +270,7 @@ const nonProColumns: TableColumn<CompanyData>[] = [
     cell: ({ row }) => h('div', { class: 'text-right' }, row.original['溫室氣體排放量（公噸二氧化碳當量）']),
     meta: {
       class: {
-        th: 'text-right max-w-[7rem]',
+        th: 'text-right',
       }
     }
   },
@@ -405,7 +415,7 @@ const proColumns: TableColumn<CompanyData>[] = [
     cell: ({ row }) => h('div', { class: 'text-right' }, row.original['溫室氣體排放量（公噸二氧化碳當量）']),
     meta: {
       class: {
-        th: 'text-right max-w-[7rem]',
+        th: 'text-right',
       }
     }
   },
@@ -590,7 +600,7 @@ const sorting = ref(
 <template>
   <div class="space-y-4">
     <!-- Color Legend -->
-    <div v-if="showLegend" class="flex gap-4 items-center text-sm mx-8 text-earth-brown">
+    <div v-if="showLegend" class="flex gap-4 items-center text-sm text-earth-brown" :class="marginX">
       <div class="flex gap-3">
         <div class="flex items-center gap-1.5">
           <div class="w-3 h-3 rounded-full bg-green-pure border-2 border-green-pure/30" />
@@ -610,7 +620,7 @@ const sorting = ref(
         </div>
       </div>
     </div>
-    <div v-if="showLegend" class="mx-8">
+    <div v-if="showLegend" :class="marginX">
       <NuxtLink to="/methodology" class="text-sm text-green-pure hover:underline">
         了解分級標準 →
       </NuxtLink>
@@ -622,7 +632,7 @@ const sorting = ref(
       sticky
       :columns="columns"
       :data="rows"
-      class="max-h-[40rem] border-1 border-gray-600 mx-8"
+      :class="['max-h-[40rem] border-1 border-gray-600', marginX]"
       :ui="{
         th: 'bg-green-forest text-white min-w-20 py-2 align-bottom',
         tr: 'even:bg-surface-mint/10 odd:bg-surface-warm',

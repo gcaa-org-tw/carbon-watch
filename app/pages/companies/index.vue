@@ -16,7 +16,7 @@ useHead({
     <CompanyListFilter v-model="filters" />
     
     <div class="mt-8">
-      <CompanyTable :rows="filteredCompanies" :is-pro="false" />
+      <CompanyTable :rows="filteredCompanies" :is-pro="false" :flush="true" />
     </div>
 
     <div v-if="filteredCompanies.length === 0" class="text-center py-12">
