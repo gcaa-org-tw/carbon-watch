@@ -261,6 +261,16 @@ const nonProColumns: TableColumn<CompanyData>[] = [
     accessorKey: '產業分類',
     header: ({ column }) => createSortableHeader(column, '產業分類'),
     enableSorting: true,
+    // Cap the column so a rare long industry name (e.g. 金屬加工用機械設備製造業)
+    // wraps to two lines instead of stretching the whole column wide — which left
+    // a large gap between the short common values (石化業…) and the right-aligned
+    // 燃煤／溫室氣體 column next to it. Common values (≤5 chars) still fit one line.
+    meta: {
+      class: {
+        th: 'max-w-[7rem]',
+        td: 'max-w-[7rem]',
+      }
+    }
   },
   {
     accessorKey: '溫室氣體排放量（公噸二氧化碳當量）',
@@ -406,6 +416,16 @@ const proColumns: TableColumn<CompanyData>[] = [
     accessorKey: '產業分類',
     header: ({ column }) => createSortableHeader(column, '產業分類'),
     enableSorting: true,
+    // Cap the column so a rare long industry name (e.g. 金屬加工用機械設備製造業)
+    // wraps to two lines instead of stretching the whole column wide — which left
+    // a large gap between the short common values (石化業…) and the right-aligned
+    // 燃煤／溫室氣體 column next to it. Common values (≤5 chars) still fit one line.
+    meta: {
+      class: {
+        th: 'max-w-[7rem]',
+        td: 'max-w-[7rem]',
+      }
+    }
   },
   {
     accessorKey: '溫室氣體排放量（公噸二氧化碳當量）',
