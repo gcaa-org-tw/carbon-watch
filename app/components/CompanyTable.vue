@@ -465,7 +465,7 @@ const proColumns: TableColumn<CompanyData>[] = [
   },
   {
     accessorKey: '有具體減量策略',
-    header: ({ column }) => createSortableHeader(column, '有具體減量策略'),
+    header: ({ column }) => createSortableHeader(column, '有關鍵減量策略'),
     enableSorting: true,
     cell: ({ row }) => h('div', { class: 'text-center' }, renderStatus(row.original['有具體減量策略'])),
     meta: {

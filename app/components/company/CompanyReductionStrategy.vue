@@ -9,7 +9,7 @@ defineProps<Props>()
 <template>
   <div class="mt-8">
     <h3 class="text-lg font-bold text-earth-brown mb-4">
-      具體減量策略
+      關鍵減量策略
     </h3>
     <div class="bg-surface-warm rounded-lg p-4">
       <p class="text-sm text-earth-brown leading-relaxed whitespace-pre-wrap">
