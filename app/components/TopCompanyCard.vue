@@ -32,7 +32,7 @@ const formatEmissions = (n: number) => n.toLocaleString('zh-TW')
       <p class="font-bold text-green-forest mt-1" :class="compact ? 'text-base' : 'text-lg'">
         {{ formatEmissions(全台排放量) }}
         <span class="font-normal text-gray-400" :class="compact ? 'text-xs' : 'text-sm'">
-          {{ compact ? '噸' : '噸總碳排' }}
+          {{ compact ? '噸' : '噸溫室氣體排放' }}
         </span>
       </p>
       <p class="text-green-deep mt-0.5" :class="compact ? 'text-xs' : 'text-sm'">

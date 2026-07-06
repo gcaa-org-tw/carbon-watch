@@ -139,7 +139,7 @@ const showMobileCarousel = computed(() => {
   <section class="bg-surface-warm py-35 min-h-[80vh]">
     <div class="mx-auto w-full px-4" :class="isPhone ? 'max-w-[90rem]' : 'max-w-[80rem]'">
       <h2 class="text-4xl font-bold text-green-mint dark:text-green-mint mb-8 text-center">
-        排碳縣市分佈
+        各縣市排碳大戶排放量
       </h2>
       
       <!-- Mobile Layout -->
