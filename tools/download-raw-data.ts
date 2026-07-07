@@ -43,6 +43,7 @@ const CONSUMED_TABS: { tab: string; consumer: string }[] = [
   { tab: 'XIII. ESG基金_sitca', consumer: 'tools/transform-fund-data.ts' },
   { tab: 'XIV. ESG基金summary', consumer: 'tools/transform-fund-data.ts' },
   { tab: 'XV. ESG持股明細', consumer: 'tools/transform-fund-data.ts' },
+  { tab: 'XVI. 燃煤工廠地圖', consumer: 'tools/transform-coal-map-data.ts' },
 ];
 
 // 工廠縣市排放歷年 SOT — factory-level emissions by year and county.
