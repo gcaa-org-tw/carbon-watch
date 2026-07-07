@@ -25,21 +25,27 @@ const colorByIndustry: Record<string, string> = Object.fromEntries(
   meta.業別排序.map((industry, i) => [industry, PALETTE[i % PALETTE.length] ?? '#898781'])
 )
 
-const activeIndustries = ref<Set<string>>(new Set(meta.業別排序))
+// Pills highlight: empty selection = everything shown at full strength;
+// clicking a pill highlights that industry (others dim on the map and drop
+// out of the lists); clicking again un-highlights it.
+const selectedIndustries = ref<Set<string>>(new Set())
 
 const toggleIndustry = (industry: string) => {
-  const next = new Set(activeIndustries.value)
+  const next = new Set(selectedIndustries.value)
   if (next.has(industry)) {
     next.delete(industry)
   } else {
     next.add(industry)
   }
-  activeIndustries.value = next
+  selectedIndustries.value = next
 }
 
 const resetIndustries = () => {
-  activeIndustries.value = new Set(meta.業別排序)
+  selectedIndustries.value = new Set()
 }
+
+const isHighlighted = (industry: string) =>
+  selectedIndustries.value.size === 0 || selectedIndustries.value.has(industry)
 
 const industryCounts = computed<Record<string, number>>(() => {
   const counts: Record<string, number> = {}
@@ -52,14 +58,13 @@ const industryCounts = computed<Record<string, number>>(() => {
 // Bubble scale anchors on the all-data max so filtering never resizes survivors
 const maxValue = Math.max(...factories.map(f => f.用煤量2024))
 
-// Map dots: 2024 > 0 only (zero rows stay in the table below)
-const dotFactories = computed(() =>
-  factories.filter(f => f.用煤量2024 > 0 && activeIndustries.value.has(f.業別))
-)
+// Map dots: 2024 > 0 only (zero rows stay in the table below). All dots stay
+// on the map — highlight dimming happens inside CoalFactoryMap.
+const dotFactories = computed(() => factories.filter(f => f.用煤量2024 > 0))
 
 const filteredSorted = computed(() =>
   [...factories]
-    .filter(f => activeIndustries.value.has(f.業別))
+    .filter(f => isHighlighted(f.業別))
     .sort((a, b) => b.用煤量2024 - a.用煤量2024)
 )
 
@@ -153,20 +158,22 @@ const isStreetLevel = (f: CoalMapFactory) => f.座標來源.startsWith('OSM')
         :key="industry"
         type="button"
         class="flex items-center gap-2 px-3 py-1.5 rounded-full border text-sm transition-opacity"
-        :class="activeIndustries.has(industry)
-          ? 'border-earth-brown/40 text-earth-brown bg-surface-warm'
-          : 'border-earth-brown/20 text-earth-brown/40 opacity-60'"
+        :class="selectedIndustries.has(industry)
+          ? 'border-green-mint/70 text-green-mint bg-surface-warm ring-1 ring-green-mint/40'
+          : isHighlighted(industry)
+            ? 'border-earth-brown/40 text-earth-brown bg-surface-warm'
+            : 'border-earth-brown/20 text-earth-brown/40 opacity-60'"
         @click="toggleIndustry(industry)"
       >
         <span
           class="inline-block w-3 h-3 rounded-full"
-          :style="{ backgroundColor: colorByIndustry[industry], opacity: activeIndustries.has(industry) ? 1 : 0.35 }"
+          :style="{ backgroundColor: colorByIndustry[industry], opacity: isHighlighted(industry) ? 1 : 0.35 }"
         />
         {{ industry }}
         <span class="text-xs opacity-70">{{ industryCounts[industry] }}</span>
       </button>
       <button
-        v-if="activeIndustries.size < meta.業別排序.length"
+        v-if="selectedIndustries.size > 0"
         type="button"
         class="px-3 py-1.5 rounded-full text-sm text-green-mint border border-green-mint/40 hover:bg-surface-warm"
         @click="resetIndustries"
@@ -183,16 +190,11 @@ const isStreetLevel = (f: CoalMapFactory) => f.座標來源.startsWith('OSM')
           :color-by-industry="colorByIndustry"
           :selected-cno="selected?.管制編號 ?? null"
           :max-value="maxValue"
+          :highlight-industries="[...selectedIndustries]"
           @factory-hover="handleHover"
           @factory-leave="handleLeave"
           @factory-select="handleSelect"
         />
-        <div
-          v-if="dotFactories.length === 0"
-          class="absolute inset-0 flex items-center justify-center text-earth-brown/60"
-        >
-          請至少選擇一個業別
-        </div>
       </div>
 
       <div class="flex flex-col gap-4">
@@ -284,16 +286,11 @@ const isStreetLevel = (f: CoalMapFactory) => f.座標來源.startsWith('OSM')
           :color-by-industry="colorByIndustry"
           :selected-cno="selected?.管制編號 ?? null"
           :max-value="maxValue"
+          :highlight-industries="[...selectedIndustries]"
           @factory-hover="handleHover"
           @factory-leave="handleLeave"
           @factory-select="handleSelect"
         />
-        <div
-          v-if="dotFactories.length === 0"
-          class="absolute inset-0 flex items-center justify-center text-earth-brown/60"
-        >
-          請至少選擇一個業別
-        </div>
       </div>
 
       <div v-if="selected" class="bg-surface-warm rounded-lg p-4">
