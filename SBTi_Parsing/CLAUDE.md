@@ -27,9 +27,23 @@ homepage. The full chain (all formula-driven, single manual root):
    default「無」) → `I. 總表` SBTi 承諾 → public sheet → CI sync → site
 
 Separate deliverable: qyke's snapshot xlsx「臺灣國際減碳倡議企業名單.xlsx」
-Drive id `1AyCyX5zS-oBaAe102LSAchVmPPAvHN7b` — regenerated wholesale from the
-same scrape (5 tabs: 企業名單 / 說明 / 統計摘要 / 2025年永續獎 /
-所有排碳大戶_2024_300).
+Drive id `1AyCyX5zS-oBaAe102LSAchVmPPAvHN7b`. **Maintained by qyke — do not
+touch** (decision #11, 2026-07-29). Verified the same day: no tab in the hub
+spreadsheet references this file (anchor-cell scan of all raw_* tabs), so his
+tab renames can never break the site chain. `build_xlsx.py` can regenerate a
+full merged rebuild on request.
+
+Wiring facts verified live 2026-07-29 (formula reads, not assumptions):
+
+- `raw_國際減碳倡議!A1` = IMPORTRANGE of scrape sheet `1Ys5JuyG…` raw_data A:E
+  — the site chain reads OUR scrape sheet only.
+- Site「SBTi 承諾」= I. 總表 F ← 排碳大戶表_Data O ← raw_國際減碳倡議 B
+  (統編 join through H). Full 211-company list lives in raw_國際減碳倡議
+  (superset of emitters); the site surfaces SBTi only for the ~287 emitters.
+- Site「RE100 承諾」has a DIFFERENT upstream: 排碳大戶表_Data AD
+  「是否取得RE100認證」← raw_LLM 欄位蒐集結果 (external sheet `1uxyET6…`).
+  greentrade's RE100/EV100/SEC flags land in raw_國際減碳倡議 C:E but are not
+  what the site's RE100 column shows.
 
 ## Conventions (must follow)
 
