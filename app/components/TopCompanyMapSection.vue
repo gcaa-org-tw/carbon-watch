@@ -265,20 +265,20 @@ onUnmounted(() => {
     <Teleport to="body">
       <div
         v-if="tooltipDisplay && selectedCompany && hoveredCounty"
-        class="fixed z-50 pointer-events-none bg-white border border-gray-300 rounded-lg shadow-xl"
+        class="fixed z-50 pointer-events-none bg-surface-warm text-earth-brown border border-earth-brown/30 rounded-lg shadow-xl"
         :style="{ ...tooltipStyle, maxWidth: `${TOOLTIP_MAX_WIDTH}px` }"
       >
-        <div class="px-3 py-2 bg-surface-mint border-b border-gray-200 rounded-t-lg">
+        <div class="px-3 py-2 bg-surface-mint border-b border-earth-brown/20 rounded-t-lg">
           <div class="font-semibold text-green-mint text-sm whitespace-nowrap">
             {{ selectedCompany.公司 }} · {{ hoveredCounty }}
           </div>
-          <div class="text-xs text-gray-600 mt-0.5 whitespace-nowrap">
+          <div class="text-xs text-earth-brown mt-0.5 whitespace-nowrap">
             {{ tooltipDisplay.factoryCount }} 廠 · 合計 {{ formatTonnes(tooltipDisplay.total.總排放) }} 公噸 CO2e
           </div>
         </div>
         <table class="w-full text-xs">
           <thead>
-            <tr class="text-gray-500 bg-gray-50">
+            <tr class="text-earth-brown bg-surface-mint">
               <th class="text-left px-3 py-1 font-normal">廠區</th>
               <th class="text-right px-2 py-1 font-normal">範疇一</th>
               <th class="text-right px-2 py-1 font-normal">範疇二</th>
@@ -289,7 +289,7 @@ onUnmounted(() => {
             <tr
               v-for="(f, i) in tooltipDisplay.rows"
               :key="i"
-              class="border-t border-gray-100"
+              class="border-t border-earth-brown/15"
             >
               <td class="px-3 py-1 whitespace-nowrap">{{ f.名稱 }}</td>
               <td class="px-2 py-1 text-right tabular-nums whitespace-nowrap">{{ formatTonnes(f.範疇一) }}</td>
@@ -298,7 +298,7 @@ onUnmounted(() => {
             </tr>
             <tr
               v-if="tooltipDisplay.collapsed"
-              class="border-t border-gray-200 text-gray-600 italic"
+              class="border-t border-earth-brown/20 text-earth-brown/70 italic"
             >
               <td class="px-3 py-1 whitespace-nowrap">其他 {{ tooltipDisplay.collapsed.count }} 廠 合計</td>
               <td class="px-2 py-1 text-right tabular-nums whitespace-nowrap">{{ formatTonnes(tooltipDisplay.collapsed.範疇一) }}</td>
