@@ -10,6 +10,9 @@
  *   with 公司全名 + 事業統編 already attached and 排放量 overridden from the SOT.
  * - `raw-data/工廠縣市排放_歷年.csv`  — factory-level SOT (本年度 113 = 2024).
  *   Used for per-county distribution.
+ * - `raw-data/廠座標.csv`  — static factory-coordinate lookup (key: 管制編號)
+ *   from the same SOT spreadsheet. Attaches 經度/緯度 to each factory for the
+ *   home-page dot markers; factories without a match are logged loudly.
  *
  * Sourcing both totals and the per-county split from the same SOT keeps the
  * home cards aligned with the company detail page (year, scope, value).
@@ -37,6 +40,8 @@ interface FactoryEmission {
   範疇一: number;
   範疇二: number;
   總排放: number;
+  經度?: number;
+  緯度?: number;
 }
 
 interface CompanyRegionEmission {
@@ -150,6 +155,19 @@ async function transformTopCompanyRegionData() {
       if (u) allowedUBNs.add(u);
     }
 
+    // 4a) Load factory coordinates lookup (管制編號 → wgs84 經緯度).
+    const coordsPath = join(RAW_DATA_DIR, '廠座標.csv');
+    const coordsByCno = new Map<string, { 經度: number; 緯度: number }>();
+    for (const row of parseCSV(readFileSync(coordsPath, 'utf-8'))) {
+      const cno = (row['管制編號'] || '').trim();
+      const lon = parseFloat(row['wgs84經度'] || '');
+      const lat = parseFloat(row['wgs84緯度'] || '');
+      if (cno && !isNaN(lon) && !isNaN(lat) && lon !== 0 && lat !== 0) {
+        coordsByCno.set(cno, { 經度: lon, 緯度: lat });
+      }
+    }
+    logger.info(`Loaded ${coordsByCno.size} factory coordinates from 廠座標.csv`);
+
     const factoryPath = join(RAW_DATA_DIR, '工廠縣市排放_歷年.csv');
     const factoryRows = parseCSV(readFileSync(factoryPath, 'utf-8'));
     const byUBN = new Map<string, Map<string, number>>();
@@ -167,11 +185,13 @@ async function transformTopCompanyRegionData() {
       if (!factoriesByUBN.has(ubn)) factoriesByUBN.set(ubn, new Map());
       const countyMap = factoriesByUBN.get(ubn)!;
       if (!countyMap.has(county)) countyMap.set(county, []);
+      const coords = coordsByCno.get((row['管制編號'] || '').trim());
       countyMap.get(county)!.push({
         名稱: stripCompanyPrefix(row['事業名稱'] || ''),
         範疇一: Math.round(parseAmount(row['直接排放量(公噸CO2e)'])),
         範疇二: Math.round(parseAmount(row['能源間接排放量(公噸CO2e)'])),
         總排放: Math.round(amt),
+        ...(coords ? { 經度: coords.經度, 緯度: coords.緯度 } : {}),
       });
     }
     logger.info(`Loaded factory SOT year ${FACTORY_SOT_YEAR}: ${byUBN.size} 事業統編`);
@@ -215,6 +235,25 @@ async function transformTopCompanyRegionData() {
         排放縣市,
         縣市工廠,
       });
+    }
+
+    // 5a) Coordinate coverage check — every factory on the home map should
+    //     get a dot. Misses mean the SOT 廠座標 tab needs new rows.
+    const noCoords: string[] = [];
+    for (const c of result) {
+      for (const [county, factories] of Object.entries(c.縣市工廠)) {
+        for (const f of factories) {
+          if (f.經度 === undefined || f.緯度 === undefined) {
+            noCoords.push(`${c.公司}／${county}／${f.名稱}`);
+          }
+        }
+      }
+    }
+    if (noCoords.length > 0) {
+      logger.error(`${noCoords.length} factories have NO coordinates — add rows to the SOT 廠座標 tab:`);
+      noCoords.forEach(n => logger.error(`  - ${n}`));
+    } else {
+      logger.success('All factories in output carry coordinates');
     }
 
     // 6) Write

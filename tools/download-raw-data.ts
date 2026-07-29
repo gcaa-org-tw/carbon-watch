@@ -54,6 +54,13 @@ const FACTORY_SOT_SPREADSHEET_ID = '125IPdMEUeLGzOF95ga3wsGV3jhP4J5wqbrIQt9KGjI4
 const FACTORY_SOT_TAB = '原始檔（勿動）';
 const FACTORY_SOT_CSV_NAME = '工廠縣市排放_歷年.csv';
 
+// 廠座標 — static factory-coordinate lookup (key: 管制編號) in the same SOT
+// spreadsheet. Sources per row: ems_s_01 / 同址廠區 / OSM 街道級 (see 座標來源).
+// Consumed by tools/transform-top-company-region-data.ts for the home-page
+// factory dot markers.
+const FACTORY_COORDS_TAB = '廠座標';
+const FACTORY_COORDS_CSV_NAME = '廠座標.csv';
+
 // Output directory for raw CSV files
 const RAW_DATA_DIR = join(__dirname, '..', 'raw-data');
 
@@ -175,6 +182,31 @@ async function downloadRawData() {
     } catch (error) {
       logger.info(
         `Could not refresh factory SOT (likely the sheet is not public to this API key). Existing CSV is retained.`
+      );
+      logger.info(`  ${error instanceof Error ? error.message : String(error)}`);
+    }
+
+    // Fetch factory coordinates lookup (best-effort; non-fatal on failure)
+    logger.info(`Fetching factory coords tab "${FACTORY_COORDS_TAB}" from ${FACTORY_SOT_SPREADSHEET_ID}`);
+    try {
+      const response = await sheets.spreadsheets.values.get({
+        spreadsheetId: FACTORY_SOT_SPREADSHEET_ID,
+        range: FACTORY_COORDS_TAB,
+      });
+      const values = response.data.values;
+      if (values && values.length > 0) {
+        const csv = arrayToCSV(values);
+        const filePath = join(RAW_DATA_DIR, FACTORY_COORDS_CSV_NAME);
+        writeFileSync(filePath, csv, 'utf-8');
+        logger.success(
+          `Saved factory coords to ${FACTORY_COORDS_CSV_NAME} (${values.length} rows, ${values[0]?.length || 0} columns)`
+        );
+      } else {
+        logger.info('Factory coords tab is empty, skipping');
+      }
+    } catch (error) {
+      logger.info(
+        `Could not refresh factory coords (likely the sheet is not public to this API key). Existing CSV is retained.`
       );
       logger.info(`  ${error instanceof Error ? error.message : String(error)}`);
     }

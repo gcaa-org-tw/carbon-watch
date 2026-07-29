@@ -5,12 +5,21 @@ import * as d3 from 'd3'
 import { feature } from 'topojson-client'
 import type { Topology, GeometryCollection } from 'topojson-specification'
 
+interface MapMarker {
+  經度: number
+  緯度: number
+}
+
 interface Props {
   highlightedRegion?: string | null
   highlightedRegions?: string[]
   allowZoom?: boolean
   focusedRegion?: string | null
   validRegions?: string[]
+  /** false = 純展示模式：hover 不變色、游標不變手指（首頁前十大用） */
+  hoverHighlight?: boolean
+  /** 廠區點位（wgs84），畫在縣市之上、不攔截滑鼠事件 */
+  markers?: MapMarker[]
 }
 
 interface RegionProperties {
@@ -24,6 +33,8 @@ const props = withDefaults(defineProps<Props>(), {
   allowZoom: true,
   focusedRegion: null,
   validRegions: () => [],
+  hoverHighlight: true,
+  markers: () => [],
 })
 
 const emit = defineEmits<{
@@ -39,6 +50,8 @@ const containerRef = ref<HTMLDivElement | null>(null)
 let svg: d3.Selection<SVGSVGElement, unknown, null, undefined> | null = null
 let g: d3.Selection<SVGGElement, unknown, null, undefined> | null = null
 let zoom: d3.ZoomBehavior<SVGSVGElement, unknown> | null = null
+let markersG: d3.Selection<SVGGElement, unknown, null, undefined> | null = null
+let mapProjection: d3.GeoProjection | null = null
 
 const initMap = async () => {
   if (!svgRef.value || !containerRef.value) return
@@ -72,6 +85,7 @@ const initMap = async () => {
   // Create projection
   const projection = d3.geoMercator()
     .fitSize([width, height], geoData)
+  mapProjection = projection
 
   const path = d3.geoPath().projection(projection)
 
@@ -87,6 +101,7 @@ const initMap = async () => {
     .attr('stroke', 'var(--color-earth-brown, #8B4513)')
     .attr('stroke-width', 1)
     .style('cursor', (d: any) => {
+      if (!props.hoverHighlight) return 'default'
       const regionName = d.properties?.name
       const isValid = props.validRegions.length === 0 || props.validRegions.includes(regionName)
       return isValid ? 'pointer' : 'default'
@@ -102,7 +117,7 @@ const initMap = async () => {
       const regionName = d.properties?.name
       const isValid = props.validRegions.length === 0 || props.validRegions.includes(regionName)
       const isMultiHighlighted = props.highlightedRegions.includes(regionName)
-      if (!props.focusedRegion && isValid && !isMultiHighlighted) {
+      if (props.hoverHighlight && !props.focusedRegion && isValid && !isMultiHighlighted) {
         d3.select(this)
           .attr('fill', 'var(--color-earth-brown-light, #D2691E)')
           .attr('stroke-width', 2)
@@ -130,6 +145,10 @@ const initMap = async () => {
       }
       if (regionName) emit('regionLeave', regionName)
     })
+
+  // Factory dot layer sits above counties; never intercepts county hover
+  markersG = g.append('g').attr('pointer-events', 'none')
+  drawMarkers()
 
   zoom = d3.zoom<SVGSVGElement, unknown>()
     .scaleExtent([1, 8])
@@ -182,6 +201,39 @@ const initMap = async () => {
   
   // Emit map loaded event
   emit('mapLoaded')
+}
+
+// 廠區點位用 ×（十字叉）記號：靠形狀而非色相區辨，不會被誤讀成圓形地物；
+// 深色（surface-warm，視覺近黑）在亮綠 highlight 縣市上對比 6.8:1，
+// 亮度差對各型色覺都成立（淡紅點對亮綠不到 2:1 且踩紅綠色弱混淆區，棄用）
+const MARKER_ARM = 4
+const MARKER_PATH = `M ${-MARKER_ARM} ${-MARKER_ARM} L ${MARKER_ARM} ${MARKER_ARM} M ${-MARKER_ARM} ${MARKER_ARM} L ${MARKER_ARM} ${-MARKER_ARM}`
+
+const drawMarkers = () => {
+  if (!markersG || !mapProjection) return
+  const marks = markersG
+    .selectAll<SVGPathElement, MapMarker>('path.factory-dot')
+    .data(props.markers, d => `${d.經度},${d.緯度}`)
+
+  marks.exit().remove()
+
+  marks.enter()
+    .append('path')
+    .attr('class', 'factory-dot')
+    .attr('d', MARKER_PATH)
+    .attr('fill', 'none')
+    .attr('stroke', 'var(--color-surface-warm, #213620)')
+    .attr('stroke-width', 2)
+    .attr('stroke-linecap', 'round')
+    .attr('opacity', 0)
+    .merge(marks)
+    .attr('transform', (d) => {
+      const p = mapProjection!([d.經度, d.緯度])
+      return p ? `translate(${p[0]}, ${p[1]})` : 'translate(-100, -100)'
+    })
+    .transition()
+    .duration(200)
+    .attr('opacity', 1)
 }
 
 const updateHighlight = () => {
@@ -260,6 +312,10 @@ const resetZoom = () => {
 
 watch(() => props.highlightedRegions, () => {
   updateHighlight()
+}, { deep: true })
+
+watch(() => props.markers, () => {
+  drawMarkers()
 }, { deep: true })
 
 watch(() => props.highlightedRegion, async (newRegion) => {

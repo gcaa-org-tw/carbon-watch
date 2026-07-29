@@ -6,6 +6,8 @@ interface FactoryEmission {
   範疇一: number
   範疇二: number
   總排放: number
+  經度?: number
+  緯度?: number
 }
 
 interface CompanyRegionEmission {
@@ -40,6 +42,26 @@ const rightCards = computed(() => companies.slice(5, 10))
 const carouselRef = ref<HTMLDivElement | null>(null)
 
 const selectedCompany = computed(() => companies[selectedIndex.value])
+
+// 選中公司的廠區點位（缺座標的廠在 transform 端已警告，這裡直接略過）。
+// 同址分期廠（如台積電十八廠一～六期）座標相同，去重後一址一點，
+// 也讓 TaiwanMap 內以座標為 key 的 d3 data join 保持 key 唯一
+const factoryMarkers = computed(() => {
+  const company = selectedCompany.value
+  if (!company) return []
+  const seen = new Set<string>()
+  return Object.values(company.縣市工廠)
+    .flat()
+    .filter((f): f is FactoryEmission & { 經度: number; 緯度: number } =>
+      f.經度 !== undefined && f.緯度 !== undefined)
+    .filter((f) => {
+      const key = `${f.經度},${f.緯度}`
+      if (seen.has(key)) return false
+      seen.add(key)
+      return true
+    })
+    .map(f => ({ 經度: f.經度, 緯度: f.緯度 }))
+})
 
 const tooltipFactories = computed<FactoryEmission[] | null>(() => {
   if (!hoveredCounty.value) return null
@@ -187,6 +209,8 @@ onUnmounted(() => {
           <TaiwanMap
             class="!bg-transparent"
             :highlighted-regions="highlightedCounties"
+            :markers="factoryMarkers"
+            :hover-highlight="false"
             :allow-zoom="false"
             @region-hover="handleRegionHover"
             @region-leave="handleRegionLeave"
@@ -214,6 +238,8 @@ onUnmounted(() => {
           <TaiwanMap
             class="!bg-transparent"
             :highlighted-regions="highlightedCounties"
+            :markers="factoryMarkers"
+            :hover-highlight="false"
             :allow-zoom="false"
             @region-hover="handleRegionHover"
             @region-leave="handleRegionLeave"
