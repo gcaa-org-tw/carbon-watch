@@ -6,7 +6,8 @@ const { isPro } = useViewMode()
 
 const menuItems = computed(() => [
   { to: isPro.value ? '/companies/pro' : '/companies', label: '依企業查詢' },
-  // { to: '/funds', label: '依基金持股查詢' }, // 暫時隱藏 -- 資料管線已通，待前端定案後復原
+  { to: '/funds', label: '依基金持股查詢' },
+  { to: '/coal-map', label: '燃煤工廠地圖' },
   { to: '/methodology', label: '氣候績效指標方法論' }
 ])
 
@@ -32,7 +33,7 @@ const closeMobileMenu = () => {
         </NuxtLink>
 
         <!-- Desktop Menu -->
-        <div class="hidden md:flex items-center gap-12">
+        <div class="hidden lg:flex items-center gap-12">
           <NuxtLink
             v-for="item in menuItems"
             :key="item.to"
@@ -53,8 +54,8 @@ const closeMobileMenu = () => {
         </div>
 
         <!-- Mobile Hamburger Button -->
-        <button 
-          class="md:hidden flex flex-col justify-center items-center w-10 h-10 gap-1.5"
+        <button
+          class="lg:hidden flex flex-col justify-center items-center w-10 h-10 gap-1.5"
           aria-label="Toggle menu"
           @click="toggleMobileMenu"
         >
@@ -83,9 +84,9 @@ const closeMobileMenu = () => {
       leave-from-class="opacity-100 translate-y-0"
       leave-to-class="opacity-0 -translate-y-4"
     >
-      <div 
+      <div
         v-if="mobileMenuOpen"
-        class="md:hidden bg-surface-mint border-t border-surface-warm shadow-lg"
+        class="lg:hidden bg-surface-mint border-t border-surface-warm shadow-lg"
       >
         <ContentContainer>
           <div class="flex flex-col py-4 gap-6">
