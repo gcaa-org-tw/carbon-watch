@@ -35,3 +35,12 @@
 ## 驗證（2026-07-29 全過）
 
 `npm run build`（887 routes）＋ `npm run lint` 乾淨；瀏覽器（chrome-devtools MCP）：非 highlight 縣市 hover fill 不變、游標 default、綠縣市 tooltip 正常（台積電·台南 15 廠）、台積電 25 個不重複點位含竹科／南科群聚可辨、手機 390px 重繪後點位正常、縣市排放區塊 hover 變色與 pointer 游標未變且無點位、/coal-map 80 顆泡泡正常、console 無錯誤。
+
+## 2026-07-29 修訂（部署後同日）：記號改淡紅圓點＋tooltip 配色修正
+
+部署上線後 Joseph 指示：「請使用淡紅色小點好了，直徑約等於現在的 x」，並回報 tooltip 黑字灰底難讀。
+
+- 記號改為淡紅實心圓點：r 3.25＋外圈 surface-warm 1.5px（外徑 8px＝原 × 跨距）；fill 用新 token `--color-accent-red-light: #FFA0A0`（accent-red 與白 1:1 混色，main.css 新增）
+- 對比依據（dataviz validate_palette＋WCAG 計算）：fill 對 green-pure 亮度比僅 1.01:1、色弱模擬 deutan ΔE 10.2（過 8 門檻）、一般視覺 ΔE 33.5——邊界由深色外圈承擔（#213620 對綠 6.78:1，各型色覺亮度差皆成立）；fill 對 surface-warm 深底 6.69:1（點落在深色縣市時換 fill 承擔）
+- tooltip 原用原生 Tailwind 灰階（bg-white／gray-*），在深色主題下對比失效，違反 ui-conventions token 規則；改站內 token：容器 surface-warm＋earth-brown 文字（6.9:1）、表頭與標題列 surface-mint 底（earth-brown 7.8:1、green-mint 9.3:1）
+- 驗證（serve .output/public＋chrome-devtools MCP）：台塑化麥寮群聚與中龍單點視覺可辨、台積電 25 點／六縣市 highlight（DOM 驗證，輪播自動前進未及截圖）、390px 手機台化五點清晰、tooltip 可讀、console 無錯誤；build＋lint 乾淨

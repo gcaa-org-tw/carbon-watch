@@ -28,6 +28,7 @@
   --color-accent-blue: #7A9CFF;
   --color-accent-yellow: #F5C71A;
   --color-accent-red: #FF4040;
+  --color-accent-red-light: #FFA0A0;
 }
 
 /**
@@ -47,6 +48,7 @@
   --color-accent-blue : var(--color-accent-blue);
   --color-accent-yellow: var(--color-accent-yellow);
   --color-accent-red: var(--color-accent-red);
+  --color-accent-red-light: var(--color-accent-red-light);
 }
 
 /**

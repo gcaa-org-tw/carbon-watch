@@ -203,28 +203,27 @@ const initMap = async () => {
   emit('mapLoaded')
 }
 
-// 廠區點位用 ×（十字叉）記號：靠形狀而非色相區辨，不會被誤讀成圓形地物；
-// 深色（surface-warm，視覺近黑）在亮綠 highlight 縣市上對比 6.8:1，
-// 亮度差對各型色覺都成立（淡紅點對亮綠不到 2:1 且踩紅綠色弱混淆區，棄用）
-const MARKER_ARM = 4
-const MARKER_PATH = `M ${-MARKER_ARM} ${-MARKER_ARM} L ${MARKER_ARM} ${MARKER_ARM} M ${-MARKER_ARM} ${MARKER_ARM} L ${MARKER_ARM} ${-MARKER_ARM}`
+// 廠區點位：淡紅實心圓點。淡紅 fill 對亮綠 highlight 亮度對比僅約 1:1（紅綠色弱
+// 也難靠色相區辨），邊界由深色外圈承擔——surface-warm 對綠 6.8:1，亮度差對各型
+// 色覺都成立；外徑 2r＋ring＝8px，與先前 × 記號同跨距
+const MARKER_R = 3.25
+const MARKER_RING = 1.5
 
 const drawMarkers = () => {
   if (!markersG || !mapProjection) return
   const marks = markersG
-    .selectAll<SVGPathElement, MapMarker>('path.factory-dot')
+    .selectAll<SVGCircleElement, MapMarker>('circle.factory-dot')
     .data(props.markers, d => `${d.經度},${d.緯度}`)
 
   marks.exit().remove()
 
   marks.enter()
-    .append('path')
+    .append('circle')
     .attr('class', 'factory-dot')
-    .attr('d', MARKER_PATH)
-    .attr('fill', 'none')
+    .attr('r', MARKER_R)
+    .attr('fill', 'var(--color-accent-red-light, #FFA0A0)')
     .attr('stroke', 'var(--color-surface-warm, #213620)')
-    .attr('stroke-width', 2)
-    .attr('stroke-linecap', 'round')
+    .attr('stroke-width', MARKER_RING)
     .attr('opacity', 0)
     .merge(marks)
     .attr('transform', (d) => {
