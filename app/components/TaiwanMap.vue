@@ -149,6 +149,9 @@ const initMap = async () => {
   // Factory dot layer sits above counties; never intercepts county hover
   markersG = g.append('g').attr('pointer-events', 'none')
   drawMarkers()
+  // 初次載入與 resize 重畫時，props 沒有變化事件、watcher 不會跑，
+  // 這裡不套用一次的話 highlight 要等下一次 props 變化（輪播切換）才出現
+  updateHighlight()
 
   zoom = d3.zoom<SVGSVGElement, unknown>()
     .scaleExtent([1, 8])

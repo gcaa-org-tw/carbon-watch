@@ -44,3 +44,4 @@
 - 對比依據（dataviz validate_palette＋WCAG 計算）：fill 對 green-pure 亮度比僅 1.01:1、色弱模擬 deutan ΔE 10.2（過 8 門檻）、一般視覺 ΔE 33.5——邊界由深色外圈承擔（#213620 對綠 6.78:1，各型色覺亮度差皆成立）；fill 對 surface-warm 深底 6.69:1（點落在深色縣市時換 fill 承擔）
 - tooltip 原用原生 Tailwind 灰階（bg-white／gray-*），在深色主題下對比失效，違反 ui-conventions token 規則；改站內 token：容器 surface-warm＋earth-brown 文字（6.9:1）、表頭與標題列 surface-mint 底（earth-brown 7.8:1、green-mint 9.3:1）
 - 驗證（serve .output/public＋chrome-devtools MCP）：台塑化麥寮群聚與中龍單點視覺可辨、台積電 25 點／六縣市 highlight（DOM 驗證，輪播自動前進未及截圖）、390px 手機台化五點清晰、tooltip 可讀、console 無錯誤；build＋lint 乾淨
+- 同日補修 latent bug：initMap 畫縣市一律深底、綠 highlight 只在 watcher 觸發時套用，首次載入與 resize 重畫後綠色要等下一次輪播（3.5s）才出現——× 時代深色記號落在深底上看不見、未曾暴露，淡紅點可見後成為「紅點先出、綠色後到」的體驗問題。修法：initMap 畫完即呼叫 updateHighlight()（比照 drawMarkers 既有模式）。取樣驗證（250ms 間隔 initScript）：修前 t≈0.25s 點出現、綠 0 個直到 t≈3.75s；修後點與綠同一取樣幀出現，resize 後 300ms 綠色仍在
