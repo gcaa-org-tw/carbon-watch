@@ -21,6 +21,14 @@ useHead({
     {
       rel: 'canonical',
       href: 'https://thaubing-esg.gcaa.org.tw/'
+    },
+    {
+      rel: 'preconnect',
+      href: 'https://fonts.googleapis.com'
+    },
+    {
+      rel: 'stylesheet',
+      href: 'https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap'
     }
   ]
 })
@@ -107,7 +115,7 @@ function scrollToCompanies() {
     </div>
 
     <!-- Top 10 Companies Section -->
-    <div class="py-6 top-10-section">
+    <div ref="companiesSection" class="py-6 top-10-section">
       <ContentContainer>
         <UPageHero
           title="前十大溫室氣體排放企業"
@@ -139,5 +147,153 @@ function scrollToCompanies() {
 
 .top-10-section {
   background: linear-gradient(to bottom right, var(--color-surface-mint, #e0f2f1), var(--color-surface-warm, #f5f5dc));
+}
+
+/* ── HERO (依 排碳大戶_mockup.html 設計) ───────────────── */
+.hero {
+  padding: 72px 64px 56px;
+  background:
+    radial-gradient(ellipse 70% 60% at 10% 80%, rgba(58, 154, 92, .07) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 40% at 90% 10%, rgba(58, 154, 92, .05) 0%, transparent 60%),
+    #090D0A;
+}
+
+.hero-eyebrow {
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  color: #3A9A5C;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hero-eyebrow::before {
+  content: '';
+  width: 20px;
+  height: 1px;
+  background: #3A9A5C;
+  display: inline-block;
+}
+
+.hero h1 {
+  font-family: 'Noto Sans TC', 'PingFang TC', sans-serif;
+  font-size: 40px;
+  font-weight: 700;
+  letter-spacing: -.025em;
+  line-height: 1.2;
+  margin-bottom: 16px;
+  color: #DDE8DF;
+}
+
+.hero h1 em {
+  color: #5BB278;
+  font-style: normal;
+}
+
+.hero-sub {
+  font-size: 15px;
+  color: #8A9E8D;
+  max-width: 520px;
+  margin-bottom: 36px;
+  line-height: 1.75;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.btn-primary {
+  background: #3A9A5C;
+  color: #090D0A;
+  border: 1px solid #3A9A5C;
+  border-radius: 8px;
+  padding: 10px 22px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background .15s;
+}
+
+.btn-primary:hover {
+  background: #2A7A45;
+}
+
+.btn-secondary {
+  display: inline-block;
+  background: transparent;
+  color: #5BB278;
+  border: 1px solid #1D5C31;
+  border-radius: 8px;
+  padding: 10px 22px;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all .15s;
+}
+
+.btn-secondary:hover {
+  background: #172019;
+  border-color: #3A9A5C;
+  color: #7FCF98;
+}
+
+/* ── STAT STRIP (依 排碳大戶_mockup.html 設計) ─────────── */
+.stat-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: #1F2D22;
+  border-top: 1px solid #1F2D22;
+  border-bottom: 1px solid #1F2D22;
+}
+
+.stat-cell {
+  background: #0F1511;
+  padding: 22px 28px;
+}
+
+.stat-cell-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .09em;
+  color: #556A58;
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.stat-cell-val {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 28px;
+  font-weight: 700;
+  color: #5BB278;
+  letter-spacing: -.02em;
+  line-height: 1;
+}
+
+.stat-cell-sub {
+  font-size: 12px;
+  color: #8A9E8D;
+  margin-top: 4px;
+}
+
+@media (max-width: 768px) {
+  .hero {
+    padding: 48px 24px 40px;
+  }
+
+  .hero h1 {
+    font-size: 30px;
+  }
+
+  .stat-strip {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 </style>
