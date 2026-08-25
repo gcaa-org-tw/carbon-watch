@@ -49,7 +49,7 @@ function scrollToCompanies() {
     <section class="hero">
       <div class="hero-eyebrow">台灣氣候績效追蹤平台</div>
       <h1>追蹤台灣<em>排碳大戶</em><br>一鍵看清氣候責任</h1>
-      <p class="hero-sub">追蹤 300+ 家企業溫室氣體排放量、減量承諾與行動成果，以透明數據推動台灣氣候行動。</p>
+      <p class="hero-sub">追蹤 350+ 家企業溫室氣體排放量、減量承諾與行動成果，以透明數據推動台灣氣候行動。</p>
       <div class="hero-actions">
         <button class="btn-primary" @click="scrollToCompanies">了解企業表現</button>
         <NuxtLink to="/methodology" class="btn-secondary">氣候績效指標方法論</NuxtLink>
@@ -87,32 +87,42 @@ function scrollToCompanies() {
     <RegionEmissionSection />
 
     <!-- Methodology Section -->
-    <div class="py-12">
+    <section class="methodology-section">
       <ContentContainer>
-        <UPageHero
-          title="氣候績效指標方法論"
-          description="依據法規與國際標準，制定企業氣候表現檢核表"
-          class="methodology-section"
-          :ui="{container: 'gap-6 sm:gap-6', title: 'text-earth-brown'}"
-        >
-          <template #description>
-            <p>綠盟參考台灣氣候法規及國際標準，</p>
-            <p>制定涵蓋承諾、行動與透明度三大面向，</p>
-            <p>共十項指標的氣候績效檢核表，檢驗企業氣候表現。</p>
-          </template>
-          <template #links>
-            <UButton
-              to="/methodology"
-              color="primary"
-              size="lg"
-              trailing-icon="i-heroicons-arrow-right-20-solid"
-            >
-              查看方法論定義
-            </UButton>
-          </template>
-        </UPageHero>
+        <div class="section-head">
+          <h2>氣候績效指標方法論</h2>
+          <p>綠盟參考台灣氣候法規及國際標準，制定涵蓋承諾、行動與透明度三大面向，共十項指標的氣候績效檢核表，檢驗企業氣候表現。</p>
+        </div>
+
+        <div class="pillar-grid">
+          <div class="pillar">
+            <div class="pillar-head"><span class="pillar-title">承諾</span><span class="pillar-count">2 項指標</span></div>
+            <div class="pillar-item"><span class="pillar-num">1</span><span class="pillar-text">承諾在 2050 年或更早實現淨零排放（範疇一＋二）</span></div>
+            <div class="pillar-item"><span class="pillar-num">2</span><span class="pillar-text">2030 年的減量目標不低於國家目標（26%），或是有取得科學基礎減量目標（SBT）</span></div>
+          </div>
+
+          <div class="pillar">
+            <div class="pillar-head"><span class="pillar-title">行動</span><span class="pillar-count">5 項指標</span></div>
+            <div class="pillar-item"><span class="pillar-num">3</span><span class="pillar-text">近三年的能源密集度（2022 年–2024 年）平均進步幅度達 2%</span></div>
+            <div class="pillar-item"><span class="pillar-num">4</span><span class="pillar-text">中期（2030 年）的平均年節能率或年節電率目標大於 1.5%</span></div>
+            <div class="pillar-item"><span class="pillar-num">5</span><span class="pillar-text">用電大戶完成法規要求「再生能源建置義務為契約容量的 10%」</span></div>
+            <div class="pillar-item"><span class="pillar-num">6</span><span class="pillar-text">說明既有法規義務之上的再生能源中長期規劃</span></div>
+            <div class="pillar-item"><span class="pillar-num">7</span><span class="pillar-text">說明關鍵減量策略的進展與未來規劃，包括該策略的執行及預期完成時間點、評量指標、預期減排量等</span></div>
+          </div>
+
+          <div class="pillar">
+            <div class="pillar-head"><span class="pillar-title">透明度</span><span class="pillar-count">3 項指標</span></div>
+            <div class="pillar-item"><span class="pillar-num">8</span><span class="pillar-text">揭露近三年範疇一及範疇二的排放量，以及範疇三主要類別的排放量</span></div>
+            <div class="pillar-item"><span class="pillar-num">9</span><span class="pillar-text">揭露當年度各類能源消費量（煤炭、石油、天然氣、非再生電力與再生電力），並且說明再生電力形式及佔比</span></div>
+            <div class="pillar-item"><span class="pillar-num">10</span><span class="pillar-text">揭露公司當年度「支持轉型至低碳經濟之產品／服務」之收入佔總營收之比例。公司須說明該低碳產品與服務之定義</span></div>
+          </div>
+        </div>
+
+        <div class="methodology-cta">
+          <NuxtLink to="/methodology" class="btn-secondary">查看方法論定義 →</NuxtLink>
+        </div>
       </ContentContainer>
-    </div>
+    </section>
 
     <!-- Top 10 Companies Section -->
     <div ref="companiesSection" class="py-6 top-10-section">
@@ -131,16 +141,6 @@ function scrollToCompanies() {
 </template>
 
 <style scoped>
-.methodology-section :deep(h1) {
-  font-size: 2rem;
-}
-
-.methodology-section :deep(h1 + div) {
-  font-size: 1.125rem;
-  line-height: 1.75;
-  color: var(--color-green-deep);
-}
-
 .custom-hero :deep(h1) {
   font-size: 2.25rem;
 }
@@ -283,6 +283,103 @@ function scrollToCompanies() {
   margin-top: 4px;
 }
 
+/* ── 方法論三大面向 (依 改設計0825.html SECTION 3 設計) ── */
+.methodology-section {
+  padding: 56px 0;
+  background: #090D0A;
+}
+
+.methodology-section .section-head {
+  margin-bottom: 22px;
+}
+
+.methodology-section .section-head h2 {
+  font-size: 22px;
+  font-weight: 700;
+  color: #DDE8DF;
+  letter-spacing: -.015em;
+  margin-bottom: 6px;
+}
+
+.methodology-section .section-head p {
+  font-size: 14px;
+  color: #8A9E8D;
+}
+
+.pillar-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.pillar {
+  background: #0F1511;
+  border: 1px solid #1F2D22;
+  border-radius: 12px;
+  padding: 22px 24px 20px;
+}
+
+.pillar-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #1F2D22;
+  margin-bottom: 6px;
+}
+
+.pillar-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #5BB278;
+  letter-spacing: .02em;
+}
+
+.pillar-count {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: #556A58;
+}
+
+.pillar-item {
+  display: flex;
+  gap: 11px;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(31, 45, 34, .55);
+}
+
+.pillar-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.pillar-num {
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  margin-top: 1px;
+  background: #134020;
+  color: #8ECBA0;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pillar-text {
+  font-size: 12.5px;
+  color: #8A9E8D;
+  line-height: 1.65;
+}
+
+.methodology-cta {
+  margin-top: 24px;
+}
+
 @media (max-width: 768px) {
   .hero {
     padding: 48px 24px 40px;
@@ -294,6 +391,18 @@ function scrollToCompanies() {
 
   .stat-strip {
     grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 1100px) {
+  .pillar-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 900px) {
+  .methodology-section {
+    padding: 40px 24px;
   }
 }
 </style>
