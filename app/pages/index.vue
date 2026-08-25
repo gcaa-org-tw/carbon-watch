@@ -27,10 +27,51 @@ useHead({
 
 // Get top 10 companies
 const top10Companies = top10CompaniesData as CompanyData[]
+
+// Hero section: scroll to company performance section
+const companiesSection = ref<HTMLElement>()
+function scrollToCompanies() {
+  companiesSection.value?.scrollIntoView({ behavior: 'smooth' })
+}
 </script>
 
 <template>
   <div>
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="hero-eyebrow">台灣氣候績效追蹤平台</div>
+      <h1>追蹤台灣<em>排碳大戶</em><br>一鍵看清氣候責任</h1>
+      <p class="hero-sub">追蹤 350+ 家企業溫室氣體排放量、減量承諾與行動成果，以透明數據推動台灣氣候行動。</p>
+      <div class="hero-actions">
+        <button class="btn-primary" @click="scrollToCompanies">了解企業表現</button>
+        <NuxtLink to="/methodology" class="btn-secondary">氣候績效指標方法論</NuxtLink>
+      </div>
+    </section>
+
+    <!-- Stat Strip -->
+    <div class="stat-strip">
+      <div class="stat-cell">
+        <div class="stat-cell-label">追蹤製造業</div>
+        <div class="stat-cell-val">300+</div>
+        <div class="stat-cell-sub">排碳大戶公司</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-cell-label">涵蓋全國</div>
+        <div class="stat-cell-val">54%</div>
+        <div class="stat-cell-sub">溫室氣體排放</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-cell-label">2024年相較2023年</div>
+        <div class="stat-cell-val">-1.38%</div>
+        <div class="stat-cell-sub">溫室氣體排放量</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-cell-label">比對發現</div>
+        <div class="stat-cell-val">116</div>
+        <div class="stat-cell-sub">家公司排放量仍在上升</div>
+      </div>
+    </div>
+
     <!-- Top 10 Companies Region Map Section -->
     <TopCompanyMapSection />
 
