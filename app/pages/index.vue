@@ -49,7 +49,7 @@ function scrollToCompanies() {
     <section class="hero">
       <div class="hero-eyebrow">台灣氣候績效追蹤平台</div>
       <h1>追蹤台灣<em>排碳大戶</em><br>一鍵看清氣候責任</h1>
-      <p class="hero-sub">追蹤 350+ 家企業溫室氣體排放量、減量承諾與行動成果，以透明數據推動台灣氣候行動。</p>
+      <p class="hero-sub">追蹤 300+ 家企業溫室氣體排放量、減量承諾與行動成果，以透明數據推動台灣氣候行動。</p>
       <div class="hero-actions">
         <button class="btn-primary" @click="scrollToCompanies">了解企業表現</button>
         <NuxtLink to="/methodology" class="btn-secondary">氣候績效指標方法論</NuxtLink>
