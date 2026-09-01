@@ -88,8 +88,6 @@ useHead({
       </div>
     </div>
 
-    <FundDataNotice />
-
     <!-- Company Table -->
     <div class="mt-8">
       <CompanyTable :rows="companies" :is-pro="true" :coal-first="true" :flush="true" />
