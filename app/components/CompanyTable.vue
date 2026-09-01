@@ -51,6 +51,11 @@ const formatNumber = (value: string | number): string => {
   return isNaN(num) ? String(value) : num.toLocaleString('zh-TW', { maximumFractionDigits: 1 })
 }
 
+const formatWholeNumber = (value: string | number): string => {
+  const num = parseValue(value)
+  return isNaN(num) ? String(value) : num.toLocaleString('zh-TW', { maximumFractionDigits: 0 })
+}
+
 const formatPercent = (value: string | number | undefined): string => {
   if (value === undefined || value === '') return ''
   const raw = String(value).replace(/,/g, '').trim()
@@ -60,6 +65,10 @@ const formatPercent = (value: string | number | undefined): string => {
   if (isNaN(num)) return String(value)
   const percent = hasPercentSign ? num : num * 100
   return `${percent.toLocaleString('zh-TW', { maximumFractionDigits: 1 })}%`
+}
+
+const formatNumericField = (field: string, value: string | number): string => {
+  return field === '燃煤使用量（公噸）' ? formatWholeNumber(value) : formatNumber(value)
 }
 
 // Numeric sort comparator: parses comma-formatted numbers and percentages before comparing.
@@ -207,7 +216,7 @@ const renderValueWithGrade = (field: string, value: string | number, isNumeric: 
   const grade = getGrade(field, value)
   if (!grade) {
     if (isNumeric) {
-      return h('span', formatNumber(value))
+      return h('span', formatNumericField(field, value))
     }
     return h('span', field === '2030 年減量目標設定' ? formatPercent(value) : String(value))
   }
@@ -218,7 +227,7 @@ const renderValueWithGrade = (field: string, value: string | number, isNumeric: 
   const displayValue = field === '2030 年減量目標設定'
     ? formatPercent(value)
     : isNumeric
-      ? formatNumber(value)
+      ? formatNumericField(field, value)
       : String(value)
   
   return h('div', { class: 'inline-flex items-center' }, [
