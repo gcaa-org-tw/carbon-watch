@@ -35,7 +35,7 @@
  * - `app/assets/data/fund-list.json` -- array of `FundData` (74 funds).
  * - `app/assets/data/funds/{fundKey}.json` -- `{ meta: FundData, companies: CompanyData[] }`
  *   for each fund that holds 排碳大戶. Coal is a single column (company-list
- *   `燃煤使用量（公噸）`); the session-14 `燃煤使用量_2026` per-holding column is gone.
+ *   `燃煤使用量（公噸）`), currently using 2025 data.
  */
 
 import { readFileSync, writeFileSync, mkdirSync, readdirSync, unlinkSync } from 'fs';
@@ -96,7 +96,7 @@ function parseCSV(csvContent: string): Record<string, string>[] {
   }
 
   // Parse header
-  const headers = parseCSVLine(lines[0]);
+  const headers = parseCSVLine(lines[0].replace(/^\uFEFF/, ''));
 
   // Parse data rows
   const data: Record<string, string>[] = [];
@@ -167,6 +167,25 @@ function normUBN(v: string | undefined): string {
   if (!v) return '';
   const digits = String(v).replace(/\D/g, '');
   return digits ? digits.padStart(8, '0') : '';
+}
+
+function calculateWeightedEmissions(
+  holdings: Record<string, string>[],
+  resolveFundKey: (row: Record<string, string>) => string | undefined,
+  companyByUBN: Map<string, CompanyData>
+): Map<string, number> {
+  const totals = new Map<string, number>();
+  holdings.forEach(row => {
+    if (String(row['是否排碳大戶']).trim().toUpperCase() !== 'TRUE') return;
+    const fundKey = resolveFundKey(row);
+    const fundSize = parseNumber(row['基金規模（萬）']);
+    const holdingValue = parseNumber(row['持股價值（萬）']);
+    const company = companyByUBN.get(normUBN(row['統一編號']));
+    const emissions = parseNumber(company?.['溫室氣體排放量（公噸二氧化碳當量）']);
+    if (!fundKey || fundSize <= 0 || holdingValue <= 0 || emissions <= 0) return;
+    totals.set(fundKey, (totals.get(fundKey) ?? 0) + holdingValue / fundSize * emissions);
+  });
+  return totals;
 }
 
 /** Read a raw-data CSV into rows of {header: value}. */
@@ -355,6 +374,39 @@ async function transformFundData() {
       if (f.基金代號) mgrCodeToFundKey.set(f.基金代號, f.fundKey);
     });
 
+    const companyByUBN = new Map<string, CompanyData>();
+    companyListData.forEach(company => {
+      const ubn = normUBN(company.事業統編);
+      if (ubn) companyByUBN.set(ubn, company);
+    });
+
+    const weightedEmissions = new Map<string, number>();
+    const addWeightedEmissions = (totals: Map<string, number>) => {
+      totals.forEach((value, fundKey) => {
+        weightedEmissions.set(fundKey, (weightedEmissions.get(fundKey) ?? 0) + value);
+      });
+    };
+    addWeightedEmissions(
+      calculateWeightedEmissions(
+        managerHoldings,
+        row => mgrCodeToFundKey.get((row['基金代號'] || '').trim()),
+        companyByUBN
+      )
+    );
+    addWeightedEmissions(
+      calculateWeightedEmissions(
+        esgHoldings,
+        row => {
+          const fundKey = esgCodeToUbn.get((row['基金代號'] || '').trim());
+          return fundKey && addedUbnSet.has(fundKey) ? fundKey : undefined;
+        },
+        companyByUBN
+      )
+    );
+    fundList.forEach(fund => {
+      fund.排碳大戶總碳排量 = Math.round((weightedEmissions.get(fund.fundKey) ?? 0) * 100) / 100;
+    });
+
     // Generate per-fund company lists (keyed by fundKey).
     logger.info('Generating per-fund company lists...');
     const fundCompanyLists = generateFundCompanyLists(
@@ -366,6 +418,17 @@ async function transformFundData() {
       companyListData,
       logger
     );
+
+    const coalUserCounts = new Map<string, number>();
+    fundCompanyLists.forEach((companies, fundKey) => {
+      coalUserCounts.set(
+        fundKey,
+        companies.filter(company => parseNumber(company['燃煤使用量（公噸）']) > 0).length
+      );
+    });
+    fundList.forEach(fund => {
+      fund.使用燃煤家數 = coalUserCounts.get(fund.fundKey) ?? 0;
+    });
 
     // Create output directories
     mkdirSync(OUTPUT_DIR, { recursive: true });
