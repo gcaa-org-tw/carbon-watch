@@ -121,6 +121,12 @@ const columns: TableColumn<FundData>[] = [
         ]
       )
     },
+    meta: {
+      class: {
+        th: 'max-w-[30rem]',
+        td: 'max-w-[30rem] whitespace-normal',
+      }
+    }
   },
   {
     accessorKey: '使用燃煤家數',
