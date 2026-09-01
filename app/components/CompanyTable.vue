@@ -309,16 +309,27 @@ const nonProColumns: TableColumn<CompanyData>[] = [
   },
   {
     accessorKey: '淨零目標年',
-    header: ({ column }) => createSortableHeader(column, '淨零目標年'),
+    header: ({ column }) => createSortableHeader(column, '淨零目標年', 'right'),
     enableSorting: true,
     sortingFn: numericSortingFn,
+    cell: ({ row }) => h('div', { class: 'text-right' }, row.original['淨零目標年']),
+    meta: {
+      class: {
+        th: 'text-right',
+      }
+    }
   },
   {
     accessorKey: '2030 年減量目標設定',
-    header: ({ column }) => createSortableHeader(column, '2030 年減量目標設定'),
+    header: ({ column }) => createSortableHeader(column, '2030 年減量目標設定', 'right'),
     enableSorting: true,
     sortingFn: numericSortingFn,
     cell: ({ row }) => h('div', { class: 'text-right' }, render2030Cell(row.original)),
+    meta: {
+      class: {
+        th: 'text-right',
+      }
+    }
   },
   {
     accessorKey: 'SBTi 承諾',
@@ -464,16 +475,27 @@ const proColumns: TableColumn<CompanyData>[] = [
   },
   {
     accessorKey: '淨零目標年',
-    header: ({ column }) => createSortableHeader(column, '淨零目標年'),
+    header: ({ column }) => createSortableHeader(column, '淨零目標年', 'right'),
     enableSorting: true,
     sortingFn: numericSortingFn,
+    cell: ({ row }) => h('div', { class: 'text-right' }, row.original['淨零目標年']),
+    meta: {
+      class: {
+        th: 'text-right',
+      }
+    }
   },
   {
     accessorKey: '2030 年減量目標設定',
-    header: ({ column }) => createSortableHeader(column, '2030 年減量目標設定'),
+    header: ({ column }) => createSortableHeader(column, '2030 年減量目標設定', 'right'),
     enableSorting: true,
     sortingFn: numericSortingFn,
     cell: ({ row }) => h('div', { class: 'text-right' }, render2030Cell(row.original)),
+    meta: {
+      class: {
+        th: 'text-right',
+      }
+    }
   },
   {
     accessorKey: 'SBTi 承諾',
