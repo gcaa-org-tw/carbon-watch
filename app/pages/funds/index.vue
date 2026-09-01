@@ -166,7 +166,7 @@ const columns: TableColumn<FundData>[] = [
   },
   {
     accessorKey: '排碳大戶總碳排量',
-    header: ({ column }) => createSortableHeader(column, '基金分攤排放量（持股權重估算，公噸CO2e）', 'right'),
+    header: ({ column }) => createSortableHeader(column, '基金分攤排放量（公噸CO2e）', 'right'),
     enableSorting: true,
     cell: ({ row }) => h('div', { class: 'text-right' }, row.original.排碳大戶總碳排量.toLocaleString('zh-TW')),
     meta: {
