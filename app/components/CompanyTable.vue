@@ -46,6 +46,22 @@ const parseValue = (value: string | number): number => {
   return parseFloat(cleanValue)
 }
 
+const formatNumber = (value: string | number): string => {
+  const num = parseValue(value)
+  return isNaN(num) ? String(value) : num.toLocaleString('zh-TW', { maximumFractionDigits: 1 })
+}
+
+const formatPercent = (value: string | number | undefined): string => {
+  if (value === undefined || value === '') return ''
+  const raw = String(value).replace(/,/g, '').trim()
+  if (raw === '-' || raw === 'NA') return raw
+  const hasPercentSign = raw.endsWith('%')
+  const num = parseFloat(hasPercentSign ? raw.slice(0, -1) : raw)
+  if (isNaN(num)) return String(value)
+  const percent = hasPercentSign ? num : num * 100
+  return `${percent.toLocaleString('zh-TW', { maximumFractionDigits: 1 })}%`
+}
+
 // Numeric sort comparator: parses comma-formatted numbers and percentages before comparing.
 // Treats unparseable/empty values as the smallest rank so they sink to the bottom when sorting descending.
 const numericSortingFn = (rowA: Row<CompanyData>, rowB: Row<CompanyData>, columnId: string): number => {
@@ -190,22 +206,20 @@ const render2030Cell = (row: CompanyData) => {
 const renderValueWithGrade = (field: string, value: string | number, isNumeric: boolean = false) => {
   const grade = getGrade(field, value)
   if (!grade) {
-    if (isNumeric && typeof value === 'number') {
-      return h('span', value.toLocaleString('zh-TW'))
+    if (isNumeric) {
+      return h('span', formatNumber(value))
     }
-    return h('span', String(value))
+    return h('span', field === '2030 年減量目標設定' ? formatPercent(value) : String(value))
   }
   
   const colors = getGradeColors(grade.label)
   
   // Always use pill for graded values
-  let displayValue = String(value)
-  
-  // For 2030 年減量目標設定, remove decimal point and show as integer percentage
-  if (field === '2030 年減量目標設定' && displayValue.includes('%')) {
-    const numValue = parseValue(value) * 100 // Convert back to percentage
-    displayValue = `${Math.round(numValue)}%`
-  }
+  const displayValue = field === '2030 年減量目標設定'
+    ? formatPercent(value)
+    : isNumeric
+      ? formatNumber(value)
+      : String(value)
   
   return h('div', { class: 'inline-flex items-center' }, [
     h('span', { 
@@ -277,7 +291,7 @@ const nonProColumns: TableColumn<CompanyData>[] = [
     header: ({ column }) => createSortableHeader(column, '溫室氣體排放量（公噸二氧化碳當量）', 'right'),
     enableSorting: true,
     sortingFn: numericSortingFn,
-    cell: ({ row }) => h('div', { class: 'text-right' }, row.original['溫室氣體排放量（公噸二氧化碳當量）']),
+    cell: ({ row }) => h('div', { class: 'text-right' }, formatNumber(row.original['溫室氣體排放量（公噸二氧化碳當量）'])),
     meta: {
       class: {
         th: 'text-right',
@@ -432,7 +446,7 @@ const proColumns: TableColumn<CompanyData>[] = [
     header: ({ column }) => createSortableHeader(column, '溫室氣體排放量（公噸二氧化碳當量）', 'right'),
     enableSorting: true,
     sortingFn: numericSortingFn,
-    cell: ({ row }) => h('div', { class: 'text-right' }, row.original['溫室氣體排放量（公噸二氧化碳當量）']),
+    cell: ({ row }) => h('div', { class: 'text-right' }, formatNumber(row.original['溫室氣體排放量（公噸二氧化碳當量）'])),
     meta: {
       class: {
         th: 'text-right',
@@ -501,7 +515,7 @@ const proColumns: TableColumn<CompanyData>[] = [
     header: ({ column }) => createSortableHeader(column, '能源密集度變化率'),
     enableSorting: true,
     sortingFn: numericSortingFn,
-    cell: ({ row }) => h('div', { class: 'text-right' }, row.original['近三年能效進步率']),
+    cell: ({ row }) => h('div', { class: 'text-right' }, formatPercent(row.original['近三年能效進步率'])),
     meta: {
       class: {
         th: 'text-right',
@@ -513,7 +527,7 @@ const proColumns: TableColumn<CompanyData>[] = [
     header: ({ column }) => createSortableHeader(column, '節能目標設定'),
     enableSorting: true,
     sortingFn: numericSortingFn,
-    cell: ({ row }) => h('div', { class: 'text-right' }, row.original['節能目標設定']),
+    cell: ({ row }) => h('div', { class: 'text-right' }, formatPercent(row.original['節能目標設定'])),
     meta: {
       class: {
         th: 'text-right',
@@ -525,7 +539,7 @@ const proColumns: TableColumn<CompanyData>[] = [
     header: ({ column }) => createSortableHeader(column, '再生能源使用率'),
     enableSorting: true,
     sortingFn: numericSortingFn,
-    cell: ({ row }) => h('div', { class: 'text-right' }, row.original['再生能源使用率']),
+    cell: ({ row }) => h('div', { class: 'text-right' }, formatPercent(row.original['再生能源使用率'])),
     meta: {
       class: {
         th: 'text-right',
@@ -539,7 +553,7 @@ const proColumns: TableColumn<CompanyData>[] = [
     cell: ({ row }) => {
       const v = row.original['再生能源設置容量']
       const num = parseValue((v ?? '') as string)
-      return h('div', { class: 'text-right' }, isNaN(num) ? (v ?? '') : num.toLocaleString('zh-TW'))
+      return h('div', { class: 'text-right' }, isNaN(num) ? (v ?? '') : formatNumber(v ?? ''))
     },
     meta: {
       class: {
@@ -566,9 +580,7 @@ const proColumns: TableColumn<CompanyData>[] = [
     cell: ({ row }) => {
       const val = row.original['中期再生能源目標設定']
       if (!val) return h('div', { class: 'text-right' }, '')
-      const num = parseValue(val)
-      if (isNaN(num)) return h('div', { class: 'text-right' }, val)
-      return h('div', { class: 'text-right' }, `${Math.round(num * 100)}%`)
+      return h('div', { class: 'text-right' }, formatPercent(val))
     },
     meta: {
       class: {

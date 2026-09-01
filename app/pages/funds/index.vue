@@ -71,6 +71,8 @@ const createSortableHeader = (column: Column<FundData>, label: string, align: 'l
   )
 }
 
+const formatNumber = (value: number): string => value.toLocaleString('zh-TW', { maximumFractionDigits: 1 })
+
 // Define table columns using Nuxt UI v4 API
 const columns: TableColumn<FundData>[] = [
   {
@@ -135,7 +137,7 @@ const columns: TableColumn<FundData>[] = [
     accessorKey: '總市值',
     header: ({ column }) => createSortableHeader(column, '總市值（百萬新台幣）', 'right'),
     enableSorting: true,
-    cell: ({ row }) => h('div', { class: 'text-right' }, row.original.總市值.toLocaleString('zh-TW')),
+    cell: ({ row }) => h('div', { class: 'text-right' }, formatNumber(row.original.總市值)),
     meta: {
       class: {
         th: 'text-right',
@@ -168,7 +170,7 @@ const columns: TableColumn<FundData>[] = [
     accessorKey: '排碳大戶總碳排量',
     header: ({ column }) => createSortableHeader(column, '基金分攤排放量（公噸CO2e）', 'right'),
     enableSorting: true,
-    cell: ({ row }) => h('div', { class: 'text-right' }, row.original.排碳大戶總碳排量.toLocaleString('zh-TW')),
+    cell: ({ row }) => h('div', { class: 'text-right' }, formatNumber(row.original.排碳大戶總碳排量)),
     meta: {
       class: {
         th: 'text-right',
