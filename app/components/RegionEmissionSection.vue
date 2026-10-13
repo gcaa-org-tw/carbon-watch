@@ -148,6 +148,7 @@ const handleMapClick = async (regionName: string) => {
   }
 
   selectedRegion.value = regionName
+  highlightedRegion.value = regionName
 
   const regionIndex = regions.findIndex(r => r.縣市 === regionName)
   if (regionIndex === -1) return
