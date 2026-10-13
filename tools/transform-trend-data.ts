@@ -91,6 +91,7 @@ function parseValue(raw: string | undefined): number | null {
 type Point = { year: number; value: number }
 type Series = Point[]
 type TrendEntry = {
+  事業統編?: string
   ghg?: Series
   ghgIntensity?: Series
   energy?: Series
@@ -151,6 +152,8 @@ async function transformTrendData() {
       if (ghg.length === 0 && ghgIntensity.length === 0) continue
 
       const entry = ensure(trendMap, name)
+      const ubn = (row['事業統編'] || '').trim()
+      if (ubn) entry.事業統編 = ubn.padStart(8, '0')
       if (ghg.length > 0) entry.ghg = ghg
       if (ghgIntensity.length > 0) entry.ghgIntensity = ghgIntensity
       ghgCount++
