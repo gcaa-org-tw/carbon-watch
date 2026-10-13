@@ -13,7 +13,7 @@ interface ChartSpec {
   color: string
   data: DataPoint[]
   formatValue: (v: number) => string
-  formatAxis: (v: number, step: number) => string
+  formatAxis: (v: number, step: number, max: number) => string
 }
 
 interface Props {
@@ -35,9 +35,9 @@ const tooltipState = ref<{
 
 const integerFormat = d3.format(',.0f')
 const intensityFormat = (v: number) => v >= 100 ? d3.format(',.1f')(v) : d3.format(',.2f')(v)
-const axisInteger = (v: number, step: number) => {
-  const abs = Math.abs(v)
-  const unit = abs >= 1e8 ? 1e8 : abs >= 1e4 ? 1e4 : 1
+const axisInteger = (v: number, step: number, max: number) => {
+  if (v === 0) return '0'
+  const unit = max >= 1e8 ? 1e8 : max >= 1e4 ? 1e4 : 1
   const suffix = unit === 1e8 ? '億' : unit === 1e4 ? '萬' : ''
   const digits = unit === 1 ? 0 : Math.max(0, Math.ceil(Math.log10(unit / step) - 1e-9))
   return `${(v / unit).toLocaleString('zh-TW', { minimumFractionDigits: digits, maximumFractionDigits: digits })}${suffix}`
@@ -152,35 +152,10 @@ function drawChart(spec: ChartSpec) {
     .domain(xDomain)
     .range([0, innerWidth])
 
-  // Tight y domain so small trend changes are visible
-  const values = reported.map(d => d.value)
-  const minVal = Math.min(...values)
-  const maxVal = Math.max(...values)
-  let yLo: number
-  let yHi: number
-  if (minVal === maxVal) {
-    // Flat data – give a 10% band around the value (or [0, val*2] if value is 0)
-    if (minVal === 0) {
-      yLo = 0
-      yHi = 1
-    } else {
-      const pad = Math.abs(minVal) * 0.1
-      yLo = minVal - pad
-      yHi = maxVal + pad
-    }
-  } else {
-    const range = maxVal - minVal
-    const pad = range * 0.2
-    yLo = Math.max(0, minVal - pad)
-    yHi = maxVal + pad
-    // If clamping at 0 made the range collapse, restore the lower padding
-    if (yLo === 0 && minVal > range * 0.5) {
-      yLo = minVal - pad
-    }
-  }
+  const maxVal = Math.max(...reported.map(d => d.value))
 
   const yScale = d3.scaleLinear()
-    .domain([yLo, yHi])
+    .domain([0, maxVal * 1.1])
     .nice()
     .range([innerHeight, 0])
 
@@ -278,9 +253,10 @@ function drawChart(spec: ChartSpec) {
   // Y axis
   const yTicks = yScale.ticks(5)
   const yStep = yTicks.length > 1 ? yTicks[1]! - yTicks[0]! : 1
+  const yMax = yTicks[yTicks.length - 1] ?? 0
   const yAxis = d3.axisLeft(yScale)
     .ticks(5)
-    .tickFormat(d => spec.formatAxis(d as number, yStep))
+    .tickFormat(d => spec.formatAxis(d as number, yStep, yMax))
     .tickSize(0)
     .tickPadding(8)
 
