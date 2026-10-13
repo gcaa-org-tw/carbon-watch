@@ -4,11 +4,11 @@ title: 企業氣候績效指標
 
 # 企業氣候績效指標制定方法
 
-綠色公民行動聯盟（綠盟）與台灣氣候行動網絡研究中心（TCAN），根據台灣《<a href="https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=O0020098" target="_blank">氣候變遷因應法🔗</a>》、《<a href="https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=J0130095" target="_blank">一定契約容量以上之電力用戶應設置再生能源發電設備管理辦法🔗</a>》、《<a href="https://gazette.nat.gov.tw/egFront/detail.do?metaid=154504" target="_blank">中華民國一百十四年至一百十七年能源用戶訂定節約能源目標及執行計畫規定🔗</a>》及《<a href="https://www.selaw.com.tw/Chinese/RegulatoryInformationResult?sysNumber=LW10867094" target="_blank">上市公司編製與申報永續報告書作業辦法🔗</a>》等規定，並參考聯合國2022年「<a href="https://www.un.org/sites/un2.un.org/files/high-level_expert_group_n7b.pdf" target="_blank">誠信第一（Integrity Matters）🔗</a>」報告、國際組織 SBTi、CDP、Climate Action 100+（CA100+）、Net Zero Tracker、World Benchmarking Alliance 等制定的企業氣候績效指標內容，綜合整理為一套涵蓋三大面向、共十項指標的氣候績效檢核表。
+綠色公民行動聯盟（綠盟）與台灣氣候行動網絡研究中心（TCAN），根據台灣《<a href="https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=O0020098" target="_blank">氣候變遷因應法</a>》、《<a href="https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=J0130095" target="_blank">一定契約容量以上之電力用戶應設置再生能源發電設備管理辦法</a>》、《<a href="https://gazette.nat.gov.tw/egFront/detail.do?metaid=154504" target="_blank">中華民國一百十四年至一百十七年能源用戶訂定節約能源目標及執行計畫規定</a>》及《<a href="https://www.selaw.com.tw/Chinese/RegulatoryInformationResult?sysNumber=LW10867094" target="_blank">上市公司編製與申報永續報告書作業辦法</a>》等規定，並參考聯合國2022年「<a href="https://www.un.org/sites/un2.un.org/files/high-level_expert_group_n7b.pdf" target="_blank">誠信第一（Integrity Matters）</a>」報告、國際組織 SBTi、CDP、Climate Action 100+（CA100+）、Net Zero Tracker、World Benchmarking Alliance 等制定的企業氣候績效指標內容，綜合整理為一套涵蓋三大面向、共十項指標的氣候績效檢核表。
 
 ## 指標檢視對象
 
-「排碳大戶觀測站」聚焦於環境部「<a href="https://ghgregistry.moenv.gov.tw/epa_ghg/Accession/PublicInformation.aspx" target="_blank">事業應盤查登錄及查驗溫室氣體排放量之排放源🔗</a>」，全廠（場）化石燃料燃燒之直接排放產生溫室氣體年排放量達2.5萬公噸二氧化碳當量者及全廠（場）化石燃料燃燒之直接排放及使用電力之間接排放產生溫室氣體年排放量達2.5萬公噸二氧化碳當量之製造業。資料來源以企業公開資訊為主，包括永續報告書、財務報告、官方排放資料、能源使用資訊與第三方查驗資料等。
+「排碳大戶觀測站」聚焦於環境部「<a href="https://ghgregistry.moenv.gov.tw/epa_ghg/Accession/PublicInformation.aspx" target="_blank">事業應盤查登錄及查驗溫室氣體排放量之排放源</a>」，全廠（場）化石燃料燃燒之直接排放產生溫室氣體年排放量達2.5萬公噸二氧化碳當量者及全廠（場）化石燃料燃燒之直接排放及使用電力之間接排放產生溫室氣體年排放量達2.5萬公噸二氧化碳當量之製造業。資料來源以企業公開資訊為主，包括永續報告書、財務報告、官方排放資料、能源使用資訊與第三方查驗資料等。
 
 ## 指標三大面向
 

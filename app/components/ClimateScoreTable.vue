@@ -44,15 +44,6 @@ const radarDot = (raw: string): string | null => {
 }
 
 /* ── 格式化 ───────────────────────────────────────────── */
-// 37,723,850 → 3,772萬噸
-const formatEmissions = (raw: string): string => {
-  const n = Number((raw ?? '').replace(/,/g, ''))
-  if (!raw || Number.isNaN(n)) return '—'
-  if (n >= 1_000_000) return `${Math.round(n / 10000).toLocaleString('zh-TW')}萬噸`
-  if (n >= 10_000) return `${(n / 10000).toFixed(1)}萬噸`
-  return `${n.toLocaleString('zh-TW')}噸`
-}
-
 const formatTarget = (raw: string): string => {
   if (!raw || raw === 'NA') return '—'
   if (raw.endsWith('%')) {
@@ -96,7 +87,7 @@ const SORT_FIELDS: Record<string, keyof CompanyData> = {
   d4: '2022-2024年能源效率進步率',
   d5: '範疇三及減量策略',
 }
-const STRING_KEYS = new Set(['company', 'industry', 'sbti'])
+const STRING_KEYS = new Set(['company', 'industry'])
 
 const sortKey = ref<string>(props.coalFirst ? 'coal' : 'emission')
 const sortDir = ref<'asc' | 'desc'>('desc')
@@ -109,7 +100,7 @@ const setSort = (key: string) => {
     sortDir.value = sortDir.value === 'desc' ? 'asc' : 'desc'
   } else {
     sortKey.value = key
-    sortDir.value = 'desc'
+    sortDir.value = STRING_KEYS.has(key) ? 'asc' : 'desc'
   }
 }
 
@@ -119,6 +110,7 @@ const arrow = (key: string): string =>
 const sortValue = (company: CompanyData, key: string): number | string => {
   const field = SORT_FIELDS[key]
   const raw = field ? String(company[field] ?? '') : ''
+  if (key === 'sbti') return sbtiRank(raw)
   if (STRING_KEYS.has(key)) return raw
   return Number.parseFloat(raw.replace(/[,%]/g, ''))
 }
@@ -150,7 +142,7 @@ const sortedRows = computed(() => {
       else cmp = (av - bv) * dir
     }
     else {
-      cmp = String(av).localeCompare(String(bv), 'zh-Hant') * dir
+      cmp = zhCollator.compare(String(av), String(bv)) * dir
     }
     // 燃煤優先排序：用量相同時以絕對排放量遞減為次要排序
     if (cmp === 0 && sortKey.value === 'coal') {
@@ -166,7 +158,8 @@ const tableRows = computed(() =>
     公司: company['公司'],
     產業分類: company['產業分類'],
     燃煤: formatCoal(company['燃煤使用量（公噸）']),
-    排放量: formatEmissions(company['溫室氣體排放量（公噸二氧化碳當量）']),
+    排放量: formatTonnes(company['溫室氣體排放量（公噸二氧化碳當量）']),
+    排放年度: fallbackEmissionYear(company),
     淨零目標年: formatPlain(company['淨零目標年']),
     減量目標: formatTarget(company['2030 年減量目標設定']),
     SBTi: formatSbti(company['SBTi 承諾']),
@@ -220,7 +213,7 @@ const legendItems = [
               :class="{ active: sortKey === 'coal' }"
               @click="setSort('coal')"
             >
-              燃煤<br>使用量<span class="arrow">{{ arrow('coal') || '↓' }}</span>
+              燃煤<br>使用量（公噸）<span class="arrow">{{ arrow('coal') || '↓' }}</span>
             </th>
             <th
               rowspan="2"
@@ -228,7 +221,7 @@ const legendItems = [
               :class="{ active: sortKey === 'emission' }"
               @click="setSort('emission')"
             >
-              溫室氣體排放量<span class="arrow">{{ arrow('emission') || (coalFirst ? '' : '↓') }}</span>
+              2024 年溫室氣體<br>排放量（公噸 CO₂e）<span class="arrow">{{ arrow('emission') || (coalFirst ? '' : '↓') }}</span>
             </th>
             <th
               rowspan="2"
@@ -259,7 +252,7 @@ const legendItems = [
               能源效率<br>進步目標<span class="arrow">{{ arrow('d2') }}</span>
             </th>
             <th class="c sortable" :class="{ active: sortKey === 'd3' }" @click="setSort('d3')">
-              去年再生<br>能源使用率<span class="arrow">{{ arrow('d3') }}</span>
+              2024 年<br>再生能源使用率<span class="arrow">{{ arrow('d3') }}</span>
             </th>
             <th class="c sortable" :class="{ active: sortKey === 'd4' }" @click="setSort('d4')">
               近三年<br>能效進步率<span class="arrow">{{ arrow('d4') }}</span>
@@ -283,7 +276,9 @@ const legendItems = [
             <td v-if="coalFirst" class="r">
               <span :class="row.燃煤 === '—' ? 'td-muted' : 'td-num td-coal'">{{ row.燃煤 }}</span>
             </td>
-            <td class="r td-num">{{ row.排放量 }}</td>
+            <td class="r td-num">
+              {{ row.排放量 }}<span v-if="row.排放年度" class="td-year-note">（{{ row.排放年度 }} 年）</span>
+            </td>
             <td class="c td-muted">{{ row.淨零目標年 }}</td>
             <td class="c td-muted">{{ row.減量目標 }}</td>
             <td class="c td-muted td-sbti">{{ row.SBTi }}</td>
@@ -388,7 +383,6 @@ const legendItems = [
   color: var(--color-text-muted);
   font-size: 12px;
   font-weight: 500;
-  text-transform: uppercase;
   letter-spacing: 0.07em;
   padding: 11px 12px;
   text-align: left;
@@ -537,6 +531,12 @@ const legendItems = [
 
 .td-sbti {
   font-size: 12px;
+}
+
+.td-year-note {
+  margin-left: 4px;
+  font-size: 11px;
+  color: var(--color-text-muted);
 }
 
 .badge {

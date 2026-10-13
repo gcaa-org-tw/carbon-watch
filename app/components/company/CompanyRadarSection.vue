@@ -29,7 +29,7 @@ const radarAxesWithPrefix = [
   '2030年再生能源使用率目標',
   '2030年能源效率進步目標',
   '2024年再生能源使用率',
-  '2022-2024年能源效率進步率',
+  '近三年能效進步率',
   '範疇三及減量策略'
 ]
 
@@ -49,6 +49,10 @@ const radarFieldMap: (keyof CompanyData)[] = [
   '2022-2024年能源效率進步率',
   '範疇三及減量策略'
 ]
+
+const isScored = computed(() =>
+  radarFieldMap.slice(0, 5).some(field => String(props.company[field] ?? '').trim() !== '')
+)
 
 // Company radar data
 const companyRadarData = computed(() => {
@@ -105,38 +109,53 @@ const scoreLegend = [
     <div :class="isPhone ? 'flex flex-col gap-8' : 'flex items-stretch gap-7'">
       <!-- Radar Chart Section -->
       <div :class="isPhone ? '' : 'w-3/5 min-w-0'">
-        <!-- Top Legend -->
-        <div class="flex items-center justify-center gap-8 md:mb-8 mb-4">
-          <div class="flex items-center gap-2">
-            <span class="w-4 h-4 rounded-full bg-red-400" />
-            <span class="md:text-sm text-xs text-earth-brown">{{ companyName }}</span>
-          </div>
-          <div v-if="showIndustryAverage" class="flex items-center gap-2">
-            <span class="w-4 h-4 rounded-full bg-earth-brown" />
-            <span class="md:text-sm text-xs text-earth-brown">{{ industryName }}</span>
-          </div>
+        <div
+          v-if="!isScored"
+          class="flex h-full min-h-48 flex-col items-center justify-center gap-2 rounded-lg border border-earth-brown/15 bg-surface-warm/40 p-6 text-center"
+        >
+          <UIcon name="i-heroicons-chart-bar" class="w-6 h-6 text-earth-brown/60" />
+          <p class="text-base font-semibold text-earth-brown">
+            未評分
+          </p>
+          <p class="text-sm text-earth-brown/70">
+            缺少評分所需的資料
+          </p>
         </div>
 
-        <!-- Radar Chart -->
-        <CompanyRadarChart
-          :company-data="companyRadarData"
-          :industry-data="industryRadarData"
-          :score-legend="scoreLegend"
-        />
-
-        <!-- Bottom Score Legend -->
-        <div class="flex flex-wrap items-center justify-center gap-6 md:mt-6 mt-3">
-          <div
-            v-for="item in scoreLegend"
-            :key="item.score"
-            class="flex items-center gap-2"
-          >
-            <span class="w-6 h-0.5" :style="{ backgroundColor: `var(${item.color})` }" />
-            <span class="md:text-sm text-xs text-earth-brown">
-              {{ item.score }}：{{ item.label }}
-            </span>
+        <template v-else>
+          <!-- Top Legend -->
+          <div class="flex items-center justify-center gap-8 md:mb-8 mb-4">
+            <div class="flex items-center gap-2">
+              <span class="w-4 h-4 rounded-full bg-red-400" />
+              <span class="md:text-sm text-xs text-earth-brown">{{ companyName }}</span>
+            </div>
+            <div v-if="showIndustryAverage" class="flex items-center gap-2">
+              <span class="w-4 h-4 rounded-full bg-earth-brown" />
+              <span class="md:text-sm text-xs text-earth-brown">{{ industryName }}</span>
+            </div>
           </div>
-        </div>
+
+          <!-- Radar Chart -->
+          <CompanyRadarChart
+            :company-data="companyRadarData"
+            :industry-data="industryRadarData"
+            :score-legend="scoreLegend"
+          />
+
+          <!-- Bottom Score Legend -->
+          <div class="flex flex-wrap items-center justify-center gap-6 md:mt-6 mt-3">
+            <div
+              v-for="item in scoreLegend"
+              :key="item.score"
+              class="flex items-center gap-2"
+            >
+              <span class="w-6 h-0.5" :style="{ backgroundColor: `var(${item.color})` }" />
+              <span class="md:text-sm text-xs text-earth-brown">
+                {{ item.score }}：{{ item.label }}
+              </span>
+            </div>
+          </div>
+        </template>
       </div>
 
       <!-- Metrics Table Section -->

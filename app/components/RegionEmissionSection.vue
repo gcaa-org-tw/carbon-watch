@@ -186,7 +186,7 @@ const heatItems = [
   { label: '2–5%',            color: 'var(--color-heat-3)' },
   { label: '0.5–2%',          color: 'var(--color-heat-2)' },
   { label: '< 0.5%',          color: 'var(--color-heat-1)' },
-  { label: '境內無製造業排碳大戶', color: 'var(--color-heat-0)' },
+  { label: '無製造業排碳大戶', color: 'var(--color-heat-0)' },
 ]
 </script>
 

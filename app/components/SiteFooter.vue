@@ -6,7 +6,7 @@ const DONATE_URL = 'https://gcaa.neticrm.tw/civicrm/contribute/transact?reset=1&
   <footer class="site-footer">
     <div class="footer-left">
       由
-      <a href="http://www.gcaa.org.tw/" target="_blank" rel="noopener noreferrer">綠色公民行動聯盟</a>
+      <a href="https://gcaa.org.tw/" target="_blank" rel="noopener noreferrer">綠色公民行動聯盟</a>
       ×
       <a href="https://thaubing.gcaa.org.tw/" target="_blank" rel="noopener noreferrer">透明足跡計畫</a>
       推動<br>
@@ -26,7 +26,7 @@ const DONATE_URL = 'https://gcaa.neticrm.tw/civicrm/contribute/transact?reset=1&
       </a>
       <a
         class="footer-link"
-        href="https://creativecommons.org/licenses/by-nc/4.0/deed.zh_TW"
+        href="https://creativecommons.org/licenses/by-nc/4.0/deed.zh-hant"
         target="_blank"
         rel="noopener noreferrer"
       >

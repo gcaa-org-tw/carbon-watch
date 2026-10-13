@@ -8,7 +8,7 @@ definePageMeta({
 
 // SEO metadata
 useHead({
-  title: '排碳大戶觀測企業清單 - 專業版',
+  title: '依企業查詢（專業版）',
   meta: [
     { name: 'description', content: '檢視台灣排碳大戶企業的詳細氣候數據與減碳策略' }
   ]

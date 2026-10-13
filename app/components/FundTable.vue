@@ -32,13 +32,7 @@ const filteredRows = computed(() => {
 })
 
 /* ── 格式化 ───────────────────────────────────────────── */
-// 94,926,108 → 9,493萬噸 ；0 → —
-const formatEmissions = (n: number): string => {
-  if (!n || Number.isNaN(n)) return '—'
-  if (n >= 1_000_000) return `${Math.round(n / 10000).toLocaleString('zh-TW')}萬噸`
-  if (n >= 10_000) return `${(n / 10000).toFixed(1)}萬噸`
-  return `${n.toLocaleString('zh-TW')}噸`
-}
+const formatEmissions = (n: number): string => (n ? formatTonnes(n) : '—')
 
 const formatMarketValue = (n: number): string => n.toLocaleString('zh-TW')
 
@@ -74,7 +68,7 @@ const setSort = (key: SortKey) => {
     sortDir.value = sortDir.value === 'desc' ? 'asc' : 'desc'
   } else {
     sortKey.value = key
-    sortDir.value = 'desc'
+    sortDir.value = STRING_KEYS.has(key) ? 'asc' : 'desc'
   }
 }
 
@@ -88,7 +82,7 @@ const sortedRows = computed(() => {
 
   return [...filteredRows.value].sort((a, b) => {
     if (STRING_KEYS.has(key)) {
-      return String(a[field]).localeCompare(String(b[field]), 'zh-Hant') * dir
+      return zhCollator.compare(String(a[field]), String(b[field])) * dir
     }
     return ((a[field] as number) - (b[field] as number)) * dir
   })
@@ -166,7 +160,7 @@ const fundHref = (key: string): string =>
               :class="{ active: sortKey === 'emis' }"
               @click="setSort('emis')"
             >
-              排碳大戶總碳排量<span class="arrow">{{ arrow('emis') }}</span>
+              排碳大戶總碳排量（公噸 CO₂e）<span class="arrow">{{ arrow('emis') }}</span>
             </th>
           </tr>
         </thead>
@@ -203,7 +197,7 @@ const fundHref = (key: string): string =>
     <p v-if="sortedRows.length === 0" class="empty-note">找不到符合條件的基金</p>
 
     <p class="esg-legend">
-      <EsgLeaf /><span>：屬於境內發行之 ESG 基金</span>
+      <EsgLeaf /><span>：屬於國內發行之 ESG 基金</span>
     </p>
   </div>
 </template>
@@ -300,7 +294,6 @@ const fundHref = (key: string): string =>
   color: var(--color-text-muted);
   font-size: 12px;
   font-weight: 500;
-  text-transform: uppercase;
   letter-spacing: 0.07em;
   padding: 11px 12px;
   text-align: left;

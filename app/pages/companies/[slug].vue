@@ -20,7 +20,7 @@ if (!company) {
 
 // SEO
 useSeoMeta({
-  title: `${company.公司} - 碳排放資訊 | 碳排大戶觀測站`,
+  title: company.公司,
   description: `查看 ${company.公司} 的溫室氣體排放量、淨零目標與減量策略`
 })
 </script>

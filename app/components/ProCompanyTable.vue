@@ -22,26 +22,28 @@ interface Col {
 }
 
 const COAL_KEY = '燃煤使用量（公噸）' as const
+const CAPACITY_KEY = '再生能源設置容量' as const
+const INTENSITY_KEY = '近三年能效進步率' as const
 const EMISSION_KEY = '溫室氣體排放量（公噸二氧化碳當量）' as const
 
 const BASE_COLUMNS: Col[] = [
   { key: '公司', label: '企業名稱', kind: 'company', sortable: true },
   { key: '產業分類', label: '產業分類', kind: 'badge', sortable: true },
-  { key: '溫室氣體排放量（公噸二氧化碳當量）', label: '溫室氣體排放量', align: 'r', kind: 'num', sortable: true },
+  { key: '溫室氣體排放量（公噸二氧化碳當量）', label: '2024 年溫室氣體排放量（公噸 CO₂e）', align: 'r', kind: 'num', sortable: true },
   { key: '淨零目標年', label: '淨零目標年', align: 'c', kind: 'text', sortable: true },
   { key: '2030 年減量目標設定', label: '2030 年減量目標設定', align: 'c', kind: 'text', sortable: true },
   { key: 'SBTi 承諾', label: 'SBTi 承諾', align: 'c', kind: 'status', sortable: true },
   { key: '有具體減量策略', label: '有關鍵減量策略', align: 'c', kind: 'status', sortable: true },
   { key: '範疇三揭露', label: '範疇三揭露', align: 'c', kind: 'status', sortable: true },
   { key: '範疇三減量規劃', label: '範疇三減量規劃', align: 'c', kind: 'status', sortable: true },
-  { key: '近三年能效進步率', label: '近三年能效進步率', align: 'c', kind: 'num', sortable: true },
+  { key: '近三年能效進步率', label: '近三年能源密集度變化率', align: 'c', kind: 'num', sortable: true },
   { key: '節能目標設定', label: '節能目標設定', align: 'c', kind: 'num', sortable: true },
-  { key: '再生能源使用率', label: '再生能源使用率', align: 'c', kind: 'num', sortable: true },
-  { key: '再生能源設置容量', label: '再生能源設置容量', align: 'r', kind: 'num', sortable: true },
+  { key: '再生能源使用率', label: '2024 年再生能源使用率', align: 'c', kind: 'num', sortable: true },
+  { key: '再生能源設置容量', label: '再生能源設置容量（kW）', align: 'r', kind: 'num', sortable: true },
   { key: '是否完成用電大戶再生能源設置義務', label: '用電大戶再生能源設置義務', align: 'c', kind: 'status', sortable: true },
   { key: '中期再生能源目標設定', label: '中期再生能源目標設定', align: 'c', kind: 'num', sortable: true },
   { key: 'RE100 承諾', label: 'RE100 承諾', align: 'c', kind: 'status', sortable: true },
-  { key: '燃煤使用量（公噸）', label: '燃煤使用量', align: 'r', kind: 'num', sortable: true },
+  { key: '燃煤使用量（公噸）', label: '燃煤使用量（公噸）', align: 'r', kind: 'num', sortable: true },
 ]
 
 // coalFirst：把燃煤欄移到企業名稱／產業分類之後、排放量之前（基金頁倡議框架）
@@ -69,13 +71,9 @@ const isBlank = (raw: unknown) => {
   return s === '' || s === 'NA'
 }
 
-// 溫室氣體排放量：與易讀版 ClimateScoreTable 一致的萬噸／噸縮寫
-const formatEmissions = (raw: unknown): string => {
-  const n = Number(String(raw ?? '').replace(/,/g, ''))
-  if (isBlank(raw) || Number.isNaN(n)) return '—'
-  if (n >= 1_000_000) return `${Math.round(n / 10000).toLocaleString('zh-TW')}萬噸`
-  if (n >= 10_000) return `${(n / 10000).toFixed(1)}萬噸`
-  return `${n.toLocaleString('zh-TW')}噸`
+const formatPercent = (s: string): string => {
+  const n = Number.parseFloat(s.slice(0, -1))
+  return Number.isNaN(n) ? s : `${n.toFixed(1)}%`
 }
 
 const EMOJI_CHECK = String.fromCodePoint(0x2705)
@@ -83,7 +81,7 @@ const EMOJI_CROSS = String.fromCodePoint(0x274C)
 const TEXT_CHECK = String.fromCodePoint(0x2713)
 const TEXT_CROSS = String.fromCodePoint(0x2717)
 
-type Cell = { kind: 'company' | 'badge' | 'num' | 'text', text: string }
+type Cell = { kind: 'company' | 'badge' | 'num' | 'text', text: string, tone?: 'good' | 'bad', note?: string }
   | { kind: 'status', tone: 'yes' | 'no' | 'text', text: string }
 
 const statusCell = (raw: unknown): Extract<Cell, { kind: 'status' }> => {
@@ -106,27 +104,27 @@ const buildCell = (company: CompanyData, col: Col): Cell => {
       return statusCell(raw)
     case 'num': {
       if (isBlank(raw)) return { kind: 'num', text: '—' }
-      if (col.key === EMISSION_KEY) return { kind: 'num', text: formatEmissions(raw) }
+      if (col.key === EMISSION_KEY) {
+        const year = fallbackEmissionYear(company)
+        return { kind: 'num', text: formatTonnes(String(raw)), note: year ? `（${year} 年）` : undefined }
+      }
+      if (col.key === COAL_KEY || col.key === CAPACITY_KEY) return { kind: 'num', text: formatTonnes(String(raw)) }
       const s = String(raw).trim()
       if (/^-?[\d,]+(\.\d+)?$/.test(s)) {
         const n = parseNum(s)
         return { kind: 'num', text: Number.isNaN(n) ? s : n.toLocaleString('zh-TW') }
       }
-      // 百分比去除多餘的尾數零：18.0% → 18%
       if (s.endsWith('%')) {
-        const n = Number.parseFloat(s.slice(0, -1))
-        return { kind: 'num', text: Number.isNaN(n) ? s : `${n}%` }
+        const n = parseNum(s)
+        const tone = col.key === INTENSITY_KEY && !Number.isNaN(n) && n !== 0 ? (n < 0 ? 'good' : 'bad') : undefined
+        return { kind: 'num', text: formatPercent(s), tone }
       }
       return { kind: 'num', text: s }
     }
     default: {
       if (isBlank(raw)) return { kind: 'text', text: '—' }
       const s = String(raw).trim()
-      // 百分比去除多餘的尾數零：28.0% → 28%
-      if (s.endsWith('%')) {
-        const n = Number.parseFloat(s.slice(0, -1))
-        return { kind: 'text', text: Number.isNaN(n) ? s : `${n}%` }
-      }
+      if (s.endsWith('%')) return { kind: 'text', text: formatPercent(s) }
       return { kind: 'text', text: s }
     }
   }
@@ -143,13 +141,15 @@ const emissionValue = (c: CompanyData): number => {
   return Number.isNaN(n) ? 0 : n
 }
 
+const isTextCol = (col: Col): boolean => col.kind === 'company' || col.kind === 'badge'
+
 const setSort = (col: Col) => {
   if (!col.sortable) return
   if (sortKey.value === col.key) {
     sortDir.value = sortDir.value === 'desc' ? 'asc' : 'desc'
   } else {
     sortKey.value = col.key
-    sortDir.value = 'desc'
+    sortDir.value = isTextCol(col) ? 'asc' : 'desc'
   }
 }
 
@@ -162,7 +162,8 @@ const STATUS_RANK: Record<string, number> = { [EMOJI_CHECK]: 2, [EMOJI_CROSS]: 0
 
 const sortValue = (company: CompanyData, col: Col): number | string => {
   const raw = company[col.key]
-  if (col.kind === 'company' || col.kind === 'badge') return String(raw ?? '')
+  if (isTextCol(col)) return String(raw ?? '')
+  if (col.key === 'SBTi 承諾') return sbtiRank(raw)
   if (col.kind === 'status') {
     const s = String(raw ?? '').trim()
     if (s in STATUS_RANK) return STATUS_RANK[s] ?? 0
@@ -188,7 +189,7 @@ const sortedRows = computed(() => {
       else cmp = (av - bv) * dir
     }
     else {
-      cmp = String(av).localeCompare(String(bv), 'zh-Hant') * dir
+      cmp = zhCollator.compare(String(av), String(bv)) * dir
     }
     // 燃煤優先排序：用量相同時以絕對排放量遞減為次要排序
     if (cmp === 0 && sortKey.value === COAL_KEY) {
@@ -246,7 +247,11 @@ const tableRows = computed(() =>
 
               <span v-else-if="cell.kind === 'badge'" class="badge">{{ cell.text }}</span>
 
-              <span v-else-if="cell.kind === 'num'" class="td-num">{{ cell.text }}</span>
+              <span
+                v-else-if="cell.kind === 'num'"
+                class="td-num"
+                :class="cell.tone ? `td-tone-${cell.tone}` : ''"
+              >{{ cell.text }}<span v-if="cell.note" class="td-year-note">{{ cell.note }}</span></span>
 
               <span
                 v-else
@@ -310,7 +315,6 @@ const tableRows = computed(() =>
   color: var(--color-text-muted);
   font-size: 11px;
   font-weight: 500;
-  text-transform: uppercase;
   letter-spacing: 0.07em;
   padding: 9px 10px;
   text-align: left;
@@ -419,7 +423,21 @@ const tableRows = computed(() =>
   color: var(--color-text-primary);
 }
 
+.td-tone-good {
+  color: var(--color-green-deep);
+}
+
+.td-tone-bad {
+  color: var(--color-accent-red);
+}
+
 .td-muted {
+  color: var(--color-text-muted);
+}
+
+.td-year-note {
+  margin-left: 4px;
+  font-size: 11px;
   color: var(--color-text-muted);
 }
 

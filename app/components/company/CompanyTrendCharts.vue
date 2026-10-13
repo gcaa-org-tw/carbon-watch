@@ -13,7 +13,7 @@ interface ChartSpec {
   color: string
   data: DataPoint[]
   formatValue: (v: number) => string
-  formatAxis: (v: number) => string
+  formatAxis: (v: number, step: number) => string
 }
 
 interface Props {
@@ -35,8 +35,18 @@ const tooltipState = ref<{
 
 const integerFormat = d3.format(',.0f')
 const intensityFormat = (v: number) => v >= 100 ? d3.format(',.1f')(v) : d3.format(',.2f')(v)
-const axisInteger = (v: number) => d3.format('~s')(v).replace('G', 'B')
+const axisInteger = (v: number, step: number) => {
+  const abs = Math.abs(v)
+  const unit = abs >= 1e8 ? 1e8 : abs >= 1e4 ? 1e4 : 1
+  const suffix = unit === 1e8 ? '億' : unit === 1e4 ? '萬' : ''
+  const digits = unit === 1 ? 0 : Math.max(0, Math.ceil(Math.log10(unit / step) - 1e-9))
+  return `${(v / unit).toLocaleString('zh-TW', { minimumFractionDigits: digits, maximumFractionDigits: digits })}${suffix}`
+}
 const axisIntensity = (v: number) => v >= 100 ? d3.format(',.0f')(v) : d3.format(',.2f')(v)
+
+const isReported = (d: DataPoint) => d.value > 0
+const reportedPoints = (spec: ChartSpec) => spec.data.filter(isReported)
+const missingYears = (spec: ChartSpec) => spec.data.filter(d => !isReported(d)).map(d => d.year)
 
 const charts = computed<ChartSpec[]>(() => {
   const list: ChartSpec[] = []
@@ -100,10 +110,13 @@ function drawChart(spec: ChartSpec) {
 
   d3.select(host).selectAll('*').remove()
 
+  const reported = reportedPoints(spec)
+  if (reported.length === 0) return
+
   const containerWidth = host.clientWidth || 400
   const width = containerWidth
   const height = 230
-  const margin = { top: 16, right: 22, bottom: 36, left: 64 }
+  const margin = { top: 16, right: 22, bottom: 36, left: 76 }
   const innerWidth = width - margin.left - margin.right
   const innerHeight = height - margin.top - margin.bottom
 
@@ -140,7 +153,7 @@ function drawChart(spec: ChartSpec) {
     .range([0, innerWidth])
 
   // Tight y domain so small trend changes are visible
-  const values = spec.data.map(d => d.value)
+  const values = reported.map(d => d.value)
   const minVal = Math.min(...values)
   const maxVal = Math.max(...values)
   let yLo: number
@@ -191,6 +204,7 @@ function drawChart(spec: ChartSpec) {
     .x(d => xScale(d.year))
     .y0(innerHeight)
     .y1(d => yScale(d.value))
+    .defined(isReported)
     .curve(d3.curveMonotoneX)
 
   g.append('path')
@@ -202,6 +216,7 @@ function drawChart(spec: ChartSpec) {
   const line = d3.line<DataPoint>()
     .x(d => xScale(d.year))
     .y(d => yScale(d.value))
+    .defined(isReported)
     .curve(d3.curveMonotoneX)
 
   g.append('path')
@@ -213,7 +228,7 @@ function drawChart(spec: ChartSpec) {
 
   // Points (with hit area)
   const point = g.selectAll('.trend-point')
-    .data(spec.data)
+    .data(reported)
     .enter()
     .append('g')
     .attr('class', 'trend-point')
@@ -261,9 +276,11 @@ function drawChart(spec: ChartSpec) {
     .attr('font-size', '12px')
 
   // Y axis
+  const yTicks = yScale.ticks(5)
+  const yStep = yTicks.length > 1 ? yTicks[1]! - yTicks[0]! : 1
   const yAxis = d3.axisLeft(yScale)
     .ticks(5)
-    .tickFormat(d => spec.formatAxis(d as number))
+    .tickFormat(d => spec.formatAxis(d as number, yStep))
     .tickSize(0)
     .tickPadding(8)
 
@@ -320,9 +337,15 @@ watch(charts, () => {
           :ref="(el) => setChartRef(spec.key, el)"
           class="w-full"
         />
+        <p
+          v-if="missingYears(spec).length > 0"
+          class="mt-1 text-xs text-earth-brown/60"
+        >
+          {{ missingYears(spec).join('、') }} 年未申報
+        </p>
         <div class="mt-1 text-xs text-earth-brown/70 flex flex-wrap gap-x-3 gap-y-1">
           <span
-            v-for="point in spec.data"
+            v-for="point in reportedPoints(spec)"
             :key="point.year"
           >
             {{ point.year }}：{{ spec.formatValue(point.value) }}

@@ -7,13 +7,7 @@ definePageMeta({
 })
 
 useSeoMeta({
-  title: '排碳大戶觀測站 - 台灣排碳大戶氣候績效分析',
   description: '追蹤台灣排碳大戶，分析溫室氣體排放與氣候表現、檢視基金永續作為，透過氣候績效方法論協助快速辨識企業氣候責任。',
-})
-
-useHead({
-  htmlAttrs: { lang: 'zh-TW' },
-  link: [{ rel: 'canonical', href: 'https://thaubing-esg.gcaa.org.tw/' }]
 })
 
 const top10Companies = top10CompaniesData as CompanyData[]
@@ -33,7 +27,7 @@ const top10Companies = top10CompaniesData as CompanyData[]
     <!-- Section 3: 前十大溫室氣體排放企業 -->
     <section class="page-section">
       <div class="section-head">
-        <h2>前十大溫室氣體排放企業</h2>
+        <h2>前十大排碳大戶</h2>
       </div>
       <CompanyTable :rows="top10Companies" show-rank />
     </section>

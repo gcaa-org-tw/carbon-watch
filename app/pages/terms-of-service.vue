@@ -9,20 +9,8 @@ if (!page.value) {
 
 // SEO metadata
 useSeoMeta({
-  title: '免責聲明與資料來源 | 排碳大戶觀測站',
+  title: '免責聲明與資料來源',
   description: '了解排碳大戶觀測站的使用條款、免責聲明與資料來源說明。',
-})
-
-useHead({
-  htmlAttrs: {
-    lang: 'zh-TW'
-  },
-  link: [
-    {
-      rel: 'canonical',
-      href: 'https://thaubing-esg.gcaa.org.tw/terms-of-service'
-    }
-  ]
 })
 </script>
 

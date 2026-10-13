@@ -3,6 +3,7 @@ interface Props {
   公司: string
   淨零目標年?: string
   年排放量: number
+  排放年度?: number
   全台佔比?: number
   年度變化?: number
   預期碳費: number
@@ -60,7 +61,7 @@ const isDecrease = computed(() => props.年度變化 !== undefined && props.年�
       <div class="flex-1">
         <div class="flex items-center justify-between gap-4 flex-wrap">
           <p class="text-l font-bold text-earth-brown">
-            年碳排 <span class="font-semibold">{{ formattedEmission }}</span> 噸
+            {{ 排放年度 ? `${排放年度} 年碳排` : '年碳排' }} <span class="font-semibold">{{ formattedEmission }}</span> 公噸
           </p>
           <div class="flex items-center gap-3 text-sm">
             <span v-if="formattedTaiwanShare !== null" class="flex items-center gap-1.5 text-earth-brown">

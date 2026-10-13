@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://thaubing-esg.gcaa.org.tw/sitemap.xml

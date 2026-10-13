@@ -237,6 +237,9 @@ onUnmounted(() => {
         </svg>
       </button>
     </div>
+    <p class="map-hint">
+      按住 Ctrl 或 ⌘ 並滾動滑鼠滾輪可縮放地圖
+    </p>
   </div>
 </template>
 
@@ -262,5 +265,21 @@ svg :deep(.factory-dot) {
 .zoom-btn:hover {
   color: var(--color-green-mint, #5AE694);
   border-color: rgba(90, 230, 148, 0.5);
+}
+
+.map-hint {
+  position: absolute;
+  left: 0.5rem;
+  bottom: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--color-earth-brown, #C4BE9A);
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+@media (hover: none) {
+  .map-hint {
+    display: none;
+  }
 }
 </style>
