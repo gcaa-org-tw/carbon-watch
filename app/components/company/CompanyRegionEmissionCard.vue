@@ -17,7 +17,7 @@ const formattedEmission = computed(() => {
     <div class="flex items-baseline justify-between gap-2 mb-1">
       <span class="text-sm text-earth-brown">{{ 縣市 }}</span>
       <span class="text-xs text-earth-brown whitespace-nowrap">
-        佔縣市碳排 {{ 縣市佔比 }}%
+        佔縣市碳排 {{ 縣市佔比.toFixed(1) }}%
       </span>
     </div>
     <div class="h-4 bg-surface-warm rounded mb-1">

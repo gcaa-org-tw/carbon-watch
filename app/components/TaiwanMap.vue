@@ -38,7 +38,7 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const emit = defineEmits<{
-  regionClick: [regionName: string]
+  regionClick: [regionName: string, clientX: number, clientY: number]
   regionHover: [regionName: string, clientX: number, clientY: number]
   regionLeave: [regionName: string]
   mapLoaded: []
@@ -111,7 +111,7 @@ const initMap = async () => {
       const isValid = props.validRegions.length === 0 || props.validRegions.includes(regionName)
       return isValid ? 'pointer' : 'default'
     })
-    .on('click', function(_event: any, d: any) {
+    .on('click', function(event: MouseEvent, d: any) {
       // On touch devices the tap is handled in `touchend` below (the follow-up
       // synthetic click is suppressed by the svg touch handlers); skip the
       // ghost click that may still slip through.
@@ -119,7 +119,7 @@ const initMap = async () => {
       const regionName = d.properties?.name
       const isValid = props.validRegions.length === 0 || props.validRegions.includes(regionName)
       if (regionName && isValid) {
-        emit('regionClick', regionName)
+        emit('regionClick', regionName, event.clientX, event.clientY)
       }
     })
     .on('touchstart', function(event: any) {
@@ -137,7 +137,7 @@ const initMap = async () => {
       const isValid = props.validRegions.length === 0 || props.validRegions.includes(regionName)
       if (regionName && isValid) {
         suppressClickUntil = Date.now() + 700
-        emit('regionClick', regionName)
+        emit('regionClick', regionName, ct?.clientX ?? 0, ct?.clientY ?? 0)
       }
     })
     .on('mouseenter', function(this: SVGPathElement, event: MouseEvent, d: any) {

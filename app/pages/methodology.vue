@@ -9,20 +9,8 @@ if (!page.value) {
 
 // SEO metadata
 useSeoMeta({
-  title: '關於氣候績效指標 | 排碳大戶觀測站',
+  title: '氣候績效指標方法論',
   description: '綠盟參考台灣氣候法規及國際標準，制定涵蓋承諾、行動與透明度三大面向，共十項指標的氣候績效檢核表，檢驗企業氣候表現。',
-})
-
-useHead({
-  htmlAttrs: {
-    lang: 'zh-TW'
-  },
-  link: [
-    {
-      rel: 'canonical',
-      href: 'https://thaubing-esg.gcaa.org.tw/methodology'
-    }
-  ]
 })
 </script>
 

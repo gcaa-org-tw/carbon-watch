@@ -8,7 +8,7 @@ const { setMode } = useViewMode()
 const route = useRoute()
 
 // Determine if we're on a pro page by checking the route
-const isPro = computed(() => route.path.endsWith('/pro'))
+const isPro = computed(() => /\/pro\/?$/.test(route.path))
 
 // Compute target links preserving query params
 const regularModeLink = computed(() => ({

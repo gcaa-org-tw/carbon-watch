@@ -78,7 +78,7 @@ const allMetrics = computed(() => [
     tooltip: undefined
   },
   {
-    label: '能源密集度變化率',
+    label: '近三年能源密集度變化率',
     ...intensityChange(props.company['近三年能效進步率']),
     tooltip: undefined
   },

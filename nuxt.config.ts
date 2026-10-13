@@ -11,6 +11,7 @@ export default defineNuxtConfig({
   css: ['~/assets/css/main.css'],
   app: {
     head: {
+      htmlAttrs: { lang: 'zh-TW' },
       link: [
         {
           rel: 'preconnect',
@@ -31,6 +32,11 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   future: {
     compatibilityVersion: 4,
+  },
+  experimental: {
+    defaults: {
+      nuxtLink: { trailingSlash: 'append' },
+    },
   },
   typescript: {
     typeCheck: true,

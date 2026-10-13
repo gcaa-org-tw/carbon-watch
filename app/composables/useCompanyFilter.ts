@@ -1,6 +1,8 @@
 import type { CompanyData } from '~/types/company'
 import companyListData from '~/assets/data/company-list.json'
 
+export const ALL_REGIONS = '全部縣市'
+
 export const useCompanyFilter = () => {
   const route = useRoute()
   const router = useRouter()
@@ -21,14 +23,15 @@ export const useCompanyFilter = () => {
       if (newFilters.search) {
         query.search = newFilters.search
       }
-      if (newFilters.region && newFilters.region !== '全部地區') {
+      if (newFilters.region && newFilters.region !== ALL_REGIONS) {
         query.region = newFilters.region
       }
       if (newFilters.industry && newFilters.industry !== '全部產業') {
         query.industry = newFilters.industry
       }
 
-      router.push({ query })
+      const path = route.path.endsWith('/') ? route.path : `${route.path}/`
+      router.replace({ path, query })
     },
     { deep: true }
   )
@@ -50,7 +53,7 @@ export const useCompanyFilter = () => {
     // a company belongs to a county if it operates at least one factory there.
     // Using 代表縣市 (single HQ county) would diverge from the map's 企業數
     // because many UBNs have factories outside their registered HQ county.
-    if (filters.value.region && filters.value.region !== '全部地區') {
+    if (filters.value.region && filters.value.region !== ALL_REGIONS) {
       companies = companies.filter(company =>
         (company.factoryCounties ?? []).includes(filters.value.region)
       )

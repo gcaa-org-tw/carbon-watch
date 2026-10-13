@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import coalMapJson from '~/assets/data/coal-map.json'
 import type { CoalMapData, CoalMapFactory } from '~/types/coalMap'
 
@@ -7,12 +7,9 @@ const coalMap = coalMapJson as unknown as CoalMapData
 const meta = coalMap.meta
 const factories = coalMap.factories
 
-// Soft launch: reachable by URL only — no nav/homepage entry, and hidden
-// from search engines until the page officially ships.
 useHead({
-  title: '燃煤工廠地圖 - 排碳大戶觀測站',
+  title: '燃煤工廠地圖',
   meta: [
-    { name: 'robots', content: 'noindex, nofollow' },
     { name: 'description', content: '台灣排碳大戶燃煤工廠分布地圖：以生煤使用申報資料呈現各廠 2024 年燃煤使用量。' },
   ],
 })
@@ -74,6 +71,18 @@ const zeroCount = computed(() => factories.filter(f => f.用煤量2024 <= 0).len
 
 const selected = ref<CoalMapFactory | null>(null)
 
+watch(selectedIndustries, () => {
+  if (selected.value && !isHighlighted(selected.value.業別)) selected.value = null
+})
+
+const selectedIndustriesText = computed(() =>
+  meta.業別排序.filter(industry => selectedIndustries.value.has(industry)).join('、')
+)
+
+const tableTitle = computed(() =>
+  selectedIndustriesText.value ? `${selectedIndustriesText.value}燃煤工廠` : '全部燃煤工廠'
+)
+
 const handleSelect = (factory: CoalMapFactory) => {
   selected.value = selected.value?.管制編號 === factory.管制編號 ? null : factory
 }
@@ -125,28 +134,25 @@ const isStreetLevel = (f: CoalMapFactory) => f.座標來源.startsWith('OSM')
         燃煤工廠地圖
       </h1>
       <p class="text-earth-brown max-w-3xl leading-relaxed">
-        台灣的排碳大戶中，有 {{ meta.公司數 }} 家企業共 {{ meta.廠數 }} 座工廠仍在使用生煤，
-        {{ meta.資料年份 }} 年合計使用約 {{ formatMillionTonnes(meta.用煤量2024合計) }} 百萬公噸。
-        點大小代表該廠 {{ meta.資料年份 }} 年的燃煤使用量，顏色代表產業別。
+        台灣的排碳大戶中，有 {{ meta.公司數 }} 家企業共 {{ meta.廠數 }} 座工廠仍在使用生煤，{{ meta.資料年份 }} 年合計使用約 {{ formatMillionTonnes(meta.用煤量2024合計) }} 百萬公噸。點大小代表該廠 {{ meta.資料年份 }} 年的燃煤使用量，顏色代表產業別。
       </p>
       <p class="text-sm text-earth-brown/70 mt-3 max-w-3xl">
-        範疇說明：本地圖僅涵蓋排碳大戶（本站追蹤的製造業排碳大戶）的用煤工廠，不含電力業；
-        全台工業用煤另有約百家非排碳大戶的小型用煤工廠，合計約佔工業用煤總量 1%。
+        範疇說明：本地圖僅涵蓋排碳大戶（本站追蹤的製造業排碳大戶）的用煤工廠，不含電力業；全台工業用煤另有約百家非排碳大戶的小型用煤工廠，合計約佔工業用煤總量 1%。
       </p>
     </div>
 
     <!-- Stat strip -->
     <div class="grid grid-cols-3 gap-4 mb-8 max-w-2xl">
       <div>
-        <div class="text-3xl font-bold text-green-mint">{{ meta.公司數 }}</div>
+        <div class="text-2xl sm:text-3xl font-bold text-green-mint">{{ meta.公司數 }}</div>
         <div class="text-sm text-earth-brown/80 mt-1">燃煤企業</div>
       </div>
       <div>
-        <div class="text-3xl font-bold text-green-mint">{{ meta.廠數 }}</div>
+        <div class="text-2xl sm:text-3xl font-bold text-green-mint">{{ meta.廠數 }}</div>
         <div class="text-sm text-earth-brown/80 mt-1">燃煤工廠</div>
       </div>
       <div>
-        <div class="text-3xl font-bold text-green-mint">{{ formatMillionTonnes(meta.用煤量2024合計) }}<span class="text-lg font-normal ml-1">百萬公噸</span></div>
+        <div class="text-2xl sm:text-3xl font-bold text-green-mint whitespace-nowrap">{{ formatMillionTonnes(meta.用煤量2024合計) }}<span class="text-xs sm:text-lg font-normal ml-0.5 sm:ml-1">百萬公噸</span></div>
         <div class="text-sm text-earth-brown/80 mt-1">{{ meta.資料年份 }} 年燃煤使用量</div>
       </div>
     </div>
@@ -244,14 +250,14 @@ const isStreetLevel = (f: CoalMapFactory) => f.座標來源.startsWith('OSM')
             class="mt-4"
             trailing-icon="i-heroicons-arrow-right-20-solid"
           >
-            查看 {{ selected.公司簡稱 }} 的氣候績效
+            查看{{ selected.公司簡稱 }}的氣候績效
           </UButton>
         </div>
 
         <!-- Top 10 list -->
         <div class="bg-surface-warm rounded-lg p-5 flex-1 overflow-y-auto" :class="selected ? 'max-h-[260px]' : 'max-h-[620px]'">
           <h3 class="text-lg font-bold text-green-mint mb-3">
-            前十大燃煤工廠（{{ meta.資料年份 }}）
+            前十大{{ selectedIndustriesText }}燃煤工廠（{{ meta.資料年份 }}）
           </h3>
           <ol class="flex flex-col gap-1">
             <li v-for="(f, i) in top10" :key="f.管制編號">
@@ -315,7 +321,7 @@ const isStreetLevel = (f: CoalMapFactory) => f.座標來源.startsWith('OSM')
           class="mt-3"
           trailing-icon="i-heroicons-arrow-right-20-solid"
         >
-          查看 {{ selected.公司簡稱 }} 的氣候績效
+          查看{{ selected.公司簡稱 }}的氣候績效
         </UButton>
       </div>
 
@@ -344,7 +350,7 @@ const isStreetLevel = (f: CoalMapFactory) => f.座標來源.startsWith('OSM')
     <!-- Full table -->
     <div class="mb-12">
       <h2 class="text-2xl font-bold text-green-mint mb-4">
-        全部燃煤工廠（{{ filteredSorted.length }} 座）
+        {{ tableTitle }}（{{ filteredSorted.length }} 座）
       </h2>
       <div class="overflow-x-auto rounded-lg border border-earth-brown/20">
         <table class="w-full text-sm">
@@ -399,27 +405,21 @@ const isStreetLevel = (f: CoalMapFactory) => f.座標來源.startsWith('OSM')
     <div class="max-w-3xl text-sm text-earth-brown/70 leading-relaxed flex flex-col gap-2 mb-8">
       <h2 class="text-lg font-bold text-green-mint">資料說明</h2>
       <p>
-        燃煤使用量來自各縣市政府生煤使用許可申報資料（綠色公民行動聯盟彙整）。
-        地圖僅呈現 {{ meta.資料年份 }} 年有申報數值的工廠；表格中「—」表示該廠當年無申報數值，
-        可能為停用或未申報（共 {{ zeroCount }} 座），本站不逕行判定為已停用。
+        燃煤使用量來自各縣市政府生煤使用許可申報資料（綠色公民行動聯盟彙整）。地圖僅呈現 {{ meta.資料年份 }} 年有申報數值的工廠；表格中「—」表示該廠當年無申報數值，可能為停用或未申報（共 {{ zeroCount }} 座），本站不逕行判定為已停用。
       </p>
       <p>
-        廠區位置以環境部「環境保護許可管理系統對象基本資料」（依管制編號）之座標為準；
-        標示「＊」之工廠該資料集無座標，改以登記地址之街道級定位，非精確廠址。
+        廠區位置以環境部「環境保護許可管理系統對象基本資料」（依管制編號）之座標為準；標示「＊」之工廠該資料集無座標，改以登記地址之街道級定位，非精確廠址。
       </p>
       <p>
-        2025 年申報資料尚未完整（鋼鐵業等尚未納入），故以 {{ meta.資料年份 }} 年為基準年；
-        2020–2021 年申報涵蓋率較低，歷年趨勢僅供個別工廠參考。
+        2025 年申報資料尚未完整（鋼鐵業等尚未納入），故以 {{ meta.資料年份 }} 年為基準年；2020–2021 年申報涵蓋率較低，歷年趨勢僅供個別工廠參考。
       </p>
       <p>
-        關心所在縣市的氣候治理？前往
-        <a
+        關心所在縣市的氣候治理？前往<a
           href="https://localnetzero.gcaa.org.tw/"
           target="_blank"
           rel="noopener"
           class="text-green-mint hover:underline"
-        >地方淨零觀測站</a>
-        檢視地方政府的實際政策作為。
+        >地方淨零觀測站</a>檢視地方政府的實際政策作為。
       </p>
     </div>
 

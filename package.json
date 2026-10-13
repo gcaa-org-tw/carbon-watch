@@ -5,7 +5,7 @@
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev",
-    "generate": "nuxt generate",
+    "generate": "nuxt generate && tsx tools/generate-sitemap.ts",
     "preview": "nuxt preview",
     "lint": "eslint --ext .js,.ts,.vue .",
     "download-data": "tsx tools/download-raw-data.ts",

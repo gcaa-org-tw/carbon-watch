@@ -57,6 +57,7 @@ function drawRadarChart() {
   const chartArea = isPhone ? 200 : 280
   const labelMargin = isPhone ? 90 : 100
   const totalSize = chartArea + labelMargin * 2
+  const sidePad = isPhone ? 32 : 48
 
   const visualPadding = 20
   const radius = chartArea / 2 - visualPadding
@@ -68,7 +69,7 @@ function drawRadarChart() {
   const svg = d3.select(chartRef.value)
     .append('svg')
     .attr('width', '100%')
-    .attr('viewBox', `0 0 ${totalSize} ${totalSize}`)
+    .attr('viewBox', `${-sidePad} 0 ${totalSize + sidePad * 2} ${totalSize}`)
     .attr('preserveAspectRatio', 'xMidYMid meet')
 
   const center = totalSize / 2

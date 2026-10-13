@@ -68,6 +68,12 @@ const trendEntry = computed<TrendEntry>(() => {
   return (trendMap as Record<string, TrendEntry>)[fullName] || {}
 })
 
+const latestEmissionYear = computed(() => {
+  const reported = (trendEntry.value.ghg ?? []).filter(d => d.value > 0)
+  if (reported.length === 0) return undefined
+  return Math.max(...reported.map(d => d.year))
+})
+
 const parseParagraph = (value?: string): string => {
   if (!value) return ''
   return value.replace(/([。：])(?!$)/g, "$1\n")
@@ -136,6 +142,7 @@ const 淨零年預估排放量 = computed(() => {
       :公司="company.公司"
       :淨零目標年="company.淨零目標年"
       :年排放量="companyEmission"
+      :排放年度="latestEmissionYear"
       :全台佔比="taiwanPercentage"
       :年度變化="company.年度變化 ?? undefined"
       :預期碳費="expectedCarbonFee"

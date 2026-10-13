@@ -27,11 +27,19 @@ const barWidth = computed(() => {
   return (props.總排放量佔比 / props.maxBars * 100).toFixed(1) + '%'
 })
 
-const formattedWanTon = computed(() =>
-  props.總排放量
-    ? Math.round(props.總排放量 / 10000).toLocaleString('zh-TW') + '萬噸'
-    : ''
-)
+const formattedWanTon = computed(() => {
+  const n = props.總排放量
+  if (!n) return ''
+  if (n >= 1_000_000) return Math.round(n / 10000).toLocaleString('zh-TW') + '萬公噸'
+  if (n >= 10_000) return (n / 10000).toFixed(1) + '萬公噸'
+  return n.toLocaleString('zh-TW') + '公噸'
+})
+
+const formattedPct = computed(() => {
+  const p = props.總排放量佔比 ?? 0
+  if (p > 0 && p < 0.1) return '<0.1%'
+  return p.toFixed(1) + '%'
+})
 </script>
 
 <template>
@@ -44,13 +52,13 @@ const formattedWanTon = computed(() =>
       <div class="region-name">
         {{ 縣市 }}<span v-if="!disabled && 企業數">{{ 企業數 }} 家企業</span>
       </div>
-      <div v-if="disabled" class="region-none">境內無製造業排碳大戶</div>
+      <div v-if="disabled" class="region-none">無製造業排碳大戶</div>
       <div v-else class="region-bar-wrap">
         <div class="region-bar-fill" :style="{ width: barWidth, background: heatColor }" />
       </div>
     </div>
     <div v-if="!disabled" class="region-right">
-      <div class="region-pct">{{ 總排放量佔比 }}%</div>
+      <div class="region-pct">{{ formattedPct }}</div>
       <div class="region-ton">{{ formattedWanTon }}</div>
     </div>
   </div>

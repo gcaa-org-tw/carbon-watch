@@ -8,7 +8,7 @@ definePageMeta({
 
 // SEO metadata
 useHead({
-  title: '排碳大戶觀測企業清單 - 易讀版',
+  title: '依企業查詢',
   meta: [
     { name: 'description', content: '檢視台灣排碳大戶企業的溫室氣體排放量、減量目標與氣候行動' }
   ]

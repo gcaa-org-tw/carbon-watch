@@ -26,7 +26,7 @@ const { setMode } = useViewMode()
 const route = useRoute()
 
 // Highlight follows the URL — the viewMode cookie can desync from the route
-const isPro = computed(() => route.path.endsWith('/pro'))
+const isPro = computed(() => /\/pro\/?$/.test(route.path))
 
 const patch = (part: Partial<Filters>) => {
   emit('update:modelValue', { ...props.modelValue, ...part })
@@ -42,8 +42,8 @@ const industry = computed({
   set: value => patch({ industry: value }),
 })
 
-// Region options with "全部地區" as default
-const regionOptions = computed(() => ['全部地區', ...regionList])
+// Region options with ALL_REGIONS as default
+const regionOptions = computed(() => [ALL_REGIONS, ...regionList])
 
 // Industry options with "全部產業" as default
 const industryOptions = computed(() => [
@@ -122,12 +122,12 @@ const selectUi = {
       </div>
 
       <div class="filter-group">
-        <label class="filter-label" for="co-region">指定地區</label>
+        <label class="filter-label" for="co-region">指定縣市</label>
         <USelect
           id="co-region"
           v-model="region"
           :items="regionOptions"
-          placeholder="全部縣市"
+          :placeholder="ALL_REGIONS"
           trailing-icon="i-heroicons-chevron-down"
           :ui="selectUi"
         />

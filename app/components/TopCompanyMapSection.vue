@@ -32,7 +32,12 @@ let timer: ReturnType<typeof setInterval> | null = null
 let leaveTimer: ReturnType<typeof setTimeout> | null = null
 
 const hoveredCounty = ref<string | null>(null)
+const pinnedCounty = ref<string | null>(null)
 const mousePos = ref<{ x: number; y: number }>({ x: 0, y: 0 })
+const pinnedPos = ref<{ x: number; y: number }>({ x: 0, y: 0 })
+const autoplayStopped = ref(false)
+
+const activeCounty = computed(() => hoveredCounty.value ?? pinnedCounty.value)
 
 const highlightedCounties = computed(() => companies[selectedIndex.value]?.排放縣市 ?? [])
 const selectedShare = computed(() => companies[selectedIndex.value]?.全台佔比.toFixed(1) + '%')
@@ -60,8 +65,8 @@ const factoryMarkers = computed(() => {
 })
 
 const tooltipFactories = computed<FactoryEmission[] | null>(() => {
-  if (!hoveredCounty.value) return null
-  const list = selectedCompany.value?.縣市工廠?.[hoveredCounty.value]
+  if (!activeCounty.value) return null
+  const list = selectedCompany.value?.縣市工廠?.[activeCounty.value]
   return list && list.length > 0 ? list : null
 })
 
@@ -102,23 +107,29 @@ const tooltipDisplay = computed<TooltipDisplay | null>(() => {
   return { rows: top5, collapsed, factoryCount: factories.length, total }
 })
 
-const tooltipStyle = computed(() => {
-  let x = mousePos.value.x + TOOLTIP_OFFSET
-  let y = mousePos.value.y + TOOLTIP_OFFSET
+const clampToViewport = (pos: { x: number; y: number }) => {
+  let x = pos.x + TOOLTIP_OFFSET
+  let y = pos.y + TOOLTIP_OFFSET
   if (typeof window !== 'undefined') {
     if (x + TOOLTIP_MAX_WIDTH > window.innerWidth) {
-      x = Math.max(8, mousePos.value.x - TOOLTIP_MAX_WIDTH - TOOLTIP_OFFSET)
+      x = Math.max(8, pos.x - TOOLTIP_MAX_WIDTH - TOOLTIP_OFFSET)
     }
     if (y + TOOLTIP_MAX_HEIGHT > window.innerHeight) {
-      y = Math.max(8, mousePos.value.y - TOOLTIP_MAX_HEIGHT - TOOLTIP_OFFSET)
+      y = Math.max(8, pos.y - TOOLTIP_MAX_HEIGHT - TOOLTIP_OFFSET)
     }
   }
+  return { x, y }
+}
+
+const tooltipStyle = computed(() => {
+  const { x, y } = hoveredCounty.value ? clampToViewport(mousePos.value) : pinnedPos.value
   return { left: `${x}px`, top: `${y}px` }
 })
 
 const formatTonnes = (n: number) => n.toLocaleString('en-US')
 
 const startRotation = () => {
+  if (autoplayStopped.value) return
   if (timer) clearInterval(timer)
   timer = setInterval(() => {
     selectedIndex.value = (selectedIndex.value + 1) % companies.length
@@ -132,9 +143,36 @@ const pauseRotation = () => {
   }
 }
 
+const stopAutoplay = () => {
+  autoplayStopped.value = true
+  pauseRotation()
+}
+
+const toggleAutoplay = () => {
+  if (!autoplayStopped.value) {
+    stopAutoplay()
+    return
+  }
+  autoplayStopped.value = false
+  pinnedCounty.value = null
+  startRotation()
+}
+
 const handleCardClick = (index: number) => {
   selectedIndex.value = index
-  startRotation()
+  pinnedCounty.value = null
+  stopAutoplay()
+}
+
+const handleRegionClick = (county: string, clientX: number, clientY: number) => {
+  if (pinnedCounty.value === county) {
+    pinnedCounty.value = null
+    return
+  }
+  pinnedCounty.value = county
+  const { x, y } = clampToViewport({ x: clientX, y: clientY })
+  pinnedPos.value = { x: x + window.scrollX, y: y + window.scrollY }
+  stopAutoplay()
 }
 
 const handleRegionHover = (county: string, clientX: number, clientY: number) => {
@@ -167,9 +205,20 @@ onUnmounted(() => {
 <template>
   <section class="top-map-section">
     <div class="section-head">
-      <h2>前十大碳排企業縣市分布</h2>
+      <h2>前十大排碳大戶縣市分布</h2>
     </div>
-    <p class="hint-note">點選企業可查看該企業工廠分佈與排放狀況</p>
+    <div class="hint-row">
+      <p class="hint-note">點選企業查看其廠區的縣市分布，再點選縣市查看各廠排放</p>
+      <UButton
+        :icon="autoplayStopped ? 'i-heroicons-play-20-solid' : 'i-heroicons-pause-20-solid'"
+        :aria-label="autoplayStopped ? '繼續輪播' : '暫停輪播'"
+        color="neutral"
+        variant="ghost"
+        size="sm"
+        class="rotation-toggle"
+        @click="toggleAutoplay"
+      />
+    </div>
 
     <!-- Desktop layout -->
     <div class="map-layout hidden md:grid">
@@ -196,6 +245,7 @@ onUnmounted(() => {
           :allow-zoom="false"
           @region-hover="handleRegionHover"
           @region-leave="handleRegionLeave"
+          @region-click="handleRegionClick"
         />
       </div>
     </div>
@@ -213,6 +263,7 @@ onUnmounted(() => {
           :allow-zoom="false"
           @region-hover="handleRegionHover"
           @region-leave="handleRegionLeave"
+          @region-click="handleRegionClick"
         />
       </div>
       <div class="co-list mobile-co-list">
@@ -231,16 +282,17 @@ onUnmounted(() => {
 
     <Teleport to="body">
       <div
-        v-if="tooltipDisplay && selectedCompany && hoveredCounty"
-        class="fixed z-50 pointer-events-none bg-surface-warm text-earth-brown border border-earth-brown/30 rounded-lg shadow-xl"
+        v-if="tooltipDisplay && selectedCompany && activeCounty"
+        class="z-50 pointer-events-none bg-surface-warm text-earth-brown border border-earth-brown/30 rounded-lg shadow-xl"
+        :class="hoveredCounty ? 'fixed' : 'absolute'"
         :style="{ ...tooltipStyle, maxWidth: `${TOOLTIP_MAX_WIDTH}px` }"
       >
         <div class="px-3 py-2 bg-surface-mint border-b border-earth-brown/20 rounded-t-lg">
           <div class="font-semibold text-green-mint text-sm whitespace-nowrap">
-            {{ selectedCompany.公司 }} · {{ hoveredCounty }}
+            {{ selectedCompany.公司 }} · {{ activeCounty }}
           </div>
           <div class="text-xs text-earth-brown mt-0.5 whitespace-nowrap">
-            {{ tooltipDisplay.factoryCount }} 廠 · 合計 {{ formatTonnes(tooltipDisplay.total.總排放) }} 公噸 CO2e
+            {{ tooltipDisplay.factoryCount }} 廠 · 合計 {{ formatTonnes(tooltipDisplay.total.總排放) }} 公噸 CO₂e
           </div>
         </div>
         <table class="w-full text-xs">
@@ -295,10 +347,31 @@ onUnmounted(() => {
   letter-spacing: -0.015em;
 }
 
+.hint-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
 .hint-note {
   font-size: 13px;
   color: var(--color-text-secondary);
-  margin-bottom: 18px;
+}
+
+.hint-row :deep(.rotation-toggle) {
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-bg-border);
+  border-radius: 8px;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.hint-row :deep(.rotation-toggle:hover) {
+  color: var(--color-green-spring);
+  border-color: var(--color-green-forest);
+  background: transparent;
 }
 
 .map-layout {

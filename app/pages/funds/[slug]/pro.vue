@@ -55,7 +55,7 @@ const companies = computed<CompanyData[]>(() => {
 
 // SEO metadata
 useHead({
-  title: `${fundData.meta.基金名稱} - 基金詳情 - 專業版`,
+  title: `${fundData.meta.基金名稱}（專業版）`,
   meta: [
     { name: 'description', content: `檢視${fundData.meta.基金名稱}投資的排碳大戶企業詳細資訊（專業版）` }
   ]
@@ -73,9 +73,9 @@ useHead({
     />
 
     <div class="co-body">
-      <CompanyTable :rows="companies" :is-pro="true" :coal-first="true" />
+      <CompanyTable v-if="companies.length" :rows="companies" :is-pro="true" :coal-first="true" />
 
-      <p v-if="companies.length === 0" class="empty-note">
+      <p v-else class="empty-note">
         此基金無排碳大戶企業資料
       </p>
     </div>

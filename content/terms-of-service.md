@@ -26,27 +26,27 @@ title: 免責聲明與資料來源
 
 ### 政府開放資料：
 環境部：
-*  <a href="https://data.moenv.gov.tw/dataset/detail/GHG_P_01" target="_blank">溫室氣體年排放量🔗</a>
-*  <a href="https://data.moenv.gov.tw/dataset/detail/GHG_P_02" target="_blank">國家溫室氣體排放清冊報告🔗</a>
-*  <a href="https://data.moenv.gov.tw/dataset/detail/AQX_P_555" target="_blank">燃料季用量申報資料🔗</a>
-*  <a href="https://data.moenv.gov.tw/dataset/detail/EMS_P_08" target="_blank">各工廠空氣污染物排放資料🔗</a>
+*  <a href="https://data.moenv.gov.tw/dataset/detail/GHG_P_01" target="_blank">溫室氣體年排放量</a>
+*  <a href="https://data.moenv.gov.tw/dataset/detail/GHG_P_02" target="_blank">國家溫室氣體排放清冊報告</a>
+*  <a href="https://data.moenv.gov.tw/dataset/detail/AQX_P_555" target="_blank">燃料季用量申報資料</a>
+*  <a href="https://data.moenv.gov.tw/dataset/detail/EMS_P_08" target="_blank">各工廠空氣污染物排放資料</a>
 
 經濟部國際貿易署：
-*  <a href="https://www.greentrade.org.tw/content/%E8%87%BA%E7%81%A3%E5%9C%8B%E9%9A%9B%E6%B8%9B%E7%A2%B3%E5%80%A1%E8%AD%B0%E5%8F%83%E8%88%87%E4%BC%81%E6%A5%AD%E5%B9%B3%E5%8F%B0" target="_blank">臺灣加入國際減碳倡議企業動態儀表板🔗</a>
+*  <a href="https://www.greentrade.org.tw/content/%E8%87%BA%E7%81%A3%E5%9C%8B%E9%9A%9B%E6%B8%9B%E7%A2%B3%E5%80%A1%E8%AD%B0%E5%8F%83%E8%88%87%E4%BC%81%E6%A5%AD%E5%B9%B3%E5%8F%B0" target="_blank">臺灣加入國際減碳倡議企業動態儀表板</a>
 
 金融監督管理委員會證券期貨局：
-*  <a href="https://data.gov.tw/dataset/18419" target="_blank">上市公司基本資料🔗</a>
-*  <a href="https://data.gov.tw/dataset/25036" target="_blank">上櫃股票基本資料🔗</a>
-*  <a href="https://data.gov.tw/dataset/28568" target="_blank">興櫃公司基本資料🔗</a>
-*  <a href="https://data.gov.tw/dataset/28567" target="_blank">公開發行公司基本資料🔗</a>
+*  <a href="https://data.gov.tw/dataset/18419" target="_blank">上市公司基本資料</a>
+*  <a href="https://data.gov.tw/dataset/25036" target="_blank">上櫃股票基本資料</a>
+*  <a href="https://data.gov.tw/dataset/28568" target="_blank">興櫃公司基本資料</a>
+*  <a href="https://data.gov.tw/dataset/28567" target="_blank">公開發行公司基本資料</a>
 
 ### 公開資訊觀測站資料：
-*  <a href="https://mops.twse.com.tw/mops/#/web/t163sb04" target="_blank">公司營運資料－綜合損益表🔗</a>
-*  <a href="https://mopsov.twse.com.tw/mops/web/t78sb35_new" target="_blank">國內成分股ETF每季持股明細表🔗</a>
+*  <a href="https://mops.twse.com.tw/mops/#/web/t163sb04" target="_blank">公司營運資料－綜合損益表</a>
+*  <a href="https://mopsov.twse.com.tw/mops/web/t78sb35_new" target="_blank">國內成分股ETF每季持股明細表</a>
 
 ### 基金資訊觀測站資料：
 本網站之基金持股明細以投信投顧公會（中華民國證券投資信託暨顧問商業同業公會）季報為準，ESG 基金名單則取自 FundClear 基金資訊觀測站；各企業碳排放與燃煤用量另以前述環境部年度申報資料計算。
-*  <a href="https://www.fundclear.com.tw/etf/product" target="_blank">基金營運資料－國內成分股ETF名單🔗</a>
+*  <a href="https://www.fundclear.com.tw/etf/product" target="_blank">基金營運資料－國內成分股ETF名單</a>
 
 
 ### 企業永續報告書資料使用說明：

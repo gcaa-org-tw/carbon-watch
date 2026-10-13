@@ -15,7 +15,7 @@ const routeKey = computed(() => props.fundKey)
 // the code-less ESG funds; blank if neither (defensive — never happens).
 const codeDisplay = computed(() => {
   if (props.code) return `基金代號 ${props.code}`
-  if (props.unifiedId) return `${props.unifiedId}（基金統一編號）`
+  if (props.unifiedId) return `基金統一編號 ${props.unifiedId}`
   return ''
 })
 </script>
@@ -23,14 +23,14 @@ const codeDisplay = computed(() => {
 <template>
   <header class="co-header">
     <NuxtLink to="/funds" class="back-link">
-      ← 回基金列表
+      ← 依基金持股查詢
     </NuxtLink>
     <h1>{{ name }}<EsgLeaf v-if="isEsg" /></h1>
     <p v-if="codeDisplay" class="fund-code">
       {{ codeDisplay }}
     </p>
     <p v-if="isEsg" class="esg-note">
-      <EsgLeaf /><span>：屬於境內發行之 ESG 基金</span>
+      <EsgLeaf /><span>：屬於國內發行之 ESG 基金</span>
     </p>
     <ViewModeSwitch :base-path="`/funds/${routeKey}`" />
     <FundDataNote />
