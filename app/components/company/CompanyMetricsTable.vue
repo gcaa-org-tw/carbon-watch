@@ -39,7 +39,7 @@ const formatPercent = (value: string | undefined): string => {
 // Parse coal usage value
 const formatCoalUsage = (value: string | undefined): string => {
   if (!value) return '-'
-  const num = parseInt(value.replace(/,/g, ''), 10)
+  const num = Math.round(parseFloat(value.replace(/,/g, '')))
   return isNaN(num) ? '-' : `${num.toLocaleString('zh-TW')} 公噸`
 }
 

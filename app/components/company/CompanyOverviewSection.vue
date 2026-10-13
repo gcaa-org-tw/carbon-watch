@@ -1,15 +1,6 @@
 <script setup lang="ts">
 import type { CompanyData } from '~/types/company'
 import coalUsageMap from '~/assets/data/coal-usage-map.json'
-import trendMap from '~/assets/data/trend-map.json'
-
-type TrendPoint = { year: number; value: number }
-type TrendEntry = {
-  ghg?: TrendPoint[]
-  ghgIntensity?: TrendPoint[]
-  energy?: TrendPoint[]
-  energyIntensity?: TrendPoint[]
-}
 
 interface Props {
   company: CompanyData
@@ -61,12 +52,8 @@ const coalUsageData = computed(() => {
   return (coalUsageMap as Record<string, Array<{ year: number; value: number }>>)[fullName] || []
 })
 
-// Trend data (排放量、密集度、能源、能源密集度) keyed by 公司全名（臺→台 normalized）
-const trendEntry = computed<TrendEntry>(() => {
-  const fullName = normalizeName(props.company['公司全名'])
-  if (!fullName) return {}
-  return (trendMap as Record<string, TrendEntry>)[fullName] || {}
-})
+// Trend data (排放量、密集度、能源、能源密集度) keyed by 公司全名（臺→台 normalized），fallback to 事業統編
+const trendEntry = computed(() => findTrendEntry(props.company))
 
 const latestEmissionYear = computed(() => {
   const reported = (trendEntry.value.ghg ?? []).filter(d => d.value > 0)
