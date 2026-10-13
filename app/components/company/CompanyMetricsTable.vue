@@ -43,10 +43,10 @@ const formatCoalUsage = (value: string | undefined): string => {
   return isNaN(num) ? '-' : `${num.toLocaleString('zh-TW')} 公噸`
 }
 
-// Format renewable installed capacity (preserves decimals, adds thousand separator)
+// Format renewable installed capacity (rounded to integer, adds thousand separator)
 const formatCapacity = (value: string | undefined): string => {
   if (!value) return '-'
-  const num = parseFloat(value.replace(/,/g, ''))
+  const num = Math.round(parseFloat(value.replace(/,/g, '')))
   return isNaN(num) ? '-' : `${num.toLocaleString('zh-TW')} kW`
 }
 
