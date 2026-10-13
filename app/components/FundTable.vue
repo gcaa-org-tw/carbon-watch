@@ -32,8 +32,6 @@ const filteredRows = computed(() => {
 })
 
 /* ── 格式化 ───────────────────────────────────────────── */
-const formatEmissions = (n: number): string => (n ? formatTonnes(n) : '—')
-
 const formatMarketValue = (n: number): string => n.toLocaleString('zh-TW')
 
 const formatShare = (n: number): string => `${n.toFixed(1)}%`
@@ -160,7 +158,7 @@ const fundHref = (key: string): string =>
               :class="{ active: sortKey === 'emis' }"
               @click="setSort('emis')"
             >
-              排碳大戶總碳排量（公噸 CO₂e）<span class="arrow">{{ arrow('emis') }}</span>
+              排碳大戶總碳排量<span class="arrow">{{ arrow('emis') }}</span>
             </th>
           </tr>
         </thead>

@@ -8,9 +8,6 @@ defineProps<{
 }>()
 
 defineEmits<{ click: [] }>()
-
-const formatEmissions = (n: number) =>
-  Math.round(n / 10000).toLocaleString('zh-TW') + '萬公噸'
 </script>
 
 <template>

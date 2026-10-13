@@ -29,7 +29,7 @@ const EMISSION_KEY = '溫室氣體排放量（公噸二氧化碳當量）' as co
 const BASE_COLUMNS: Col[] = [
   { key: '公司', label: '企業名稱', kind: 'company', sortable: true },
   { key: '產業分類', label: '產業分類', kind: 'badge', sortable: true },
-  { key: '溫室氣體排放量（公噸二氧化碳當量）', label: '2024 年溫室氣體排放量（公噸 CO₂e）', align: 'r', kind: 'num', sortable: true },
+  { key: '溫室氣體排放量（公噸二氧化碳當量）', label: '2024 年溫室氣體排放量', align: 'r', kind: 'num', sortable: true },
   { key: '淨零目標年', label: '淨零目標年', align: 'c', kind: 'text', sortable: true },
   { key: '2030 年減量目標設定', label: '2030 年減量目標設定', align: 'c', kind: 'text', sortable: true },
   { key: 'SBTi 承諾', label: 'SBTi 承諾', align: 'c', kind: 'status', sortable: true },
@@ -106,7 +106,7 @@ const buildCell = (company: CompanyData, col: Col): Cell => {
       if (isBlank(raw)) return { kind: 'num', text: '—' }
       if (col.key === EMISSION_KEY) {
         const year = fallbackEmissionYear(company)
-        return { kind: 'num', text: formatTonnes(String(raw)), note: year ? `（${year} 年）` : undefined }
+        return { kind: 'num', text: formatEmissions(String(raw)), note: year ? `（${year} 年）` : undefined }
       }
       if (col.key === COAL_KEY || col.key === CAPACITY_KEY) return { kind: 'num', text: formatTonnes(String(raw)) }
       const s = String(raw).trim()

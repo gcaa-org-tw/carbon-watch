@@ -158,7 +158,7 @@ const tableRows = computed(() =>
     公司: company['公司'],
     產業分類: company['產業分類'],
     燃煤: formatCoal(company['燃煤使用量（公噸）']),
-    排放量: formatTonnes(company['溫室氣體排放量（公噸二氧化碳當量）']),
+    排放量: formatEmissions(company['溫室氣體排放量（公噸二氧化碳當量）']),
     排放年度: fallbackEmissionYear(company),
     淨零目標年: formatPlain(company['淨零目標年']),
     減量目標: formatTarget(company['2030 年減量目標設定']),
@@ -221,7 +221,7 @@ const legendItems = [
               :class="{ active: sortKey === 'emission' }"
               @click="setSort('emission')"
             >
-              2024 年溫室氣體<br>排放量（公噸 CO₂e）<span class="arrow">{{ arrow('emission') || (coalFirst ? '' : '↓') }}</span>
+              2024 年溫室氣體<br>排放量<span class="arrow">{{ arrow('emission') || (coalFirst ? '' : '↓') }}</span>
             </th>
             <th
               rowspan="2"

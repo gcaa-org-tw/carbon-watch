@@ -19,6 +19,8 @@ const cardsContainerRef = ref<HTMLDivElement | null>(null)
 const isPhone = ref(false)
 const blinkingRegion = ref<string | null>(null)
 const mapLoaded = ref(false)
+const hoveredRegion = ref<string | null>(null)
+const hoverPos = ref({ x: 0, y: 0 })
 
 const regionSlugMap: Record<string, string> = {
   '台北市': 'taipei',
@@ -170,6 +172,37 @@ const handleCardHover = (regionName: string | null) => {
   }
 }
 
+const scrollCardIntoView = (regionName: string) => {
+  const index = mergedRegions.value.findIndex(r => r.縣市 === regionName)
+  const cardElement = document.querySelector(`[data-region-index="${index}"]`) as HTMLElement | null
+  const container = cardsContainerRef.value
+  if (!cardElement || !container) return
+  const top = cardElement.offsetTop - container.offsetTop
+  const bottom = top + cardElement.offsetHeight
+  if (top >= container.scrollTop && bottom <= container.scrollTop + container.clientHeight) return
+  const scrollTop = top - (container.clientHeight / 2) + (cardElement.offsetHeight / 2)
+  container.scrollTo({ top: Math.max(0, scrollTop), behavior: 'smooth' })
+}
+
+const handleMapHover = (regionName: string, clientX: number, clientY: number) => {
+  if (isPhone.value) return
+  hoverPos.value = { x: clientX, y: clientY }
+  if (hoveredRegion.value === regionName) return
+  hoveredRegion.value = regionName
+  scrollCardIntoView(regionName)
+}
+
+const handleMapLeave = () => {
+  hoveredRegion.value = null
+}
+
+const hoverShare = computed(() => {
+  if (!hoveredRegion.value) return ''
+  const p = regionDataMap[hoveredRegion.value]?.總排放量佔比 ?? 0
+  if (p <= 0) return '無製造業排碳大戶'
+  return `佔全台製造業排放 ${p < 0.1 ? '<0.1' : p.toFixed(1)}%`
+})
+
 const handleMapLoaded = () => {
   mapLoaded.value = true
   if (isPhone.value && carouselRef.value) {
@@ -215,7 +248,7 @@ const heatItems = [
             :總排放量佔比="region.總排放量佔比"
             :企業數="region.企業數"
             :max-bars="maxBars"
-            :is-active="highlightedRegion === region.縣市"
+            :is-active="(hoveredRegion ?? highlightedRegion) === region.縣市"
             :should-blink="blinkingRegion === region.縣市"
             :disabled="region.disabled"
           />
@@ -242,6 +275,8 @@ const heatItems = [
           :allow-zoom="false"
           :valid-regions="validRegionNames"
           @region-click="handleMapClick"
+          @region-hover="handleMapHover"
+          @region-leave="handleMapLeave"
           @map-loaded="handleMapLoaded"
         />
       </div>
@@ -309,6 +344,18 @@ const heatItems = [
         {{ item.label }}
       </div>
     </div>
+    <p class="map-note">地圖未繪出金門縣、連江縣，兩縣皆無製造業排碳大戶。</p>
+
+    <Teleport to="body">
+      <div
+        v-if="hoveredRegion"
+        class="fixed z-50 pointer-events-none bg-surface-warm text-earth-brown border border-earth-brown/30 rounded-lg shadow-xl px-3 py-2"
+        :style="{ left: `${hoverPos.x + 14}px`, top: `${hoverPos.y + 14}px` }"
+      >
+        <div class="font-semibold text-green-mint text-sm whitespace-nowrap">{{ hoveredRegion }}</div>
+        <div class="text-xs text-earth-brown mt-0.5 whitespace-nowrap">{{ hoverShare }}</div>
+      </div>
+    </Teleport>
   </section>
 </template>
 
@@ -332,6 +379,12 @@ const heatItems = [
   background: var(--color-bg-elevated);
   border: 1px solid var(--color-bg-border);
   border-radius: 8px;
+}
+
+.map-note {
+  margin-top: 8px;
+  font-size: 11px;
+  color: var(--color-text-muted);
 }
 
 .heat-label {
