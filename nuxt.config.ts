@@ -9,6 +9,9 @@ export default defineNuxtConfig({
     '@nuxt/ui',
   ],
   css: ['~/assets/css/main.css'],
+  fonts: {
+    families: [{ name: 'Noto Sans TC', provider: 'none' }],
+  },
   app: {
     head: {
       htmlAttrs: { lang: 'zh-TW' },
@@ -24,7 +27,7 @@ export default defineNuxtConfig({
         },
         {
           rel: 'stylesheet',
-          href: 'https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap',
+          href: 'https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap',
         },
       ],
     },
