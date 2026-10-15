@@ -33,7 +33,6 @@ const CONSUMED_TABS: { tab: string; consumer: string }[] = [
   { tab: 'I. 總表（進階版）', consumer: 'tools/transform-company-data.ts' },
   { tab: 'I. 總表各欄數值分級', consumer: 'tools/transform-company-data.ts' },
   { tab: 'II. 公司總表（原始值）', consumer: 'tools/transform-company-data.ts' },
-  { tab: 'VIII. 歷年燃煤數據', consumer: 'tools/transform-coal-usage-data.ts' },
   { tab: 'XII. 基金排碳量資訊', consumer: 'tools/transform-fund-data.ts' },
   { tab: '排碳大戶表_Data', consumer: 'tools/transform-company-data.ts' },
   { tab: '雷達圖_Data', consumer: 'tools/transform-company-data.ts' },
@@ -43,7 +42,6 @@ const CONSUMED_TABS: { tab: string; consumer: string }[] = [
   { tab: 'XIII. ESG基金_sitca', consumer: 'tools/transform-fund-data.ts' },
   { tab: 'XIV. ESG基金summary', consumer: 'tools/transform-fund-data.ts' },
   { tab: 'XV. ESG持股明細', consumer: 'tools/transform-fund-data.ts' },
-  { tab: 'XVI. 燃煤工廠地圖', consumer: 'tools/transform-coal-map-data.ts' },
 ];
 
 // 工廠縣市排放歷年 SOT — factory-level emissions by year and county.
@@ -61,11 +59,26 @@ const FACTORY_SOT_CSV_NAME = '工廠縣市排放_歷年.csv';
 const FACTORY_COORDS_TAB = '廠座標';
 const FACTORY_COORDS_CSV_NAME = '廠座標.csv';
 
+// 燃料季申報資料 — preprocessed fuel-season (燃料季) coal filings. 用煤者_廠 /
+// 用煤者_公司 are the factory- and company-level yearly coal usage, 用煤者產業對照
+// maps company → 業別, 廠座標 holds the coal-factory coordinates. Consumed
+// through tools/lib/coal-source.ts.
+const FUEL_SEASON_SPREADSHEET_ID = '1baBwcsZRwirOTuNxeHXtyYF7nkFEWbQrZdKNjROqXZ0';
+const FUEL_SEASON_TABS: { tab: string; csvName: string }[] = [
+  { tab: '用煤者_廠', csvName: '用煤者_廠.csv' },
+  { tab: '用煤者_公司', csvName: '用煤者_公司.csv' },
+  { tab: '用煤者產業對照', csvName: '用煤者產業對照.csv' },
+  { tab: '廠座標', csvName: '燃煤工廠座標.csv' },
+];
+
 // 鋼鐵業用煤 — steel-industry coal usage by year (中鋼, 中龍), overrides the
-// fuel-season (燃料季) coal figures. Consumed through tools/lib/steel-coal.ts.
+// fuel-season (燃料季) coal figures, plus the steel plants' 管制編號 / 縣市 (工廠對照).
+// Consumed through tools/lib/coal-source.ts.
 const STEEL_COAL_SPREADSHEET_ID = '17291n1rYSMI1tOXpyXXoLUj8yWovq2f4qg_k2oXq5zQ';
 const STEEL_COAL_TAB = '歷年用煤資料';
 const STEEL_COAL_CSV_NAME = '鋼鐵業用煤_歷年.csv';
+const STEEL_FACTORY_TAB = '工廠對照';
+const STEEL_FACTORY_CSV_NAME = '鋼鐵業工廠對照.csv';
 
 // Output directory for raw CSV files
 const RAW_DATA_DIR = join(__dirname, '..', 'raw-data');
@@ -240,6 +253,58 @@ async function downloadRawData() {
         `Could not refresh steel coal (likely the sheet is not public to this API key). Existing CSV is retained.`
       );
       logger.info(`  ${error instanceof Error ? error.message : String(error)}`);
+    }
+
+    // Fetch steel plant list (best-effort; non-fatal on failure)
+    logger.info(`Fetching steel factory tab "${STEEL_FACTORY_TAB}" from ${STEEL_COAL_SPREADSHEET_ID}`);
+    try {
+      const response = await sheets.spreadsheets.values.get({
+        spreadsheetId: STEEL_COAL_SPREADSHEET_ID,
+        range: STEEL_FACTORY_TAB,
+      });
+      const values = response.data.values;
+      if (values && values.length > 0) {
+        const csv = arrayToCSV(values);
+        const filePath = join(RAW_DATA_DIR, STEEL_FACTORY_CSV_NAME);
+        writeFileSync(filePath, csv, 'utf-8');
+        logger.success(
+          `Saved steel factories to ${STEEL_FACTORY_CSV_NAME} (${values.length} rows, ${values[0]?.length || 0} columns)`
+        );
+      } else {
+        logger.info('Steel factory tab is empty, skipping');
+      }
+    } catch (error) {
+      logger.info(
+        `Could not refresh steel factories (likely the sheet is not public to this API key). Existing CSV is retained.`
+      );
+      logger.info(`  ${error instanceof Error ? error.message : String(error)}`);
+    }
+
+    // Fetch fuel-season coal tabs (best-effort; non-fatal on failure)
+    for (const { tab, csvName } of FUEL_SEASON_TABS) {
+      logger.info(`Fetching fuel-season tab "${tab}" from ${FUEL_SEASON_SPREADSHEET_ID}`);
+      try {
+        const response = await sheets.spreadsheets.values.get({
+          spreadsheetId: FUEL_SEASON_SPREADSHEET_ID,
+          range: tab,
+        });
+        const values = response.data.values;
+        if (values && values.length > 0) {
+          const csv = arrayToCSV(values);
+          const filePath = join(RAW_DATA_DIR, csvName);
+          writeFileSync(filePath, csv, 'utf-8');
+          logger.success(
+            `Saved fuel-season tab "${tab}" to ${csvName} (${values.length} rows, ${values[0]?.length || 0} columns)`
+          );
+        } else {
+          logger.info(`Fuel-season tab "${tab}" is empty, skipping`);
+        }
+      } catch (error) {
+        logger.info(
+          `Could not refresh fuel-season tab "${tab}" (likely the sheet is not public to this API key). Existing CSV is retained.`
+        );
+        logger.info(`  ${error instanceof Error ? error.message : String(error)}`);
+      }
     }
 
     // Summary
