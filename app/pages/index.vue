@@ -29,10 +29,17 @@ const top10Companies = top10CompaniesData as CompanyData[]
       <div class="section-head">
         <h2>前十大排碳大戶</h2>
       </div>
-      <CompanyTable :rows="top10Companies" show-rank />
+      <CompanyTable
+        :rows="top10Companies"
+        show-rank
+        :more-link="{ label: '查看更多企業 →', to: '/companies' }"
+      />
     </section>
 
-    <!-- Section 4: 氣候績效指標方法論 -->
+    <!-- Section 4: 六項指標分級標準 -->
+    <GradingStandardSection />
+
+    <!-- Section 5: 氣候績效指標方法論 -->
     <ClimatePillarSection />
   </div>
 </template>

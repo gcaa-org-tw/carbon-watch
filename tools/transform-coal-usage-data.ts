@@ -30,6 +30,7 @@
 
 import { readFileSync, writeFileSync, mkdirSync } from 'fs';
 import { normalizeCompanyName } from './lib/normalize.js';
+import { loadSteelCoalByUbn, padUBN } from './lib/steel-coal.js';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { Logger } from './lib/logger.js';
@@ -129,10 +130,12 @@ async function transformCoalUsageData() {
     // 2. Detect year columns from CSV headers (any header that is a 4-digit number)
     //    Skip pre-2021: 2020 only covers ~46% of coal-using companies in the source,
     //    causing inconsistent chart start points across companies.
-    const MIN_YEAR = 2021;
+    const MIN_YEAR = 2023;
     const headers = rawData.length > 0 ? Object.keys(rawData[0]) : [];
     const yearColumns = headers.filter(h => /^\d{4}$/.test(h) && parseInt(h) >= MIN_YEAR).sort();
     logger.info(`Detected year columns: ${yearColumns.join(', ')}`);
+
+    const steelCoalByUbn = loadSteelCoalByUbn(RAW_DATA_DIR);
 
     // 3. Transform to map keyed by 公司
     const coalUsageMap: Record<string, Array<{ year: number; value: number }>> = {};
@@ -149,9 +152,10 @@ async function transformCoalUsageData() {
       }
 
       const dataPoints: Array<{ year: number; value: number }> = [];
+      const steelYears = steelCoalByUbn.get(padUBN(row['統編補0'] || row['事業統編']));
 
       for (const yearCol of yearColumns) {
-        const value = parseNumber(row[yearCol]);
+        const value = steelYears ? steelYears.get(parseInt(yearCol)) : parseNumber(row[yearCol]);
         if (value !== undefined && value > 0) {
           dataPoints.push({ year: parseInt(yearCol), value });
         }

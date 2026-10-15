@@ -79,6 +79,14 @@ const sortedRows = computed(() => {
   const dir = sortDir.value === 'asc' ? 1 : -1
 
   return [...filteredRows.value].sort((a, b) => {
+    if (key === 'code') {
+      const ca = a.基金代號 ?? ''
+      const cb = b.基金代號 ?? ''
+      if (!ca && !cb) return zhCollator.compare(a.基金名稱, b.基金名稱)
+      if (!ca) return 1
+      if (!cb) return -1
+      return zhCollator.compare(ca, cb) * dir || zhCollator.compare(a.基金名稱, b.基金名稱)
+    }
     if (STRING_KEYS.has(key)) {
       return zhCollator.compare(String(a[field]), String(b[field])) * dir
     }
@@ -90,6 +98,9 @@ const sortedRows = computed(() => {
 // funds); the first column may still *display* 基金代號.
 const fundHref = (key: string): string =>
   `/funds/${key}${isPro.value ? '/pro' : ''}`
+
+const fundLabel = (fund: FundData): string =>
+  fund.基金統編 ? `${fund.基金名稱}（${fund.基金統編}）` : fund.基金名稱
 </script>
 
 <template>
@@ -99,7 +110,7 @@ const fundHref = (key: string): string =>
       <UInput
         v-model="search"
         icon="i-heroicons-magnifying-glass-20-solid"
-        placeholder="搜尋基金代號或名稱..."
+        placeholder="搜尋證券代號、基金統編或名稱..."
         :ui="{ base: 'filter-sel', root: 'w-full max-w-md' }"
       />
       <p class="result-count">
@@ -116,7 +127,7 @@ const fundHref = (key: string): string =>
               :class="{ active: sortKey === 'code' }"
               @click="setSort('code')"
             >
-              代號 / 統編<span class="arrow">{{ arrow('code') }}</span>
+              證券代號<span class="arrow">{{ arrow('code') }}</span>
             </th>
             <th
               class="col-sticky col-sticky-2 col-sticky-last sortable"
@@ -165,14 +176,26 @@ const fundHref = (key: string): string =>
         <tbody>
           <tr v-for="fund in sortedRows" :key="fund.fundKey">
             <td class="col-sticky col-sticky-1">
-              <NuxtLink class="td-code" :to="fundHref(fund.fundKey)">
-                {{ fund.基金代號 || fund.基金統編 }}
+              <NuxtLink
+                v-if="fund.排碳大戶家數 > 0"
+                class="td-code"
+                :to="fundHref(fund.fundKey)"
+              >
+                {{ fund.基金代號 }}
               </NuxtLink>
+              <span v-else class="td-code td-static">{{ fund.基金代號 }}</span>
             </td>
             <td class="td-fund col-sticky col-sticky-2 col-sticky-last">
-              <NuxtLink class="td-fund-link" :to="fundHref(fund.fundKey)">
-                {{ fund.基金名稱 }}<EsgLeaf v-if="fund.是否ESG基金" />
+              <NuxtLink
+                v-if="fund.排碳大戶家數 > 0"
+                class="td-fund-link"
+                :to="fundHref(fund.fundKey)"
+              >
+                {{ fundLabel(fund) }}<EsgLeaf v-if="fund.是否ESG基金" />
               </NuxtLink>
+              <span v-else class="td-fund-link td-static">
+                {{ fundLabel(fund) }}<EsgLeaf v-if="fund.是否ESG基金" />
+              </span>
             </td>
             <td class="c">
               <span class="coal-tag" :class="coalTone(fund.使用燃煤家數)">
@@ -195,7 +218,7 @@ const fundHref = (key: string): string =>
     <p v-if="sortedRows.length === 0" class="empty-note">找不到符合條件的基金</p>
 
     <p class="esg-legend">
-      <EsgLeaf /><span>：屬於國內發行之 ESG 基金</span>
+      <EsgLeaf /><span>：屬於境內發行之 ESG 基金</span>
     </p>
   </div>
 </template>
@@ -407,6 +430,13 @@ const fundHref = (key: string): string =>
   color: var(--color-link-hover);
 }
 
+.td-code.td-static,
+.td-code.td-static:hover,
+.td-fund-link.td-static,
+.td-fund-link.td-static:hover {
+  color: var(--color-text-muted);
+}
+
 .td-fund {
   white-space: normal;
   word-break: break-word;
@@ -443,17 +473,17 @@ const fundHref = (key: string): string =>
 }
 
 .coal-tag.coal-bad {
-  color: var(--color-status-bad);
-  background: var(--color-bg-overlay);
+  color: var(--color-text-on-status);
+  background: var(--color-status-bad);
 }
 
 .coal-tag.coal-warn {
-  color: var(--color-status-warn);
-  background: var(--color-bg-overlay);
+  color: var(--color-text-on-status);
+  background: var(--color-status-warn-strong);
 }
 
 .coal-tag.coal-some {
-  color: var(--color-text-secondary);
+  color: var(--color-text-on-status);
   background: var(--color-bg-overlay);
 }
 

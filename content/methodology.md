@@ -35,11 +35,5 @@ title: 企業氣候績效指標
 
 ## 量化評級標準
 
-<div class="rule-grid">
-<div class="rule"><h5>1. 2030 年溫室氣體絕對減量目標</h5><div class="rule-r"><span class="dot dot-great"></span><span>超乎期待：減量目標超越 IPCC 減量目標（43%）</span></div><div class="rule-r"><span class="dot dot-ok"></span><span>合乎標準：減量目標超越國家減量目標（26%），未達 IPCC 減量目標（43%）</span></div><div class="rule-r"><span class="dot dot-warn"></span><span>有待加強：減量目標未達國家減量目標（26%）</span></div><div class="rule-r"><span class="dot dot-bad"></span><span>遠低於期望：未設定 2030 年絕對減量目標；缺乏基準年／基準年排放量；其他基礎資料缺乏問題</span></div></div>
-<div class="rule"><h5>2. 2030 年再生能源使用率目標</h5><div class="rule-r"><span class="dot dot-great"></span><span>超乎期待：承諾 RE100，且目標承諾超越國家使用率（30%）</span></div><div class="rule-r"><span class="dot dot-ok"></span><span>合乎標準：目標承諾超越國家使用率（30%）</span></div><div class="rule-r"><span class="dot dot-warn"></span><span>有待加強：目標承諾超越 10%</span></div><div class="rule-r"><span class="dot dot-bad"></span><span>遠低於期望：再生能源目標承諾未達 10%，或未設定任何再生能源使用目標</span></div></div>
-<div class="rule"><h5>3. 2030 年能源效率進步目標</h5><div class="rule-r"><span class="dot dot-great"></span><span>超乎期待：節能目標設定超越 2%</span></div><div class="rule-r"><span class="dot dot-ok"></span><span>合乎標準：節能目標設定超越 1.5%</span></div><div class="rule-r"><span class="dot dot-warn"></span><span>有待加強：節能目標設定超越 1%</span></div><div class="rule-r"><span class="dot dot-bad"></span><span>遠低於期望：節能目標設定低於 1%，或未設定節能目標</span></div></div>
-<div class="rule"><h5>4. 前一年度再生能源使用率</h5><div class="rule-r"><span class="dot dot-great"></span><span>超乎期待：再生能源使用率超越 15%</span></div><div class="rule-r"><span class="dot dot-ok"></span><span>合乎標準：再生能源使用率超越 10%</span></div><div class="rule-r"><span class="dot dot-warn"></span><span>有待加強：再生能源使用率超越 5%</span></div><div class="rule-r"><span class="dot dot-bad"></span><span>遠低於期望：再生能源使用率未達 5%，或未使用再生能源</span></div></div>
-<div class="rule"><h5>5. 近三年能效進步率</h5><div class="rule-r"><span class="dot dot-great"></span><span>超乎期待：能效進步率超越 3%</span></div><div class="rule-r"><span class="dot dot-ok"></span><span>合乎標準：能效進步率超越 2%</span></div><div class="rule-r"><span class="dot dot-warn"></span><span>有待加強：能效進步率超越 1%</span></div><div class="rule-r"><span class="dot dot-bad"></span><span>遠低於期望：能效進步率未達 1%；缺乏資料無法計算</span></div></div>
-<div class="rule"><h5>6. 範疇三減量規劃</h5><div class="rule-r"><span class="dot dot-great"></span><span>超乎期待：範疇三減量目標取得第三方驗證</span></div><div class="rule-r"><span class="dot dot-ok"></span><span>合乎標準：設定範疇三減量目標，且設定範疇三減量規劃</span></div><div class="rule-r"><span class="dot dot-warn"></span><span>有待加強：未揭露範疇三排放量，或未設定範疇三減量規劃（二者缺一）</span></div><div class="rule-r"><span class="dot dot-bad"></span><span>遠低於期望：未揭露範疇三排放量，且未設定範疇三減量規劃（二者皆無）</span></div></div>
-</div>
+::grading-rule-grid
+::

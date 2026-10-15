@@ -30,6 +30,7 @@ body {
   --color-text-secondary:#9eb8a2; /* tx2 — body text, descriptions */
   --color-text-muted:    #556A58; /* tx3 — labels, placeholder, de-emphasis */
   --color-text-inverted: #090D0A; /* txI — dark text on bright buttons */
+  --color-text-on-status:#FFFFFF; /* txS — text on filled status backgrounds */
 
   /* Alias used by existing components */
   --color-earth-brown:       #9eb8a2; /* → text-secondary */
@@ -62,6 +63,7 @@ body {
   --color-status-ok:    #7FB96F; /* st-ok    — 合乎標準 */
   --color-status-warn:  #D4943A; /* st-warn  — 有待加強 */
   --color-status-bad:   #C0504A; /* st-bad   — 遠低於期望 */
+  --color-status-warn-strong: #946829; /* st-warn-strong — warn as a filled background */
 
   /* Aliases used by existing components */
   --color-accent-blue:   #7FB96F; /* → status-ok */
@@ -106,6 +108,7 @@ body {
   --color-text-secondary: var(--color-text-secondary);
   --color-text-muted:     var(--color-text-muted);
   --color-text-inverted:  var(--color-text-inverted);
+  --color-text-on-status: var(--color-text-on-status);
 
   /* Legacy text aliases */
   --color-earth-brown:       var(--color-earth-brown);
@@ -138,6 +141,7 @@ body {
   --color-status-ok:    var(--color-status-ok);
   --color-status-warn:  var(--color-status-warn);
   --color-status-bad:   var(--color-status-bad);
+  --color-status-warn-strong: var(--color-status-warn-strong);
 
   /* Legacy accent aliases */
   --color-accent-blue:   var(--color-accent-blue);
