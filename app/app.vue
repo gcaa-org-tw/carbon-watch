@@ -14,7 +14,7 @@ useSeoMeta({
   ogImage: `${SITE_URL}/og-default.png`,
   ogImageWidth: 1200,
   ogImageHeight: 630,
-  ogImageAlt: `${SITE_NAME}：追蹤台灣排碳大戶，一鍵看清氣候責任`,
+  ogImageAlt: `${SITE_NAME}首頁：追蹤台灣排碳大戶，一鍵看清氣候責任`,
   twitterCard: 'summary_large_image',
 })
 
