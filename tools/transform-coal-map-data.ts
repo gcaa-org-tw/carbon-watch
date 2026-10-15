@@ -41,6 +41,7 @@
 
 import { readFileSync, writeFileSync, mkdirSync } from 'fs';
 import { normalizeCounty, normalizeUBN } from './lib/normalize.js';
+import { loadSteelCoalByUbn } from './lib/steel-coal.js';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { Logger } from './lib/logger.js';
@@ -173,6 +174,8 @@ async function transformCoalMapData() {
     }
     logger.info(`Hub lookup ready: ${shortNameByUBN.size} companies`);
 
+    const steelCoalByUbn = loadSteelCoalByUbn(RAW_DATA_DIR);
+
     // 3. Transform factories
     const YEARS = [2020, 2021, 2022, 2023, 2024, 2025];
     const factories: CoalMapFactory[] = [];
@@ -192,9 +195,13 @@ async function transformCoalMapData() {
         continue;
       }
 
+      const steelYears = steelCoalByUbn.get(ubn);
+      const coalOfYear = (year: number): number | undefined =>
+        steelYears ? steelYears.get(year) : parseNumber(row[`用煤量${year}`]);
+
       const 歷年用煤: Array<{ year: number; value: number }> = [];
       for (const year of YEARS) {
-        const value = parseNumber(row[`用煤量${year}`]);
+        const value = coalOfYear(year);
         if (value !== undefined && value > 0) {
           歷年用煤.push({ year, value });
         }
@@ -218,7 +225,7 @@ async function transformCoalMapData() {
         經度: lon,
         緯度: lat,
         座標來源: (row['座標來源'] || '').trim(),
-        用煤量2024: parseNumber(row['用煤量2024']) ?? 0,
+        用煤量2024: coalOfYear(2024) ?? 0,
         歷年用煤,
       });
     }

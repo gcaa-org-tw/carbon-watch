@@ -69,6 +69,7 @@ import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { Logger } from './lib/logger.js';
 import { normalizeCounty, normalizeUBN } from './lib/normalize.js';
+import { loadSteelCoalByUbn, padUBN } from './lib/steel-coal.js';
 
 // Get directory path for ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -751,16 +752,43 @@ function applyCoalShare(
   return companyList;
 }
 
+function applySustainabilityReportFlag(
+  companyList: Record<string, string>[],
+  hubData: Record<string, string>[],
+  logger: Logger
+): Record<string, string>[] {
+  const disclosedByUbn = new Map<string, boolean>();
+  for (const row of hubData) {
+    const ubn = padUBN(row['統一編號']);
+    if (!ubn) continue;
+    disclosedByUbn.set(ubn, (row['是否揭露近三年溫室氣體排放資料'] ?? '').trim() !== '');
+  }
+
+  let withReport = 0;
+  for (const company of companyList) {
+    const hasReport = disclosedByUbn.get(padUBN(company['事業統編'])) ?? false;
+    (company as Record<string, unknown>)['有永續報告書'] = hasReport;
+    if (hasReport) withReport++;
+  }
+
+  logger.success(
+    `有永續報告書: ${withReport} true / ${companyList.length - withReport} false of ${companyList.length} companies`
+  );
+  return companyList;
+}
+
 function applyCoalUsageFromHistory(
   companyList: Record<string, string>[],
   coalRows: Record<string, string>[],
+  steelCoalByUbn: ReturnType<typeof loadSteelCoalByUbn>,
   logger: Logger
 ): Record<string, string>[] {
   const coalByUbn = new Map<string, number>();
   for (const row of coalRows) {
     const ubn = normalizeUBN(row['統編補0'] || row['事業統編']);
     if (!ubn) continue;
-    coalByUbn.set(ubn, parseNumber(row['2025']) ?? 0);
+    const steelYears = steelCoalByUbn.get(padUBN(ubn));
+    coalByUbn.set(ubn, steelYears ? (steelYears.get(2025) ?? 0) : (parseNumber(row['2025']) ?? 0));
   }
 
   let matched = 0;
@@ -901,7 +929,8 @@ async function transformCompanyData() {
     const coalHistoryPath = join(RAW_DATA_DIR, 'VIII. 歷年燃煤數據.csv');
     const coalHistoryData = parseCSV(readFileSync(coalHistoryPath, 'utf-8'));
     logger.info(`Parsed ${coalHistoryData.length} records from VIII. 歷年燃煤數據.csv`);
-    companyList = applyCoalUsageFromHistory(companyList, coalHistoryData, logger);
+    const steelCoalByUbn = loadSteelCoalByUbn(RAW_DATA_DIR);
+    companyList = applyCoalUsageFromHistory(companyList, coalHistoryData, steelCoalByUbn, logger);
 
     // Add per-company top-3 縣市 emission distribution from factory-level SOT
     // (year 113 / 2024). Bridged via 事業統編. Replaces the older Sheet B IV. csv
@@ -934,6 +963,8 @@ async function transformCompanyData() {
 
     // Add 用煤佔全台製造業比例 — each company's 燃煤使用量 over the 287-company total.
     companyList = applyCoalShare(companyList, logger);
+
+    companyList = applySustainabilityReportFlag(companyList, hubData, logger);
 
     const industryAverages = computeIndustryAverages(radarData, logger);
     logger.info(`Computed averages for ${industryAverages.size} industries`);

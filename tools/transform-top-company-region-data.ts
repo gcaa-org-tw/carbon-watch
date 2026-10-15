@@ -158,7 +158,7 @@ async function transformTopCompanyRegionData() {
     // 4a) Load factory coordinates lookup (管制編號 → wgs84 經緯度).
     const coordsPath = join(RAW_DATA_DIR, '廠座標.csv');
     const coordsByCno = new Map<string, { 經度: number; 緯度: number }>();
-    for (const row of parseCSV(readFileSync(coordsPath, 'utf-8'))) {
+    for (const row of parseCSV(readFileSync(coordsPath, 'utf-8').replace(/^\uFEFF/, ''))) {
       const cno = (row['管制編號'] || '').trim();
       const lon = parseFloat(row['wgs84經度'] || '');
       const lat = parseFloat(row['wgs84緯度'] || '');

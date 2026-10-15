@@ -61,6 +61,12 @@ const FACTORY_SOT_CSV_NAME = '工廠縣市排放_歷年.csv';
 const FACTORY_COORDS_TAB = '廠座標';
 const FACTORY_COORDS_CSV_NAME = '廠座標.csv';
 
+// 鋼鐵業用煤 — steel-industry coal usage by year (中鋼, 中龍), overrides the
+// fuel-season (燃料季) coal figures. Consumed through tools/lib/steel-coal.ts.
+const STEEL_COAL_SPREADSHEET_ID = '17291n1rYSMI1tOXpyXXoLUj8yWovq2f4qg_k2oXq5zQ';
+const STEEL_COAL_TAB = '歷年用煤資料';
+const STEEL_COAL_CSV_NAME = '鋼鐵業用煤_歷年.csv';
+
 // Output directory for raw CSV files
 const RAW_DATA_DIR = join(__dirname, '..', 'raw-data');
 
@@ -207,6 +213,31 @@ async function downloadRawData() {
     } catch (error) {
       logger.info(
         `Could not refresh factory coords (likely the sheet is not public to this API key). Existing CSV is retained.`
+      );
+      logger.info(`  ${error instanceof Error ? error.message : String(error)}`);
+    }
+
+    // Fetch steel-industry coal usage (best-effort; non-fatal on failure)
+    logger.info(`Fetching steel coal tab "${STEEL_COAL_TAB}" from ${STEEL_COAL_SPREADSHEET_ID}`);
+    try {
+      const response = await sheets.spreadsheets.values.get({
+        spreadsheetId: STEEL_COAL_SPREADSHEET_ID,
+        range: STEEL_COAL_TAB,
+      });
+      const values = response.data.values;
+      if (values && values.length > 0) {
+        const csv = arrayToCSV(values);
+        const filePath = join(RAW_DATA_DIR, STEEL_COAL_CSV_NAME);
+        writeFileSync(filePath, csv, 'utf-8');
+        logger.success(
+          `Saved steel coal to ${STEEL_COAL_CSV_NAME} (${values.length} rows, ${values[0]?.length || 0} columns)`
+        );
+      } else {
+        logger.info('Steel coal tab is empty, skipping');
+      }
+    } catch (error) {
+      logger.info(
+        `Could not refresh steel coal (likely the sheet is not public to this API key). Existing CSV is retained.`
       );
       logger.info(`  ${error instanceof Error ? error.message : String(error)}`);
     }
