@@ -1,9 +1,10 @@
 /**
  * Coal Map Data Transformer
  *
- * Reads raw CSV from raw-data/XVI. 燃煤工廠地圖.csv (98 coal-burning factories
- * of 排碳大戶 companies, with WGS84 coordinates) and outputs the dataset for
- * the /coal-map page.
+ * Joins the fuel-season factory file (用煤者_廠) with the steel factory list,
+ * the factory coordinates (98 coal-burning factories with WGS84 coordinates)
+ * and the company-to-industry lookup, and outputs the dataset for the
+ * /coal-map page.
  *
  * ## Usage
  *
@@ -13,10 +14,12 @@
  *
  * ## Input
  *
- * - **Source**: `raw-data/XVI. 燃煤工廠地圖.csv`
- *   Columns: 管制編號, 廠名, 公司全名, 事業統編, 業別, 縣市, wgs84經度, wgs84緯度,
- *   座標來源, 用煤量2020..用煤量2025
- * - **Join**: `raw-data/排碳大戶表_Data.csv` — 統一編號 → 公司簡稱 (company page slug)
+ * - **Source**: `raw-data/用煤者_廠.csv` (cno, facname, 公司, county, 2020..2026)
+ *   plus `raw-data/鋼鐵業工廠對照.csv` and `raw-data/鋼鐵業用煤_歷年.csv` for the
+ *   steel plants (中鋼, 中龍), `raw-data/用煤者產業對照.csv` for 業別 and
+ *   `raw-data/燃煤工廠座標.csv` for coordinates. Merged in `tools/lib/coal-source.ts`.
+ * - **Join**: `raw-data/排碳大戶表_Data.csv` — 公司全稱 → 統一編號 and 公司簡稱
+ *   (company page slug)
  *
  * ## Output
  *
@@ -33,15 +36,15 @@
  * }
  * ```
  *
- * 事業統編 is zero-padded to 8 digits on both sides of the hub join — Sheets
- * numeric cells drop leading zeros (e.g. 亞洲水泥 03244509 → 3244509).
- * Rows whose UBN is not in the hub are dropped (scope = 排碳大戶 287): the
- * coal sheet flags group affiliates that hold their own non-hub UBNs.
+ * 事業統編 comes from the hub, joined by 公司全稱 (臺→台 normalized), zero-padded
+ * to 8 digits (Sheets numeric cells drop leading zeros, e.g. 亞洲水泥 03244509).
+ * Factories whose company is not in the hub are dropped (scope = 排碳大戶 287):
+ * the fuel file lists group affiliates that hold their own non-hub UBNs.
  */
 
 import { readFileSync, writeFileSync, mkdirSync } from 'fs';
-import { normalizeCounty, normalizeUBN } from './lib/normalize.js';
-import { loadSteelCoalByUbn } from './lib/steel-coal.js';
+import { normalizeCompanyName, normalizeUBN } from './lib/normalize.js';
+import { loadCoalFactories } from './lib/coal-source.js';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { Logger } from './lib/logger.js';
@@ -113,16 +116,6 @@ function parseCSV(csvContent: string): Record<string, string>[] {
 }
 
 /**
- * Parse a number string from CSV (handles commas and whitespace)
- */
-function parseNumber(value: string): number | undefined {
-  if (!value || value === '') return undefined;
-  const cleaned = value.replace(/[,\s]/g, '');
-  const num = parseFloat(cleaned);
-  return isNaN(num) ? undefined : num;
-}
-
-/**
  * Zero-pad a UBN to 8 digits (Sheets numeric cells drop leading zeros)
  */
 function padUBN(raw: string | undefined): string {
@@ -155,77 +148,63 @@ async function transformCoalMapData() {
   try {
     logger.info('Starting coal map data transformation');
 
-    // 1. Load factory CSV
-    const csvPath = join(RAW_DATA_DIR, 'XVI. 燃煤工廠地圖.csv');
-    logger.info(`Reading data from: ${csvPath}`);
-    const rawData = parseCSV(readFileSync(csvPath, 'utf-8'));
-    logger.info(`Parsed ${rawData.length} factory records`);
+    // 1. Load factories (fuel file + steel + coordinates + industry)
+    const { located, unlocated } = loadCoalFactories(RAW_DATA_DIR);
+    logger.info(`Merged ${located.length} factories with coordinates (${unlocated.length} without)`);
 
-    // 2. Load hub CSV for 統一編號 → 公司簡稱
+    // 2. Load hub CSV for 公司全稱 → 統一編號 / 公司簡稱
     const hubPath = join(RAW_DATA_DIR, '排碳大戶表_Data.csv');
     const hubData = parseCSV(readFileSync(hubPath, 'utf-8'));
-    const shortNameByUBN = new Map<string, string>();
+    const hubByName = new Map<string, { ubn: string; shortName: string }>();
     for (const row of hubData) {
       const ubn = padUBN(row['統一編號']);
       const shortName = (row['公司簡稱'] || '').trim();
       if (ubn && shortName) {
-        shortNameByUBN.set(ubn, shortName);
+        hubByName.set(normalizeCompanyName(row['公司全稱']), { ubn, shortName });
       }
     }
-    logger.info(`Hub lookup ready: ${shortNameByUBN.size} companies`);
+    logger.info(`Hub lookup ready: ${hubByName.size} companies`);
 
-    const steelCoalByUbn = loadSteelCoalByUbn(RAW_DATA_DIR);
+    const unlocatedHub = unlocated.filter(f => hubByName.has(normalizeCompanyName(f.公司全名)));
+    if (unlocatedHub.length > 0) {
+      logger.info(`Skipping hub factories missing coordinates: ${unlocatedHub.map(f => `${f.管制編號} ${f.廠名}`).join('、')}`);
+    }
 
     // 3. Transform factories
     const YEARS = [2020, 2021, 2022, 2023, 2024, 2025];
     const factories: CoalMapFactory[] = [];
     const joinMisses: string[] = [];
 
-    for (const row of rawData) {
-      const cno = (row['管制編號'] || '').trim();
-      if (!cno) continue;
-
-      // Scope gate: the page covers 排碳大戶 (hub 287) only. The coal sheet's
-      // 屬排碳大戶 mark is broader — it flags group affiliates (錦州科技/長輝
-      // 事業/州霖) whose own UBNs are not in the hub. Drop those rows here.
-      const ubn = padUBN(row['事業統編']);
-      const shortName = shortNameByUBN.get(ubn) ?? null;
-      if (!shortName) {
-        joinMisses.push(`${row['公司全名']} (${ubn})`);
+    for (const factory of located) {
+      // Scope gate: the page covers 排碳大戶 (hub 287) only. The fuel file
+      // lists group affiliates (錦州科技/長輝事業/州霖) whose own UBNs are not
+      // in the hub. Drop those rows here.
+      const hub = hubByName.get(normalizeCompanyName(factory.公司全名));
+      if (!hub) {
+        joinMisses.push(factory.公司全名);
         continue;
       }
 
-      const steelYears = steelCoalByUbn.get(ubn);
-      const coalOfYear = (year: number): number | undefined =>
-        steelYears ? steelYears.get(year) : parseNumber(row[`用煤量${year}`]);
-
       const 歷年用煤: Array<{ year: number; value: number }> = [];
       for (const year of YEARS) {
-        const value = coalOfYear(year);
+        const value = factory.years.get(year);
         if (value !== undefined && value > 0) {
           歷年用煤.push({ year, value });
         }
       }
 
-      const lon = parseNumber(row['wgs84經度']);
-      const lat = parseNumber(row['wgs84緯度']);
-      if (lon === undefined || lat === undefined) {
-        logger.info(`Skipping ${cno} ${row['廠名']}: missing coordinates`);
-        continue;
-      }
-
       factories.push({
-        管制編號: cno,
-        廠名: (row['廠名'] || '').trim(),
-        公司全名: (row['公司全名'] || '').trim(),
-        事業統編: ubn,
-        公司簡稱: shortName,
-        業別: (row['業別'] || '').trim(),
-        縣市: normalizeCounty((row['縣市'] || '').trim()),
-        經度: lon,
-        緯度: lat,
-        座標來源: (row['座標來源'] || '').trim(),
-        用煤量2024: coalOfYear(2024) ?? 0,
+        管制編號: factory.管制編號,
+        廠名: factory.廠名,
+        公司全名: factory.公司全名,
+        事業統編: hub.ubn,
+        公司簡稱: hub.shortName,
+        業別: factory.業別,
+        縣市: factory.縣市,
+        經度: factory.經度,
+        緯度: factory.緯度,
+        座標來源: factory.座標來源,
+        用煤量2024: factory.years.get(2024) ?? 0,
         歷年用煤,
       });
     }
