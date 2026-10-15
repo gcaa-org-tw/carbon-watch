@@ -170,8 +170,10 @@ function drawRadarChart() {
     const label = d.axis
     const lines: string[] = []
 
-    for (let j = 0; j < label.length; j += maxCharsPerLine) {
-      lines.push(label.slice(j, j + maxCharsPerLine))
+    for (const segment of label.split('\n')) {
+      for (let j = 0; j < segment.length; j += maxCharsPerLine) {
+        lines.push(segment.slice(j, j + maxCharsPerLine))
+      }
     }
 
     const textEl = g.append('text')

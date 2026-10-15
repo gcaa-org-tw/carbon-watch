@@ -104,6 +104,36 @@ function setChartRef(key: string, el: Element | unknown) {
   chartRefs.value[key] = (el as HTMLDivElement | null)
 }
 
+type AxisGroup = d3.Selection<SVGGElement, unknown, null, undefined>
+
+function drawXAxis<T extends d3.AxisDomain>(g: AxisGroup, axis: d3.Axis<T>, innerHeight: number) {
+  g.append('g')
+    .attr('transform', `translate(0, ${innerHeight})`)
+    .call(axis.tickFormat(d => String(d)).tickSize(0).tickPadding(10))
+    .call(s => s.select('.domain').attr('stroke', '#D9D7CA').attr('stroke-opacity', 0.4))
+    .selectAll('text')
+    .attr('fill', '#C4BE9A')
+    .attr('font-size', '12px')
+}
+
+function drawYAxis(g: AxisGroup, yScale: d3.ScaleLinear<number, number>, spec: ChartSpec) {
+  const yTicks = yScale.ticks(5)
+  const yStep = yTicks.length > 1 ? yTicks[1]! - yTicks[0]! : 1
+  const yMax = yTicks[yTicks.length - 1] ?? 0
+  const yAxis = d3.axisLeft(yScale)
+    .ticks(5)
+    .tickFormat(d => spec.formatAxis(d as number, yStep, yMax))
+    .tickSize(0)
+    .tickPadding(8)
+
+  g.append('g')
+    .call(yAxis)
+    .call(s => s.select('.domain').attr('stroke', 'none'))
+    .selectAll('text')
+    .attr('fill', '#C4BE9A')
+    .attr('font-size', '11px')
+}
+
 function drawChart(spec: ChartSpec) {
   const host = chartRefs.value[spec.key]
   if (!host) return
@@ -141,17 +171,7 @@ function drawChart(spec: ChartSpec) {
   const g = svg.append('g')
     .attr('transform', `translate(${margin.left}, ${margin.top})`)
 
-  const years = spec.data.map(d => d.year)
-  const minYear = Math.min(...years)
-  const maxYear = Math.max(...years)
-  const xDomain: [number, number] = minYear === maxYear
-    ? [minYear - 0.5, maxYear + 0.5]
-    : [minYear, maxYear]
-
-  const xScale = d3.scaleLinear()
-    .domain(xDomain)
-    .range([0, innerWidth])
-
+  const years = reported.map(d => d.year).sort((a, b) => a - b)
   const maxVal = Math.max(...reported.map(d => d.value))
 
   const yScale = d3.scaleLinear()
@@ -174,16 +194,66 @@ function drawChart(spec: ChartSpec) {
     .attr('stroke-opacity', 0.18)
     .attr('stroke-dasharray', '3,3')
 
+  if (reported.length < 2) {
+    const point = reported[0]!
+    const xScale = d3.scaleBand<number>()
+      .domain([point.year])
+      .range([0, innerWidth])
+    const barWidth = Math.min(56, innerWidth * 0.3)
+    const barX = (xScale(point.year) ?? 0) + xScale.bandwidth() / 2 - barWidth / 2
+    const barTop = yScale(point.value)
+
+    g.append('rect')
+      .attr('x', barX)
+      .attr('y', barTop)
+      .attr('width', barWidth)
+      .attr('height', innerHeight - barTop)
+      .attr('rx', 2)
+      .attr('fill', spec.color)
+      .attr('fill-opacity', 0.85)
+      .attr('cursor', 'pointer')
+      .on('mousemove', (event: MouseEvent) => {
+        const containerRect = containerRef.value?.getBoundingClientRect()
+        if (!containerRect) return
+        tooltipState.value = {
+          visible: true,
+          x: event.clientX - containerRect.left,
+          y: event.clientY - containerRect.top,
+          label: `${point.year} 年`,
+          value: `${spec.formatValue(point.value)} ${spec.unit}`,
+        }
+      })
+      .on('mouseleave', () => {
+        tooltipState.value = null
+      })
+
+    g.append('text')
+      .attr('x', barX + barWidth / 2)
+      .attr('y', barTop - 6)
+      .attr('text-anchor', 'middle')
+      .attr('fill', '#C4BE9A')
+      .attr('font-size', '12px')
+      .attr('pointer-events', 'none')
+      .text(spec.formatValue(point.value))
+
+    drawXAxis(g, d3.axisBottom(xScale).tickValues([point.year]), innerHeight)
+    drawYAxis(g, yScale, spec)
+    return
+  }
+
+  const xScale = d3.scaleLinear()
+    .domain([years[0]!, years[years.length - 1]!])
+    .range([0, innerWidth])
+
   // Area
   const area = d3.area<DataPoint>()
     .x(d => xScale(d.year))
     .y0(innerHeight)
     .y1(d => yScale(d.value))
-    .defined(isReported)
     .curve(d3.curveMonotoneX)
 
   g.append('path')
-    .datum(spec.data)
+    .datum(reported)
     .attr('fill', `url(#${gradId})`)
     .attr('d', area)
 
@@ -191,11 +261,10 @@ function drawChart(spec: ChartSpec) {
   const line = d3.line<DataPoint>()
     .x(d => xScale(d.year))
     .y(d => yScale(d.value))
-    .defined(isReported)
     .curve(d3.curveMonotoneX)
 
   g.append('path')
-    .datum(spec.data)
+    .datum(reported)
     .attr('fill', 'none')
     .attr('stroke', spec.color)
     .attr('stroke-width', 2.5)
@@ -235,37 +304,8 @@ function drawChart(spec: ChartSpec) {
     .attr('stroke-width', 2)
     .attr('pointer-events', 'none')
 
-  // X axis
-  const xAxis = d3.axisBottom(xScale)
-    .tickValues(years)
-    .tickFormat(d => String(d))
-    .tickSize(0)
-    .tickPadding(10)
-
-  g.append('g')
-    .attr('transform', `translate(0, ${innerHeight})`)
-    .call(xAxis)
-    .call(s => s.select('.domain').attr('stroke', '#D9D7CA').attr('stroke-opacity', 0.4))
-    .selectAll('text')
-    .attr('fill', '#C4BE9A')
-    .attr('font-size', '12px')
-
-  // Y axis
-  const yTicks = yScale.ticks(5)
-  const yStep = yTicks.length > 1 ? yTicks[1]! - yTicks[0]! : 1
-  const yMax = yTicks[yTicks.length - 1] ?? 0
-  const yAxis = d3.axisLeft(yScale)
-    .ticks(5)
-    .tickFormat(d => spec.formatAxis(d as number, yStep, yMax))
-    .tickSize(0)
-    .tickPadding(8)
-
-  g.append('g')
-    .call(yAxis)
-    .call(s => s.select('.domain').attr('stroke', 'none'))
-    .selectAll('text')
-    .attr('fill', '#C4BE9A')
-    .attr('font-size', '11px')
+  drawXAxis(g, d3.axisBottom(xScale).tickValues(years), innerHeight)
+  drawYAxis(g, yScale, spec)
 }
 
 function drawAll() {
@@ -317,7 +357,7 @@ watch(charts, () => {
           v-if="missingYears(spec).length > 0"
           class="mt-1 text-xs text-earth-brown/60"
         >
-          {{ missingYears(spec).join('、') }} 年未申報
+          {{ missingYears(spec).join('、') }} 年不在排碳大戶名單
         </p>
         <div class="mt-1 text-xs text-earth-brown/70 flex flex-wrap gap-x-3 gap-y-1">
           <span

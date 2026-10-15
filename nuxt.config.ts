@@ -9,6 +9,9 @@ export default defineNuxtConfig({
     '@nuxt/ui',
   ],
   css: ['~/assets/css/main.css'],
+  icon: {
+    clientBundle: { scan: true },
+  },
   fonts: {
     families: [{ name: 'Noto Sans TC', provider: 'none' }],
   },

@@ -30,3 +30,8 @@ export interface CoalMapData {
   meta: CoalMapMeta
   factories: CoalMapFactory[]
 }
+
+export const COAL_YEARS = [2023, 2024, 2025] as const
+
+export const coalValueOf = (factory: CoalMapFactory, year: number): number =>
+  factory.歷年用煤.find(p => p.year === year)?.value ?? 0

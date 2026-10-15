@@ -10,6 +10,7 @@ interface Props {
   // 並預設以燃煤用量遞減排序（溫室氣體排放量為次要排序）。首頁與
   // /companies 不傳，維持無燃煤欄。
   coalFirst?: boolean
+  moreLink?: { label: string, to: string }
 }
 
 withDefaults(defineProps<Props>(), {
@@ -17,6 +18,7 @@ withDefaults(defineProps<Props>(), {
   showLegend: true,
   showRank: false,
   coalFirst: false,
+  moreLink: undefined,
 })
 </script>
 
@@ -28,6 +30,7 @@ withDefaults(defineProps<Props>(), {
     :show-rank="showRank"
     :show-legend="showLegend"
     :coal-first="coalFirst"
+    :more-link="moreLink"
   />
 
   <!-- 專業版：同一套 .tbl 表格設計，純數據、無燈號（設計稿 .tbl-pro） -->

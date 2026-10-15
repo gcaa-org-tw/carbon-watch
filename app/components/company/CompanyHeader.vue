@@ -1,7 +1,9 @@
 <script setup lang="ts">
 interface Props {
   公司: string
+  公司全名?: string
   淨零目標年?: string
+  有永續報告書?: boolean
   年排放量: number
   排放年度?: number
   全台佔比?: number
@@ -14,6 +16,17 @@ const props = defineProps<Props>()
 const formattedEmission = computed(() => {
   return props.年排放量.toLocaleString('zh-TW')
 })
+
+const netZeroText = computed(() => {
+  const placeholder = reportPlaceholder(props.淨零目標年, props.有永續報告書 !== false)
+  if (placeholder) return placeholder
+  const raw = String(props.淨零目標年).trim()
+  return raw === '無' || raw === '無承諾' ? '無承諾' : raw
+})
+
+const feeNote = computed(() =>
+  `以${props.排放年度 ? ` ${props.排放年度} 年` : ''}排放量每公噸 300 元估算，未扣除免徵額與優惠費率`
+)
 
 const formattedFee = computed(() => {
   return props.預期碳費.toLocaleString('zh-TW')
@@ -41,15 +54,20 @@ const isDecrease = computed(() => props.年度變化 !== undefined && props.年�
   <div>
     <!-- Header row: company name + net-zero year -->
     <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-      <h1 class="text-3xl sm:text-[2.5rem] font-bold text-earth-brown mt-0 sm:mt-8 mb-8 leading-[1.2] pb-8">
-        {{ 公司 }}
-      </h1>
+      <div class="mt-0 sm:mt-8 mb-8 pb-8 min-w-0">
+        <h1 class="text-3xl sm:text-[2.5rem] font-bold text-earth-brown leading-[1.2]">
+          {{ 公司 }}
+        </h1>
+        <p v-if="公司全名" class="mt-2 text-sm text-earth-brown/70 break-words">
+          {{ 公司全名 }}
+        </p>
+      </div>
 
       <div class="flex flex-wrap items-center gap-3 pt-10">
-        <div v-if="淨零目標年" class="flex items-baseline gap-2">
+        <div class="flex items-baseline gap-2">
           <span class="text-lg font-bold text-earth-brown">淨零承諾年度</span>
           <span class="text-xl font-bold text-green-mint">
-            {{ 淨零目標年 }}
+            {{ netZeroText }}
           </span>
         </div>
       </div>
@@ -91,7 +109,10 @@ const isDecrease = computed(() => props.年度變化 !== undefined && props.年�
       <!-- Carbon fee -->
       <div class="md:text-right">
         <p class="text-l font-bold text-earth-brown">
-          預期碳費 : <span class="font-semibold">{{ formattedFee }} NTD</span>
+          預期碳費 : <span class="font-semibold">{{ formattedFee }} 元</span>
+        </p>
+        <p class="mt-1 text-xs text-earth-brown/60">
+          {{ feeNote }}
         </p>
       </div>
     </div>

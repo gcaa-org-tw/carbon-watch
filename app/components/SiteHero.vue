@@ -1,12 +1,17 @@
 <script setup lang="ts">
+import companyList from '~/assets/data/company-list.json'
+
 const { isPro } = useViewMode()
 
-// 對外策展數字（非即時計算）——口徑與環境部年度申報／團隊對外說法一致
+const companyCount = companyList.length
+const risingCount = companyList.filter(company => Number(company.年度變化) > 0).length
+
+// 「涵蓋全國 54%」與「-1.38%」為對外策展數字（非即時計算）——口徑與環境部年度申報／團隊對外說法一致
 const stats = [
-  { label: '追蹤製造業', value: '300+', sub: '排碳大戶公司' },
+  { label: '追蹤製造業', value: String(companyCount), sub: '排碳大戶公司' },
   { label: '涵蓋全國', value: '54%', sub: '溫室氣體排放' },
   { label: '2024年相較2023年', value: '-1.38%', sub: '溫室氣體排放量' },
-  { label: '比對發現', value: '116', sub: '家公司排放量仍在上升' },
+  { label: '比對發現', value: String(risingCount), sub: '家公司排放量仍在上升' },
 ]
 </script>
 
@@ -19,7 +24,7 @@ const stats = [
       一鍵看清氣候責任
     </h1>
     <p class="hero-sub">
-      追蹤 300+ 家企業溫室氣體排放量、減量承諾與行動成果，以透明數據推動台灣氣候行動。
+      追蹤 {{ companyCount }} 家企業溫室氣體排放量、減量承諾與行動成果，以透明數據推動台灣氣候行動。
     </p>
     <div class="hero-actions">
       <UButton :to="isPro ? '/companies/pro' : '/companies'" class="btn-primary-hero">

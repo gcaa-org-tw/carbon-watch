@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { CompanyData } from '~/types/company'
-import fundListData from '~/assets/data/fund-list.json'
 
 interface FundMeta {
   基金代號: string
@@ -29,26 +28,15 @@ const route = useRoute()
 // Get fund code from route params
 const fundCode = computed(() => route.params.slug as string)
 
-// Try the per-fund detail JSON first. transform-fund-data.ts only writes a
-// detail file when a fund has at least one 排碳大戶 holding; pure 0-排碳大戶
-// funds appear in fund-list.json but have no detail file. For those we fall
-// back to the meta row + an empty companies list, and the existing
-// v-if='companies.length === 0' empty state takes over. The route slug is the
-// fundKey (基金統編, or 基金代號 for the 2 code-less umbrella funds); files are
-// named by fundKey. Only a genuinely-unknown key (not in fund-list.json) 404s.
 let fundData: FundData
 try {
   fundData = await import(`~/assets/data/funds/${fundCode.value}.json`).then(m => m.default)
 } catch {
-  const meta = (fundListData as FundMeta[]).find(f => f.fundKey === fundCode.value)
-  if (!meta) {
-    throw createError({
-      statusCode: 404,
-      statusMessage: '找不到此基金',
-      message: `基金 ${fundCode.value} 不存在`,
-    })
-  }
-  fundData = { meta, companies: [] }
+  throw createError({
+    statusCode: 404,
+    statusMessage: '找不到此基金',
+    message: `基金 ${fundCode.value} 不存在`,
+  })
 }
 
 // Convert fund companies to CompanyData format

@@ -3,13 +3,14 @@ import { ref, watch, onMounted, onUnmounted } from 'vue'
 import * as d3 from 'd3'
 import { feature } from 'topojson-client'
 import type { Topology, GeometryCollection } from 'topojson-specification'
-import type { CoalMapFactory } from '~/types/coalMap'
+import { coalValueOf, type CoalMapFactory } from '~/types/coalMap'
 
 interface Props {
   factories: CoalMapFactory[]
   colorByIndustry: Record<string, string>
   selectedCno: string | null
-  /** Global max 用煤量2024 — keeps bubble scale stable across re-renders */
+  year: number
+  /** Global max 用煤量 across all selectable years — keeps bubble scale comparable between years */
   maxValue: number
   /** Industries to highlight; empty array = highlight all */
   highlightIndustries?: string[]
@@ -53,7 +54,7 @@ const applyMarkStyles = () => {
   const k = currentTransform.k
   if (dotsSel) {
     dotsSel
-      .attr('r', d => radiusOf(d.用煤量2024) / k)
+      .attr('r', d => radiusOf(coalValueOf(d, props.year)) / k)
       .attr('fill-opacity', d => {
         if (!isHighlighted(d)) return 0.1
         return d.管制編號 === props.selectedCno ? 1 : 0.78
@@ -109,7 +110,7 @@ const renderMap = async () => {
     .attr('fill', 'var(--color-surface-warm, #213620)')
     .attr('stroke', 'rgba(196, 190, 154, 0.4)')
 
-  // Bubbles — area proportional to 2024 coal usage, anchored at the global max
+  // Bubbles — area proportional to the selected year's coal usage, anchored at the global max
   const maxRadius = Math.min(width, height) * 0.085
   radiusOf = (value: number) => {
     if (props.maxValue <= 0 || value <= 0) return MIN_RADIUS
@@ -117,7 +118,7 @@ const renderMap = async () => {
   }
 
   // Draw big bubbles first so small ones stay reachable on top
-  const sorted = [...props.factories].sort((a, b) => b.用煤量2024 - a.用煤量2024)
+  const sorted = [...props.factories].sort((a, b) => coalValueOf(b, props.year) - coalValueOf(a, props.year))
 
   dotsSel = g.append('g')
     .selectAll<SVGCircleElement, CoalMapFactory>('circle')
@@ -148,12 +149,9 @@ const renderMap = async () => {
 
   zoomBehavior = d3.zoom<SVGSVGElement, unknown>()
     .scaleExtent([ZOOM_MIN, ZOOM_MAX])
-    // Buttons/pinch/drag/dblclick zoom; plain wheel keeps scrolling the page
+    // Buttons/pinch/drag zoom and pan; wheel and double-click leave the view alone
     .filter((event: Event) => {
-      if (event.type === 'wheel') {
-        const wheel = event as WheelEvent
-        return wheel.ctrlKey || wheel.metaKey
-      }
+      if (event.type === 'wheel' || event.type === 'dblclick') return false
       return !(event as MouseEvent).button
     })
     .on('zoom', (event: d3.D3ZoomEvent<SVGSVGElement, unknown>) => {
@@ -179,7 +177,7 @@ const resetZoom = () => {
 }
 
 // Full redraw only when the dot set changes
-watch(() => props.factories, () => {
+watch(() => [props.factories, props.year], () => {
   renderMap()
 })
 
@@ -237,9 +235,6 @@ onUnmounted(() => {
         </svg>
       </button>
     </div>
-    <p class="map-hint">
-      按住 Ctrl 或 ⌘ 並滾動滑鼠滾輪可縮放地圖
-    </p>
   </div>
 </template>
 
@@ -265,21 +260,5 @@ svg :deep(.factory-dot) {
 .zoom-btn:hover {
   color: var(--color-green-mint, #5AE694);
   border-color: rgba(90, 230, 148, 0.5);
-}
-
-.map-hint {
-  position: absolute;
-  left: 0.5rem;
-  bottom: 0.5rem;
-  font-size: 0.75rem;
-  color: var(--color-earth-brown, #C4BE9A);
-  opacity: 0.7;
-  pointer-events: none;
-}
-
-@media (hover: none) {
-  .map-hint {
-    display: none;
-  }
 }
 </style>

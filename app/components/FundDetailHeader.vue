@@ -11,11 +11,11 @@ const props = defineProps<{
 // umbrella funds); the ver-switch base path must use it, not the display code.
 const routeKey = computed(() => props.fundKey)
 
-// Identifier line under the title: prefer 基金代號; fall back to 基金統編 for
+// Identifier line under the title: prefer 證券代號; fall back to 基金統編 for
 // the code-less ESG funds; blank if neither (defensive — never happens).
 const codeDisplay = computed(() => {
-  if (props.code) return `基金代號 ${props.code}`
-  if (props.unifiedId) return `基金統一編號 ${props.unifiedId}`
+  if (props.code) return `證券代號 ${props.code}`
+  if (props.unifiedId) return `基金統編 ${props.unifiedId}`
   return ''
 })
 </script>
@@ -30,7 +30,7 @@ const codeDisplay = computed(() => {
       {{ codeDisplay }}
     </p>
     <p v-if="isEsg" class="esg-note">
-      <EsgLeaf /><span>：屬於國內發行之 ESG 基金</span>
+      <EsgLeaf /><span>：屬於境內發行之 ESG 基金</span>
     </p>
     <ViewModeSwitch :base-path="`/funds/${routeKey}`" />
     <FundDataNote />

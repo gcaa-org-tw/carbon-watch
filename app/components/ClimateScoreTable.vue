@@ -8,10 +8,12 @@ const props = withDefaults(defineProps<{
   showLegend?: boolean
   // 基金頁：插入燃煤使用量欄並預設以燃煤用量遞減排序（排放量為次要排序）
   coalFirst?: boolean
+  moreLink?: { label: string, to: string }
 }>(), {
   showRank: false,
   showLegend: true,
   coalFirst: false,
+  moreLink: undefined,
 })
 
 /* ── 雷達圖評級 → 燈號 ─────────────────────────────────── */
@@ -44,23 +46,45 @@ const radarDot = (raw: string): string | null => {
 }
 
 /* ── 格式化 ───────────────────────────────────────────── */
+const hasReport = (company: CompanyData): boolean => company['有永續報告書'] !== false
+
 const formatTarget = (raw: string): string => {
-  if (!raw || raw === 'NA') return '—'
   if (raw.endsWith('%')) {
     const n = Number.parseFloat(raw)
-    return Number.isNaN(n) ? '—' : `${Math.round(n)}%`
+    return Number.isNaN(n) ? NOT_DISCLOSED : `${n.toFixed(1)}%`
   }
   return raw
 }
 
-const formatPlain = (raw: string): string => (!raw || raw === 'NA' ? '—' : raw)
+const targetText = (company: CompanyData): string => {
+  const raw = company['2030 年減量目標設定']
+  return reportPlaceholder(raw, hasReport(company)) ?? formatTarget(String(raw).trim())
+}
 
-// 燃煤使用量：整數公噸；0 或空白顯示破折號（company-grade-map：≥1 即「遠低於期望」）
+const netZeroText = (company: CompanyData): string => {
+  const raw = company['淨零目標年']
+  const placeholder = reportPlaceholder(raw, hasReport(company))
+  if (placeholder) return placeholder
+  const s = String(raw).trim()
+  return s === '無' || s === '無承諾' ? '無承諾' : s
+}
+
+// 燃煤使用量：整數公噸；空白顯示破折號，0 顯示 0（company-grade-map：≥1 即「遠低於期望」）
 const formatCoal = (raw: string): string => {
-  const n = Number((raw ?? '').replace(/,/g, ''))
-  if (!raw || Number.isNaN(n) || n === 0) return '—'
+  const s = String(raw ?? '').trim()
+  if (s === '' || s === 'NA') return NOT_DISCLOSED
+  const n = Number(s.replace(/,/g, ''))
+  if (Number.isNaN(n)) return NOT_DISCLOSED
   return n.toLocaleString('zh-TW', { maximumFractionDigits: 0 })
 }
+
+const isBlankField = (raw: unknown): boolean => {
+  const s = String(raw ?? '').trim()
+  return s === '' || s === 'NA'
+}
+
+const isUnrated = (company: CompanyData): boolean =>
+  RADAR_FIELDS.slice(0, 5).every(field => isBlankField(company[field]))
 
 const EMOJI_CHECK = String.fromCodePoint(0x2705)
 const EMOJI_CROSS = String.fromCodePoint(0x274C)
@@ -109,6 +133,9 @@ const arrow = (key: string): string =>
 
 const sortValue = (company: CompanyData, key: string): number | string => {
   const field = SORT_FIELDS[key]
+  if (key === 'netZero') return Number.parseFloat(netZeroText(company))
+  if (key === 'target2030') return Number.parseFloat(targetText(company))
+  if (key === 'd5' && isUnrated(company)) return Number.NaN
   const raw = field ? String(company[field] ?? '') : ''
   if (key === 'sbti') return sbtiRank(raw)
   if (STRING_KEYS.has(key)) return raw
@@ -158,12 +185,15 @@ const tableRows = computed(() =>
     公司: company['公司'],
     產業分類: company['產業分類'],
     燃煤: formatCoal(company['燃煤使用量（公噸）']),
+    有燃煤: Number(String(company['燃煤使用量（公噸）'] ?? '').replace(/,/g, '')) > 0,
     排放量: formatEmissions(company['溫室氣體排放量（公噸二氧化碳當量）']),
     排放年度: fallbackEmissionYear(company),
-    淨零目標年: formatPlain(company['淨零目標年']),
-    減量目標: formatTarget(company['2030 年減量目標設定']),
+    淨零目標年: netZeroText(company),
+    減量目標: targetText(company),
     SBTi: formatSbti(company['SBTi 承諾']),
-    dots: RADAR_FIELDS.map(field => radarDot(company[field])),
+    dots: RADAR_FIELDS.map((field, i) =>
+      i === RADAR_FIELDS.length - 1 && isUnrated(company) ? null : radarDot(company[field])
+    ),
   }))
 )
 
@@ -182,7 +212,8 @@ const legendItems = [
         <span class="dot" :class="`dot-${item.dot}`" />
         {{ item.label }}
       </div>
-      <NuxtLink to="/methodology" class="legend-link">了解分級標準 →</NuxtLink>
+      <NuxtLink v-if="moreLink" :to="moreLink.to" class="legend-link">{{ moreLink.label }}</NuxtLink>
+      <NuxtLink v-else to="/methodology" class="legend-link">了解分級標準 →</NuxtLink>
     </div>
 
     <div class="table-wrap">
@@ -255,7 +286,7 @@ const legendItems = [
               2024 年<br>再生能源使用率<span class="arrow">{{ arrow('d3') }}</span>
             </th>
             <th class="c sortable" :class="{ active: sortKey === 'd4' }" @click="setSort('d4')">
-              近三年<br>能效進步率<span class="arrow">{{ arrow('d4') }}</span>
+              近三年<br>能源密集度變化<span class="arrow">{{ arrow('d4') }}</span>
             </th>
             <th class="c sortable" :class="{ active: sortKey === 'd5' }" @click="setSort('d5')">
               範疇三<br>減量規劃<span class="arrow">{{ arrow('d5') }}</span>
@@ -274,7 +305,7 @@ const legendItems = [
             </td>
             <td><span class="badge">{{ row.產業分類 }}</span></td>
             <td v-if="coalFirst" class="r">
-              <span :class="row.燃煤 === '—' ? 'td-muted' : 'td-num td-coal'">{{ row.燃煤 }}</span>
+              <span :class="row.有燃煤 ? 'td-num td-coal' : row.燃煤 === '—' ? 'td-muted' : 'td-num'">{{ row.燃煤 }}</span>
             </td>
             <td class="r td-num">
               {{ row.排放量 }}<span v-if="row.排放年度" class="td-year-note">（{{ row.排放年度 }} 年）</span>
@@ -290,6 +321,8 @@ const legendItems = [
         </tbody>
       </table>
     </div>
+
+    <p class="table-note">NA：無法取得資料</p>
 
     <p v-if="tableRows.length === 0" class="empty-note">找不到符合條件的企業</p>
   </div>
@@ -548,6 +581,11 @@ const legendItems = [
   background: var(--color-bg-overlay);
   color: var(--color-text-secondary);
   border: 1px solid var(--color-bg-border);
+}
+
+.table-note {
+  font-size: 12px;
+  color: var(--color-text-muted);
 }
 
 .empty-note {

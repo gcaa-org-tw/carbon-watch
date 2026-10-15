@@ -29,7 +29,7 @@ const radarAxesWithPrefix = [
   '2030年再生能源使用率目標',
   '2030年能源效率進步目標',
   '2024年再生能源使用率',
-  '近三年能效進步率',
+  '近三年能源\n密集度變化',
   '範疇三及減量策略'
 ]
 
@@ -109,17 +109,19 @@ const scoreLegend = [
     <div :class="isPhone ? 'flex flex-col gap-8' : 'flex items-stretch gap-7'">
       <!-- Radar Chart Section -->
       <div :class="isPhone ? '' : 'w-3/5 min-w-0'">
-        <div
-          v-if="!isScored"
-          class="flex h-full min-h-48 flex-col items-center justify-center gap-2 rounded-lg border border-earth-brown/15 bg-surface-warm/40 p-6 text-center"
-        >
-          <UIcon name="i-heroicons-chart-bar" class="w-6 h-6 text-earth-brown/60" />
-          <p class="text-base font-semibold text-earth-brown">
-            未評分
-          </p>
-          <p class="text-sm text-earth-brown/70">
-            缺少評分所需的資料
-          </p>
+        <div v-if="!isScored" class="relative">
+          <div class="unscored-chart" aria-hidden="true">
+            <CompanyRadarChart
+              :company-data="companyRadarData"
+              :industry-data="[]"
+              :score-legend="scoreLegend"
+            />
+          </div>
+          <div class="unscored-overlay">
+            <p class="text-base font-semibold text-earth-brown">
+              無資料，無法評分
+            </p>
+          </div>
         </div>
 
         <template v-else>
@@ -165,3 +167,22 @@ const scoreLegend = [
     </div>
   </div>
 </template>
+
+<style scoped>
+.unscored-chart {
+  filter: blur(3px);
+  opacity: 0.45;
+}
+
+.unscored-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  text-align: center;
+  background: color-mix(in srgb, var(--color-surface-warm) 35%, transparent);
+  border-radius: 0.5rem;
+}
+</style>

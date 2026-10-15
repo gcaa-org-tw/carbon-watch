@@ -36,6 +36,7 @@
     "topojson-client": "^3.1.0"
   },
   "devDependencies": {
+    "@iconify-json/heroicons": "^1.2.3",
     "@types/d3": "^7.4.3",
     "@types/node": "^24.10.1",
     "@types/topojson-client": "^3.1.5",

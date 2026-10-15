@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import regionList from '~/assets/data/region-list.json'
 import industryList from '~/assets/data/industry-list.json'
+import companyListData from '~/assets/data/company-list.json'
+import type { CompanyData } from '~/types/company'
 
 interface Filters {
   search: string
@@ -44,6 +46,12 @@ const industry = computed({
 
 // Region options with ALL_REGIONS as default
 const regionOptions = computed(() => [ALL_REGIONS, ...regionList])
+
+const noCountyNames = computed(() =>
+  (companyListData as CompanyData[])
+    .filter(company => !company.factoryCounties?.length)
+    .map(company => company['公司'])
+)
 
 // Industry options with "全部產業" as default
 const industryOptions = computed(() => [
@@ -156,6 +164,10 @@ const selectUi = {
 
       <p class="result-count">
         顯示 <strong>{{ resultCount }}</strong> 家企業
+      </p>
+
+      <p v-if="noCountyNames.length" class="filter-note">
+        {{ noCountyNames.join('、') }} 2024 年不在排碳大戶名單，無廠區縣市資料，不會出現在縣市篩選結果中。
       </p>
     </div>
   </div>
@@ -319,6 +331,12 @@ const selectUi = {
   color: var(--color-green-spring);
   border-color: var(--color-green-forest);
   background: transparent;
+}
+
+.filter-note {
+  flex: 0 0 100%;
+  font-size: 12px;
+  color: var(--color-text-muted);
 }
 
 .result-count {

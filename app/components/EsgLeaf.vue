@@ -1,8 +1,8 @@
 <script setup lang="ts">
-// Inline green leaf marker for ESG funds (國內發行之 ESG 基金). No emoji — an
+// Inline green leaf marker for ESG funds (境內發行之 ESG 基金). No emoji — an
 // SVG so it renders identically everywhere. Sits after the fund name on the
 // list and detail pages; the legend explains it.
-withDefaults(defineProps<{ title?: string }>(), { title: '國內發行之 ESG 基金' })
+withDefaults(defineProps<{ title?: string }>(), { title: '境內發行之 ESG 基金' })
 </script>
 
 <template>

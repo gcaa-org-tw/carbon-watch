@@ -32,6 +32,7 @@ export interface CompanyData {
   '代表縣市'?: string
   '事業統編'?: string
   '公司全名'?: string
+  '有永續報告書': boolean
   '年度變化'?: number | null
   'regionEmissions'?: Array<{ 縣市: string; 排放量: number; 縣市佔比: number }>
   'factoryCounties'?: string[]

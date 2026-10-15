@@ -157,49 +157,4 @@ useSeoMeta({
   font-family: 'IBM Plex Mono', 'Cascadia Code', monospace;
   font-size: 12px;
 }
-
-/* ── 量化評級標準 ─────────────────────────────────────── */
-.methodology-content :deep(.rule-grid) {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 14px;
-}
-
-.methodology-content :deep(.rule) {
-  background: var(--color-bg-surface);
-  border: 1px solid var(--color-bg-border);
-  border-radius: 12px;
-  padding: 16px 20px;
-}
-
-.methodology-content :deep(.rule h5) {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--color-text-primary);
-  margin-bottom: 10px;
-}
-
-.methodology-content :deep(.rule-r) {
-  display: flex;
-  gap: 9px;
-  align-items: flex-start;
-  padding: 4px 0;
-  font-size: 13px;
-  line-height: 1.7;
-  color: var(--color-text-secondary);
-}
-
-.methodology-content :deep(.dot) {
-  display: inline-block;
-  flex-shrink: 0;
-  width: 10px;
-  height: 10px;
-  margin-top: 6px;
-  border-radius: 50%;
-}
-
-.methodology-content :deep(.dot-great) { background: var(--color-status-great); }
-.methodology-content :deep(.dot-ok) { background: var(--color-status-ok); }
-.methodology-content :deep(.dot-warn) { background: var(--color-status-warn); }
-.methodology-content :deep(.dot-bad) { background: var(--color-status-bad); }
 </style>

@@ -45,6 +45,85 @@ watch(() => props.data, () => {
   }
 }, { deep: true })
 
+type ChartGroup = d3.Selection<SVGGElement, unknown, null, undefined>
+
+function drawSingleBar(
+  g: ChartGroup,
+  point: DataPoint,
+  yScale: d3.ScaleLinear<number, number>,
+  innerWidth: number,
+  innerHeight: number
+) {
+  const xScale = d3.scaleBand<number>()
+    .domain([point.year])
+    .range([0, innerWidth])
+  const barWidth = Math.min(64, innerWidth * 0.3)
+  const barX = (xScale(point.year) ?? 0) + xScale.bandwidth() / 2 - barWidth / 2
+  const barTop = yScale(point.value)
+
+  g.append('g')
+    .attr('class', 'grid')
+    .selectAll('line')
+    .data(yScale.ticks(5))
+    .enter()
+    .append('line')
+    .attr('x1', 0)
+    .attr('x2', innerWidth)
+    .attr('y1', d => yScale(d))
+    .attr('y2', d => yScale(d))
+    .attr('stroke', '#D9D7CA')
+    .attr('stroke-opacity', 0.25)
+    .attr('stroke-dasharray', '3,3')
+
+  g.append('rect')
+    .attr('x', barX)
+    .attr('y', barTop)
+    .attr('width', barWidth)
+    .attr('height', innerHeight - barTop)
+    .attr('rx', 2)
+    .attr('fill', '#207443')
+    .attr('cursor', 'pointer')
+    .on('mousemove', (event: MouseEvent) => {
+      const containerRect = containerRef.value?.getBoundingClientRect()
+      if (!containerRect) return
+      tooltipState.value = {
+        visible: true,
+        x: event.clientX - containerRect.left,
+        y: event.clientY - containerRect.top,
+        label: `${point.year} 年`,
+        value: `${valueFormat(point.value)} 公噸`,
+      }
+    })
+    .on('mouseleave', () => {
+      tooltipState.value = null
+    })
+
+  g.append('text')
+    .attr('x', barX + barWidth / 2)
+    .attr('y', barTop - 6)
+    .attr('text-anchor', 'middle')
+    .attr('fill', '#C4BE9A')
+    .attr('font-size', '12px')
+    .attr('pointer-events', 'none')
+    .text(valueFormat(point.value))
+
+  g.append('g')
+    .attr('transform', `translate(0, ${innerHeight})`)
+    .call(d3.axisBottom(xScale).tickValues([point.year]).tickFormat(d => String(d)))
+    .selectAll('text')
+    .attr('fill', '#C4BE9A')
+    .attr('font-size', '12px')
+
+  g.append('g')
+    .call(d3.axisLeft(yScale).ticks(5).tickFormat(d => d3.format(',.0f')(d as number)))
+    .selectAll('text')
+    .attr('fill', '#C4BE9A')
+    .attr('font-size', '12px')
+
+  g.selectAll('.domain, .tick line')
+    .attr('stroke', '#D9D7CA')
+}
+
 function drawChart() {
   if (!chartRef.value || props.data.length === 0) return
 
@@ -67,13 +146,19 @@ function drawChart() {
   const g = svg.append('g')
     .attr('transform', `translate(${margin.left}, ${margin.top})`)
 
+  const maxValue = (d3.max(props.data, d => d.value) ?? 0) || 1
+  const yScale = d3.scaleLinear()
+    .domain([0, maxValue * 1.1])
+    .range([innerHeight, 0])
+
+  if (props.data.length < 2) {
+    drawSingleBar(g, props.data[0]!, yScale, innerWidth, innerHeight)
+    return
+  }
+
   const xScale = d3.scaleLinear()
     .domain(d3.extent(props.data, d => d.year) as [number, number])
     .range([0, innerWidth])
-
-  const yScale = d3.scaleLinear()
-    .domain([0, d3.max(props.data, d => d.value) as number * 1.1])
-    .range([innerHeight, 0])
 
   const area = d3.area<DataPoint>()
     .x(d => xScale(d.year))

@@ -66,6 +66,32 @@ const parseNum = (raw: unknown): number => {
   return Number.parseFloat(s)
 }
 
+const hasReport = (company: CompanyData): boolean => company['有永續報告書'] !== false
+
+const REPORT_KEYS = new Set<keyof CompanyData>([
+  '淨零目標年',
+  '2030 年減量目標設定',
+  '範疇三揭露',
+  '範疇三減量規劃',
+  '近三年能效進步率',
+  '節能目標設定',
+  '再生能源使用率',
+  '再生能源設置容量',
+  '是否完成用電大戶再生能源設置義務',
+  '中期再生能源目標設定',
+  'RE100 承諾',
+  '有具體減量策略',
+])
+const UNSET_KEYS = new Set<keyof CompanyData>(['節能目標設定', '中期再生能源目標設定'])
+
+const placeholderFor = (company: CompanyData, col: Col): string | undefined => {
+  if (!REPORT_KEYS.has(col.key)) return undefined
+  const has = hasReport(company)
+  const raw = company[col.key]
+  if (has && UNSET_KEYS.has(col.key) && String(raw ?? '').trim() === 'NA') return TEXT_CROSS
+  return reportPlaceholder(raw as string | undefined, has)
+}
+
 const isBlank = (raw: unknown) => {
   const s = String(raw ?? '').trim()
   return s === '' || s === 'NA'
@@ -84,7 +110,14 @@ const TEXT_CROSS = String.fromCodePoint(0x2717)
 type Cell = { kind: 'company' | 'badge' | 'num' | 'text', text: string, tone?: 'good' | 'bad', note?: string }
   | { kind: 'status', tone: 'yes' | 'no' | 'text', text: string }
 
-const statusCell = (raw: unknown): Extract<Cell, { kind: 'status' }> => {
+const statusCell = (company: CompanyData, col: Col): Extract<Cell, { kind: 'status' }> => {
+  const raw = company[col.key]
+  if (REPORT_KEYS.has(col.key)) {
+    const text = reportCheck(raw as string | undefined, hasReport(company))
+    if (text === TEXT_CHECK) return { kind: 'status', tone: 'yes', text }
+    if (text === TEXT_CROSS) return { kind: 'status', tone: 'no', text }
+    return { kind: 'status', tone: 'text', text }
+  }
   const s = String(raw ?? '').trim()
   if (s === EMOJI_CHECK) return { kind: 'status', tone: 'yes', text: TEXT_CHECK }
   if (s === EMOJI_CROSS) return { kind: 'status', tone: 'no', text: TEXT_CROSS }
@@ -101,8 +134,10 @@ const buildCell = (company: CompanyData, col: Col): Cell => {
     case 'badge':
       return { kind: 'badge', text: String(raw ?? '') }
     case 'status':
-      return statusCell(raw)
+      return statusCell(company, col)
     case 'num': {
+      const placeholder = placeholderFor(company, col)
+      if (placeholder) return { kind: 'num', text: placeholder }
       if (isBlank(raw)) return { kind: 'num', text: '—' }
       if (col.key === EMISSION_KEY) {
         const year = fallbackEmissionYear(company)
@@ -122,8 +157,11 @@ const buildCell = (company: CompanyData, col: Col): Cell => {
       return { kind: 'num', text: s }
     }
     default: {
+      const placeholder = placeholderFor(company, col)
+      if (placeholder) return { kind: 'text', text: placeholder }
       if (isBlank(raw)) return { kind: 'text', text: '—' }
       const s = String(raw).trim()
+      if (col.key === '淨零目標年' && (s === '無' || s === '無承諾')) return { kind: 'text', text: '無承諾' }
       if (s.endsWith('%')) return { kind: 'text', text: formatPercent(s) }
       return { kind: 'text', text: s }
     }
@@ -164,6 +202,7 @@ const sortValue = (company: CompanyData, col: Col): number | string => {
   const raw = company[col.key]
   if (isTextCol(col)) return String(raw ?? '')
   if (col.key === 'SBTi 承諾') return sbtiRank(raw)
+  if (placeholderFor(company, col)) return Number.NaN
   if (col.kind === 'status') {
     const s = String(raw ?? '').trim()
     if (s in STATUS_RANK) return STATUS_RANK[s] ?? 0
@@ -263,6 +302,8 @@ const tableRows = computed(() =>
         </tbody>
       </table>
     </div>
+
+    <p class="table-note">NA：無法取得資料</p>
 
     <p v-if="tableRows.length === 0" class="empty-note">
       找不到符合條件的企業
@@ -454,6 +495,11 @@ const tableRows = computed(() =>
   background: var(--color-bg-overlay);
   color: var(--color-text-secondary);
   border: 1px solid var(--color-bg-border);
+}
+
+.table-note {
+  font-size: 12px;
+  color: var(--color-text-muted);
 }
 
 .empty-note {
