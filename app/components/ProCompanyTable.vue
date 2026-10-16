@@ -82,13 +82,12 @@ const REPORT_KEYS = new Set<keyof CompanyData>([
   '有具體減量策略',
 ])
 const OBLIGATION_KEY = '是否完成用電大戶再生能源設置義務'
-const UNSET_KEYS = new Set<keyof CompanyData>(['節能目標設定', '中期再生能源目標設定'])
+const RE100_KEY = 'RE100 承諾'
 
 const placeholderFor = (company: CompanyData, col: Col): string | undefined => {
   if (!REPORT_KEYS.has(col.key)) return undefined
   const has = hasReport(company)
   const raw = company[col.key]
-  if (has && UNSET_KEYS.has(col.key) && String(raw ?? '').trim() === 'NA') return TEXT_CROSS
   return reportPlaceholder(raw as string | undefined, has)
 }
 
@@ -113,7 +112,7 @@ type Cell = { kind: 'company' | 'badge' | 'num' | 'text', text: string, tone?: '
 const statusCell = (company: CompanyData, col: Col): Extract<Cell, { kind: 'status' }> => {
   const raw = company[col.key]
   if (REPORT_KEYS.has(col.key)) {
-    const text = reportCheck(raw as string | undefined, hasReport(company))
+    const text = reportCheck(raw as string | undefined, hasReport(company), col.key === RE100_KEY)
     if (text === TEXT_CHECK) return { kind: 'status', tone: 'yes', text }
     if (text === TEXT_CROSS) return { kind: 'status', tone: 'no', text }
     return { kind: 'status', tone: 'text', text }
@@ -197,17 +196,16 @@ const arrow = (col: Col): string => {
   return col.key === defaultSortKey() ? '↓' : ''
 }
 
-const STATUS_RANK: Record<string, number> = { [EMOJI_CHECK]: 2, [EMOJI_CROSS]: 0 }
-
 const sortValue = (company: CompanyData, col: Col): number | string => {
   const raw = company[col.key]
   if (isTextCol(col)) return String(raw ?? '')
   if (col.key === 'SBTi 承諾') return sbtiRank(raw)
   if (placeholderFor(company, col)) return Number.NaN
   if (col.kind === 'status') {
-    const s = String(raw ?? '').trim()
-    if (s in STATUS_RANK) return STATUS_RANK[s] ?? 0
-    return s === '' ? -1 : 1
+    const { text } = statusCell(company, col)
+    if (text === TEXT_CHECK) return 2
+    if (text === TEXT_CROSS) return 0
+    return Number.NaN
   }
   return parseNum(raw)
 }
