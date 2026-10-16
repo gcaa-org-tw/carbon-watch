@@ -26,7 +26,7 @@ const formattedEmission = computed(() => {
         :style="{ width: `${Math.min(縣市佔比, 100)}%` }"
       />
     </div>
-    <p class="text-sm text-earth-brown">
+    <p class="text-sm text-earth-brown whitespace-nowrap">
       {{ formattedEmission }} 公噸
     </p>
   </div>

@@ -25,7 +25,7 @@ const netZeroText = computed(() => {
 })
 
 const feeNote = computed(() =>
-  `以${props.排放年度 ? ` ${props.排放年度} 年` : ''}排放量每公噸 300 元估算，未扣除免徵額與優惠費率`
+  `以每公噸 300 元乘上${props.排放年度 ? ` ${props.排放年度} 年` : ''}排放量估算，未扣除免徵額與優惠費率`
 )
 
 const formattedFee = computed(() => {
@@ -79,7 +79,7 @@ const isDecrease = computed(() => props.年度變化 !== undefined && props.年�
       <div class="flex-1">
         <div class="flex items-center justify-between gap-4 flex-wrap">
           <p class="text-l font-bold text-earth-brown">
-            {{ 排放年度 ? `${排放年度} 年碳排` : '年碳排' }} <span class="font-semibold">{{ formattedEmission }}</span> 公噸
+            {{ 排放年度 ? `${排放年度} 年碳排` : '年碳排' }} <span class="whitespace-nowrap"><span class="font-semibold">{{ formattedEmission }}</span> 公噸</span>
           </p>
           <div class="flex items-center gap-3 text-sm">
             <span v-if="formattedTaiwanShare !== null" class="flex items-center gap-1.5 text-earth-brown">
@@ -109,7 +109,7 @@ const isDecrease = computed(() => props.年度變化 !== undefined && props.年�
       <!-- Carbon fee -->
       <div class="md:text-right">
         <p class="text-l font-bold text-earth-brown">
-          預期碳費 : <span class="font-semibold">{{ formattedFee }} 元</span>
+          預期碳費：<span class="font-semibold whitespace-nowrap">{{ formattedFee }} 元</span>
         </p>
         <p class="mt-1 text-xs text-earth-brown/60">
           {{ feeNote }}

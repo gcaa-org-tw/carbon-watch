@@ -53,6 +53,18 @@ const noCountyNames = computed(() =>
     .map(company => company['公司'])
 )
 
+const earlierCountyNotes = computed(() => {
+  const namesByYear = new Map<number, string[]>()
+  for (const company of companyListData as CompanyData[]) {
+    const year = company.factoryCountiesYear
+    if (!year) continue
+    namesByYear.set(year, [...(namesByYear.get(year) ?? []), company['公司']])
+  }
+  return [...namesByYear].map(([year, names]) =>
+    `${names.join('、')} 2024 年不在排碳大戶名單，縣市篩選依 ${year} 年廠區。`
+  )
+})
+
 // Industry options with "全部產業" as default
 const industryOptions = computed(() => [
   '全部產業',
@@ -164,6 +176,10 @@ const selectUi = {
 
       <p class="result-count">
         顯示 <strong>{{ resultCount }}</strong> 家企業
+      </p>
+
+      <p v-for="note in earlierCountyNotes" :key="note" class="filter-note">
+        {{ note }}
       </p>
 
       <p v-if="noCountyNames.length" class="filter-note">

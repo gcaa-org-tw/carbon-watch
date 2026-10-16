@@ -134,7 +134,7 @@ const fundLabel = (fund: FundData): string =>
               :class="{ active: sortKey === 'name' }"
               @click="setSort('name')"
             >
-              基金名稱<span class="arrow">{{ arrow('name') }}</span>
+              基金名稱（基金統編）<span class="arrow">{{ arrow('name') }}</span>
             </th>
             <th
               class="c sortable"

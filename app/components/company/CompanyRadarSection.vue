@@ -119,7 +119,7 @@ const scoreLegend = [
           </div>
           <div class="unscored-overlay">
             <p class="text-base font-semibold text-earth-brown">
-              無資料，無法評分
+              無資料，無法繪製雷達圖
             </p>
           </div>
         </div>

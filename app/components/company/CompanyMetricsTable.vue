@@ -142,7 +142,7 @@ const allMetrics = computed<Metric[]>(() => [
           </UTooltip>
         </span>
         <span
-          class="text-sm font-medium text-right"
+          class="text-sm font-medium text-right whitespace-nowrap"
           :class="{
             'text-accent-red': item.isNegative,
             'text-green-deep': item.isPositive
@@ -153,7 +153,7 @@ const allMetrics = computed<Metric[]>(() => [
       </div>
     </div>
     <p class="text-xs text-earth-brown/60">
-      NA：無法取得資料
+      無法取得資料的部分用 NA 表示
     </p>
   </div>
 </template>

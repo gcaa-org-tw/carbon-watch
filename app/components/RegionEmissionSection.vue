@@ -268,7 +268,7 @@ const heatItems = [
             rel="noopener noreferrer"
             class="btn-act"
           >
-            地方淨零觀測站 <span class="ext">↗</span>
+            地方淨零觀測站<UIcon name="i-heroicons-arrow-top-right-on-square-20-solid" class="ext" aria-hidden="true" />
           </a>
         </div>
         <TaiwanMap
@@ -298,7 +298,7 @@ const heatItems = [
             rel="noopener noreferrer"
             class="btn-act"
           >
-            地方淨零觀測站 <span class="ext">↗</span>
+            地方淨零觀測站<UIcon name="i-heroicons-arrow-top-right-on-square-20-solid" class="ext" aria-hidden="true" />
           </a>
         </div>
         <TaiwanMap
@@ -499,7 +499,8 @@ const heatItems = [
 }
 
 .ext {
-  font-size: 11px;
+  width: 0.85em;
+  height: 0.85em;
 }
 
 @media (max-width: 900px) {

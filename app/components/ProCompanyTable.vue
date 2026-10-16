@@ -303,7 +303,7 @@ const tableRows = computed(() =>
       </table>
     </div>
 
-    <p class="table-note">NA：無法取得資料</p>
+    <p class="table-note">無法取得資料的部分用 NA 表示</p>
 
     <p v-if="tableRows.length === 0" class="empty-note">
       找不到符合條件的企業
