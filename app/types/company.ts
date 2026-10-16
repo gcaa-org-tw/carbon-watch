@@ -36,4 +36,5 @@ export interface CompanyData {
   '年度變化'?: number | null
   'regionEmissions'?: Array<{ 縣市: string; 排放量: number; 縣市佔比: number }>
   'factoryCounties'?: string[]
+  'factoryCountiesYear'?: number
 }

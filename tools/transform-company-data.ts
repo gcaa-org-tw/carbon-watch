@@ -68,7 +68,7 @@ import { readFileSync, writeFileSync, mkdirSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { Logger } from './lib/logger.js';
-import { normalizeCompanyName, normalizeCounty, normalizeUBN } from './lib/normalize.js';
+import { createFactoryUBNResolver, normalizeCompanyName, normalizeCounty } from './lib/normalize.js';
 import { loadCoalByCompany, padUBN, type YearTonnes } from './lib/coal-source.js';
 
 // Get directory path for ES modules
@@ -464,25 +464,34 @@ function addRegionEmissionsFromFactorySOT(
   // 企業數 to "排碳大戶 in this site's dataset", which naturally excludes
   // 電力供應業 (台電 et al. are not in our list) and avoids double-counting
   // consumer Scope 2 against producer Scope 1.
-  const allowedUBNs = new Set<string>();
-  for (const c of companyList) {
-    const u = (c['事業統編'] || '').trim();
-    if (u) allowedUBNs.add(u);
-  }
+  const resolveUBN = createFactoryUBNResolver(companyList);
 
   // Aggregate (UBN, county) → emission for the chosen year + per-county totals
   const byUBN = new Map<string, Map<string, number>>();
   const countyTotals: Record<string, number> = {};
   let yearRowCount = 0;
+  const earlierByUBN = new Map<string, { year: number; counties: Map<string, number> }>();
 
   for (const row of factoryRows) {
-    if (row['年度'] !== yearFilter) continue;
-    yearRowCount++;
-    const ubn = normalizeUBN(row['事業統編']);
-    if (!ubn || !allowedUBNs.has(ubn)) continue;
+    const isTargetYear = row['年度'] === yearFilter;
+    if (isTargetYear) yearRowCount++;
+    const ubn = resolveUBN(row);
+    if (!ubn) continue;
     const county = normalizeCounty((row['縣市別'] || '').trim());
     const amt = parseAmount(row['合計排放量(公噸CO2e)']);
     if (!county || amt <= 0) continue;
+
+    if (!isTargetYear) {
+      const year = Number(row['年度']);
+      if (!(year < Number(yearFilter))) continue;
+      const earlier = earlierByUBN.get(ubn);
+      if (!earlier || year > earlier.year) {
+        earlierByUBN.set(ubn, { year, counties: new Map([[county, amt]]) });
+      } else if (year === earlier.year) {
+        earlier.counties.set(county, (earlier.counties.get(county) || 0) + amt);
+      }
+      continue;
+    }
 
     if (!byUBN.has(ubn)) byUBN.set(ubn, new Map());
     const ubnMap = byUBN.get(ubn)!;
@@ -502,7 +511,16 @@ function addRegionEmissionsFromFactorySOT(
     if (!ubn) { noUBN++; continue; }
 
     const ubnMap = byUBN.get(ubn);
-    if (!ubnMap) { noMatch++; continue; }
+    if (!ubnMap) {
+      const earlier = earlierByUBN.get(ubn);
+      if (!earlier) { noMatch++; continue; }
+      (company as Record<string, unknown>)['factoryCounties'] = Array.from(earlier.counties.entries())
+        .sort((a, b) => b[1] - a[1])
+        .map(([county]) => county);
+      (company as Record<string, unknown>)['factoryCountiesYear'] = earlier.year + 1911;
+      logger.info(`  ${company['公司']}: no ${yearFilter} factories, factoryCounties from ${earlier.year}`);
+      continue;
+    }
 
     const sortedEntries = Array.from(ubnMap.entries())
       .map(([county, amt]) => {

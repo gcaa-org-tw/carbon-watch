@@ -25,7 +25,7 @@ import { readFileSync, writeFileSync, mkdirSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { Logger } from './lib/logger.js';
-import { normalizeCounty, normalizeUBN } from './lib/normalize.js';
+import { createFactoryUBNResolver, normalizeCounty } from './lib/normalize.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -149,11 +149,7 @@ async function transformTopCompanyRegionData() {
     // 4) Load factory SOT and build (UBN → county → emission) for year 113.
     //    Restricted to UBNs in our 287-list so the per-county breakdown lines
     //    up with the region-emission-list and detail-page county shares.
-    const allowedUBNs = new Set<string>();
-    for (const c of companies) {
-      const u = ((c['事業統編'] as string) || '').trim();
-      if (u) allowedUBNs.add(u);
-    }
+    const resolveUBN = createFactoryUBNResolver(companies);
 
     // 4a) Load factory coordinates lookup (管制編號 → wgs84 經緯度).
     const coordsPath = join(RAW_DATA_DIR, '廠座標.csv');
@@ -174,8 +170,8 @@ async function transformTopCompanyRegionData() {
     const factoriesByUBN = new Map<string, Map<string, FactoryEmission[]>>();
     for (const row of factoryRows) {
       if (row['年度'] !== FACTORY_SOT_YEAR) continue;
-      const ubn = normalizeUBN(row['事業統編']);
-      if (!ubn || !allowedUBNs.has(ubn)) continue;
+      const ubn = resolveUBN(row);
+      if (!ubn) continue;
       const county = normalizeCounty((row['縣市別'] || '').trim());
       const amt = parseAmount(row['合計排放量(公噸CO2e)']);
       if (!county || amt <= 0) continue;
