@@ -34,7 +34,7 @@ import { readFileSync, writeFileSync, mkdirSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { Logger } from './lib/logger.js';
-import { normalizeCounty, normalizeUBN } from './lib/normalize.js';
+import { createFactoryUBNResolver, normalizeCounty } from './lib/normalize.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -111,12 +111,7 @@ async function transformRegionMapData() {
     const companies: Array<Record<string, unknown>> = JSON.parse(
       readFileSync(companyListPath, 'utf-8')
     );
-    const allowedUBNs = new Set<string>();
-    for (const c of companies) {
-      const u = ((c['事業統編'] as string) || '').trim();
-      if (u) allowedUBNs.add(u);
-    }
-    logger.info(`Whitelist size: ${allowedUBNs.size} UBNs from company-list.json`);
+    const resolveUBN = createFactoryUBNResolver(companies);
 
     const csvPath = join(RAW_DATA_DIR, '工廠縣市排放_歷年.csv');
     logger.info(`Reading factory SOT from: ${csvPath}`);
@@ -131,8 +126,8 @@ async function transformRegionMapData() {
     for (const row of rows) {
       if (row['年度'] !== FACTORY_SOT_YEAR) continue;
       yearRowCount++;
-      const ubn = normalizeUBN(row['事業統編']);
-      if (!ubn || !allowedUBNs.has(ubn)) continue;
+      const ubn = resolveUBN(row);
+      if (!ubn) continue;
       const county = normalizeCounty((row['縣市別'] || '').trim());
       const amt = parseAmount(row['合計排放量(公噸CO2e)']);
       if (!county || amt <= 0) continue;

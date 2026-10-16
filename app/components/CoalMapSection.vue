@@ -87,18 +87,54 @@ const top10 = computed(() =>
     .slice(0, 10)
 )
 
+type TextSortKey = '廠名' | '公司簡稱' | '業別' | '縣市'
+type TableSortKey = TextSortKey | number
+
+const TEXT_COLUMNS: Array<{ key: TextSortKey, label: string }> = [
+  { key: '廠名', label: '廠名' },
+  { key: '公司簡稱', label: '所屬企業' },
+  { key: '業別', label: '業別' },
+  { key: '縣市', label: '縣市' },
+]
+
+const sortKey = ref<TableSortKey | null>(null)
+const sortDir = ref<'asc' | 'desc'>('desc')
+const activeSortKey = computed<TableSortKey>(() => sortKey.value ?? selectedYear.value)
+
+const setSort = (key: TableSortKey) => {
+  if (activeSortKey.value === key) {
+    sortDir.value = sortDir.value === 'desc' ? 'asc' : 'desc'
+  } else {
+    sortDir.value = typeof key === 'number' ? 'desc' : 'asc'
+  }
+  sortKey.value = key
+}
+
+const sortArrow = (key: TableSortKey): string =>
+  activeSortKey.value === key ? (sortDir.value === 'desc' ? '↓' : '↑') : ''
+
 const tableRows = computed(() => {
-  const tieBreakYears = [...COAL_YEARS].reverse().filter(y => y !== selectedYear.value)
-  const sortYears = [selectedYear.value, ...tieBreakYears]
-  return factories
-    .filter(f => isHighlighted(f.業別) && COAL_YEARS.some(y => coalValueOf(f, y) > 0))
-    .sort((a, b) => {
-      for (const y of sortYears) {
-        const diff = coalValueOf(b, y) - coalValueOf(a, y)
-        if (diff !== 0) return diff
-      }
-      return 0
-    })
+  const key = activeSortKey.value
+  const dir = sortDir.value === 'asc' ? 1 : -1
+  const rows = factories.filter(f => isHighlighted(f.業別) && COAL_YEARS.some(y => coalValueOf(f, y) > 0))
+  if (typeof key !== 'number') {
+    return rows.sort((a, b) =>
+      zhCollator.compare(a[key], b[key]) * dir
+      || coalValueOf(b, selectedYear.value) - coalValueOf(a, selectedYear.value)
+    )
+  }
+  const tieBreakYears = [...COAL_YEARS].reverse().filter(y => y !== key)
+  return rows.sort((a, b) => {
+    const av = coalValueOf(a, key)
+    const bv = coalValueOf(b, key)
+    if ((av > 0) !== (bv > 0)) return av > 0 ? -1 : 1
+    if (av !== bv) return (av - bv) * dir
+    for (const y of tieBreakYears) {
+      const diff = coalValueOf(b, y) - coalValueOf(a, y)
+      if (diff !== 0) return diff
+    }
+    return 0
+  })
 })
 
 const selected = ref<CoalMapFactory | null>(null)
@@ -415,20 +451,29 @@ const isStreetLevel = (f: CoalMapFactory) => f.座標來源.startsWith('OSM')
           <thead>
             <tr class="bg-surface-warm text-earth-brown/80 text-left">
               <th rowspan="2" class="px-3 py-2 font-normal w-10 text-right">#</th>
-              <th rowspan="2" class="px-3 py-2 font-normal whitespace-nowrap">廠名</th>
-              <th rowspan="2" class="px-3 py-2 font-normal whitespace-nowrap">所屬企業</th>
-              <th rowspan="2" class="px-3 py-2 font-normal whitespace-nowrap">業別</th>
-              <th rowspan="2" class="px-3 py-2 font-normal whitespace-nowrap">縣市</th>
+              <th
+                v-for="col in TEXT_COLUMNS"
+                :key="col.key"
+                rowspan="2"
+                class="px-3 py-2 font-normal whitespace-nowrap cursor-pointer select-none hover:text-earth-brown"
+                :class="activeSortKey === col.key ? 'text-green-mint' : ''"
+                :aria-sort="activeSortKey === col.key ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none'"
+                @click="setSort(col.key)"
+              >
+                {{ col.label }}<span class="ml-0.5 text-xs">{{ sortArrow(col.key) }}</span>
+              </th>
               <th colspan="3" class="px-3 pt-2 pb-1 font-normal text-center whitespace-nowrap">用煤量（公噸）</th>
             </tr>
             <tr class="bg-surface-warm text-earth-brown/80 text-left">
               <th
                 v-for="y in COAL_YEARS"
                 :key="y"
-                class="px-3 pb-2 font-normal text-right whitespace-nowrap"
-                :class="y === selectedYear ? 'text-green-mint font-semibold' : ''"
+                class="px-3 pb-2 font-normal text-right whitespace-nowrap cursor-pointer select-none hover:text-earth-brown"
+                :class="[y === selectedYear ? 'font-semibold' : '', activeSortKey === y || y === selectedYear ? 'text-green-mint' : '']"
+                :aria-sort="activeSortKey === y ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none'"
+                @click="setSort(y)"
               >
-                {{ y }} 年
+                {{ y }} 年<span class="ml-0.5 text-xs">{{ sortArrow(y) }}</span>
               </th>
             </tr>
           </thead>
