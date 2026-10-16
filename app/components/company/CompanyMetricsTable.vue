@@ -19,9 +19,9 @@ const hasReport = computed(() => props.company['有永續報告書'] !== false)
 
 const plain = (value: string, isNegative = false, isPositive = false) => ({ value, isNegative, isPositive })
 
-// ✅/❌ flags; blank is treated like missing data
-const checkMetric = (raw: string | undefined) => {
-  const value = reportCheck(raw, hasReport.value)
+// Report flags: only RE100 shows ✗; any other non-✅ means the report does not say
+const checkMetric = (raw: string | undefined, showCross = false) => {
+  const value = reportCheck(raw, hasReport.value, showCross)
   return plain(value, value === '✗')
 }
 
@@ -59,12 +59,10 @@ const formatPercent = (value: string): string => {
   return `${Math.round(decimal * 100)}%`
 }
 
-// Target fields where raw 'NA' means "no target set" (✗) once a report exists
 const targetMetric = (raw: string | undefined, format: (v: string) => string = v => v, positive = false) => {
   if (!hasReport.value) return plain(NO_REPORT)
   const s = String(raw ?? '').trim()
-  if (s === '') return plain(NOT_DISCLOSED)
-  if (s === 'NA') return plain('✗', true)
+  if (s === '' || s === 'NA') return plain(NOT_DISCLOSED)
   return plain(format(s), false, positive)
 }
 
@@ -105,7 +103,7 @@ const allMetrics = computed<Metric[]>(() => [
   { label: '再生能源設置容量', ...capacityMetric(props.company['再生能源設置容量']) },
   { label: '是否完成用電大戶再生能源設置義務', ...obligationMetric(props.company['是否完成用電大戶再生能源設置義務']) },
   { label: '中期再生能源目標設定', ...targetMetric(props.company['中期再生能源目標設定'], formatPercent, true) },
-  { label: 'RE100 承諾', ...checkMetric(props.company['RE100 承諾']) },
+  { label: 'RE100 承諾', ...checkMetric(props.company['RE100 承諾'], true) },
   { label: '2025 年燃煤使用量（公噸）', ...coalMetric(props.company['燃煤使用量（公噸）']) },
   { label: '2025 年用煤佔全台製造業比例', ...coalShareMetric(props.company['用煤佔全台製造業比例']) }
 ])

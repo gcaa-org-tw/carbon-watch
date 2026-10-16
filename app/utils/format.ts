@@ -27,9 +27,9 @@ export const reportPlaceholder = (raw: string | number | null | undefined, hasRe
   return undefined
 }
 
-export const reportCheck = (raw: string | null | undefined, hasReport: boolean): string => {
+export const reportCheck = (raw: string | null | undefined, hasReport: boolean, showCross = false): string => {
   if (!hasReport) return NO_REPORT
   if (raw === '✅') return '✓'
-  if (raw === '❌') return '✗'
+  if (showCross && raw === '❌') return '✗'
   return NOT_DISCLOSED
 }
