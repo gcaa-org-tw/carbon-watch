@@ -66,7 +66,7 @@ const netZeroText = (company: CompanyData): string => {
   const placeholder = reportPlaceholder(raw, hasReport(company))
   if (placeholder) return placeholder
   const s = String(raw).trim()
-  return s === '無' || s === '無承諾' ? '無承諾' : s
+  return s === '無' || s === '無承諾' ? NOT_DISCLOSED : s
 }
 
 // 燃煤使用量：整數公噸；空白顯示破折號，0 顯示 0（company-grade-map：≥1 即「遠低於期望」）

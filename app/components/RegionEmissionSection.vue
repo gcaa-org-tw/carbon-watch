@@ -99,8 +99,10 @@ onMounted(() => {
   }
 })
 
+const hasMobileFocus = ref(false)
+
 const focusedRegion = computed(() => {
-  if (isPhone.value && activeCardIndex.value >= 0) {
+  if (isPhone.value && hasMobileFocus.value && activeCardIndex.value >= 0) {
     return mergedRegions.value[activeCardIndex.value]?.縣市 || null
   }
   return null
@@ -112,6 +114,7 @@ const handleScroll = () => {
   const cardWidth = window.innerWidth * 0.7 + 16
   const newIndex = Math.round(scrollLeft / cardWidth)
   if (newIndex !== activeCardIndex.value) {
+    hasMobileFocus.value = true
     activeCardIndex.value = newIndex
     // Keep the region actions in sync once the user has engaged with the map.
     if (selectedRegion.value) {
@@ -126,6 +129,7 @@ const selectRegionOnMobile = async (regionName: string) => {
   selectedRegion.value = regionName
   const mergedIndex = mergedRegions.value.findIndex(r => r.縣市 === regionName)
   if (mergedIndex === -1) return
+  hasMobileFocus.value = true
   activeCardIndex.value = mergedIndex
   await nextTick()
   const cardWidth = window.innerWidth * 0.7 + 16
