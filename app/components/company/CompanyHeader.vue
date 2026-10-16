@@ -21,7 +21,7 @@ const netZeroText = computed(() => {
   const placeholder = reportPlaceholder(props.淨零目標年, props.有永續報告書 !== false)
   if (placeholder) return placeholder
   const raw = String(props.淨零目標年).trim()
-  return raw === '無' || raw === '無承諾' ? '無承諾' : raw
+  return raw === '無' || raw === '無承諾' ? NOT_DISCLOSED : raw
 })
 
 const feeNote = computed(() =>

@@ -34,12 +34,9 @@ const sbtiMetric = (raw: string | undefined) => {
   return plain(raw)
 }
 
-// 用電大戶義務 only ever carries ✅; anything else is missing data, never a negative
-const obligationMetric = (raw: string | undefined) => {
-  const placeholder = reportPlaceholder(raw, hasReport.value)
-  if (placeholder) return plain(placeholder)
-  return plain(raw === '✅' ? '✓' : NOT_DISCLOSED)
-}
+// 用電大戶義務 comes from government records, not the report: blank means not fulfilled
+const obligationMetric = (raw: string | undefined) =>
+  raw === '✅' ? plain('✓') : plain('✗', true)
 
 // 能源密集度變化率: + = intensity rose (worse → red), − = fell (improved → green)
 const intensityChange = (val: string | undefined) => {

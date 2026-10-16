@@ -77,11 +77,11 @@ const REPORT_KEYS = new Set<keyof CompanyData>([
   '節能目標設定',
   '再生能源使用率',
   '再生能源設置容量',
-  '是否完成用電大戶再生能源設置義務',
   '中期再生能源目標設定',
   'RE100 承諾',
   '有具體減量策略',
 ])
+const OBLIGATION_KEY = '是否完成用電大戶再生能源設置義務'
 const UNSET_KEYS = new Set<keyof CompanyData>(['節能目標設定', '中期再生能源目標設定'])
 
 const placeholderFor = (company: CompanyData, col: Col): string | undefined => {
@@ -120,6 +120,7 @@ const statusCell = (company: CompanyData, col: Col): Extract<Cell, { kind: 'stat
   }
   const s = String(raw ?? '').trim()
   if (s === EMOJI_CHECK) return { kind: 'status', tone: 'yes', text: TEXT_CHECK }
+  if (col.key === OBLIGATION_KEY) return { kind: 'status', tone: 'no', text: TEXT_CROSS }
   if (s === EMOJI_CROSS) return { kind: 'status', tone: 'no', text: TEXT_CROSS }
   if (s === '') return { kind: 'status', tone: 'text', text: '—' }
   return { kind: 'status', tone: 'text', text: s }
@@ -161,7 +162,7 @@ const buildCell = (company: CompanyData, col: Col): Cell => {
       if (placeholder) return { kind: 'text', text: placeholder }
       if (isBlank(raw)) return { kind: 'text', text: '—' }
       const s = String(raw).trim()
-      if (col.key === '淨零目標年' && (s === '無' || s === '無承諾')) return { kind: 'text', text: '無承諾' }
+      if (col.key === '淨零目標年' && (s === '無' || s === '無承諾')) return { kind: 'text', text: NOT_DISCLOSED }
       if (s.endsWith('%')) return { kind: 'text', text: formatPercent(s) }
       return { kind: 'text', text: s }
     }
