@@ -33,7 +33,6 @@ const tooltipState = ref<{
   value: string
 } | null>(null)
 
-const integerFormat = d3.format(',.0f')
 const intensityFormat = (v: number) => v >= 100 ? d3.format(',.1f')(v) : d3.format(',.2f')(v)
 const axisInteger = (v: number, step: number, max: number) => {
   if (v === 0) return '0'
@@ -57,7 +56,7 @@ const charts = computed<ChartSpec[]>(() => {
       unit: '公噸 CO₂e',
       color: '#FF4040',
       data: props.ghg,
-      formatValue: integerFormat,
+      formatValue: formatApprox,
       formatAxis: axisInteger,
     })
   }
@@ -79,7 +78,7 @@ const charts = computed<ChartSpec[]>(() => {
       unit: 'MJ',
       color: '#7A9CFF',
       data: props.energy,
-      formatValue: integerFormat,
+      formatValue: formatApprox,
       formatAxis: axisInteger,
     })
   }

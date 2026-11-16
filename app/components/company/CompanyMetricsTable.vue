@@ -59,11 +59,13 @@ const formatPercent = (value: string): string => {
   return `${Math.round(decimal * 100)}%`
 }
 
-const targetMetric = (raw: string | undefined, format: (v: string) => string = v => v, positive = false) => {
+const targetMetric = (raw: string | undefined, targetYear: string | undefined, format: (v: string) => string = v => v, positive = false) => {
   if (!hasReport.value) return plain(NO_REPORT)
   const s = String(raw ?? '').trim()
   if (s === '' || s === 'NA') return plain(NOT_DISCLOSED)
-  return plain(format(s), false, positive)
+  const year = String(targetYear ?? '').trim()
+  const note = /^\d{4}$/.test(year) ? `（${year} 年）` : ''
+  return plain(`${format(s)}${note}`, false, positive)
 }
 
 const rawMetric = (raw: string | undefined) => {
@@ -75,7 +77,7 @@ const formatNumberWithUnit = (raw: string | undefined, unit: string) => {
   const s = String(raw ?? '').trim()
   if (s === '') return NOT_DISCLOSED
   const num = Math.round(parseFloat(s.replace(/,/g, '')))
-  return isNaN(num) ? NOT_DISCLOSED : `${num.toLocaleString('zh-TW')} ${unit}`
+  return isNaN(num) ? NOT_DISCLOSED : formatApproxWithUnit(num, unit)
 }
 
 const capacityMetric = (raw: string | undefined) => {
@@ -97,12 +99,12 @@ const allMetrics = computed<Metric[]>(() => [
   { label: 'SBTi 承諾', ...sbtiMetric(props.company['SBTi 承諾']) },
   { label: '範疇三揭露', ...checkMetric(props.company['範疇三揭露']) },
   { label: '範疇三減量規劃', ...checkMetric(props.company['範疇三減量規劃']) },
-  { label: '近三年能源密集度變化率', ...intensityChange(props.company['近三年能效進步率']) },
-  { label: '節能目標設定', ...targetMetric(props.company['節能目標設定']) },
-  { label: '再生能源使用率', ...rawMetric(props.company['再生能源使用率']) },
-  { label: '再生能源設置容量', ...capacityMetric(props.company['再生能源設置容量']) },
+  { label: '近三年（2022–2024）能源密集度變化率', ...intensityChange(props.company['近三年能效進步率']) },
+  { label: '節能目標設定', ...targetMetric(props.company['節能目標設定'], props.company['節能目標年設定']) },
+  { label: '2024 年再生能源使用率', ...rawMetric(props.company['再生能源使用率']) },
+  { label: '2024 年再生能源設置容量', ...capacityMetric(props.company['再生能源設置容量']) },
   { label: '是否完成用電大戶再生能源設置義務', ...obligationMetric(props.company['是否完成用電大戶再生能源設置義務']) },
-  { label: '中期再生能源目標設定', ...targetMetric(props.company['中期再生能源目標設定'], formatPercent, true) },
+  { label: '中期再生能源目標設定', ...targetMetric(props.company['中期再生能源目標設定'], props.company['再生能源目標年設定'], formatPercent, true) },
   { label: 'RE100 承諾', ...checkMetric(props.company['RE100 承諾'], true) },
   { label: '2025 年燃煤使用量（公噸）', ...coalMetric(props.company['燃煤使用量（公噸）']) },
   { label: '2025 年用煤佔全台製造業比例', ...coalShareMetric(props.company['用煤佔全台製造業比例']) }

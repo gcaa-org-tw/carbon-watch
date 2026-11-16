@@ -117,8 +117,6 @@ const tooltipStyle = computed(() => {
   return { left: `${x}px`, top: `${y}px` }
 })
 
-const formatTonnes = (n: number) => n.toLocaleString('en-US')
-
 const startRotation = () => {
   if (autoplayStopped.value) return
   if (timer) clearInterval(timer)
@@ -243,7 +241,7 @@ onUnmounted(() => {
             {{ selectedCompany.公司 }} · {{ hoveredCounty }}
           </div>
           <div class="text-xs text-earth-brown mt-0.5 whitespace-nowrap">
-            {{ tooltipDisplay.factoryCount }} 廠 · 合計 {{ formatTonnes(tooltipDisplay.total.總排放) }} 公噸 CO₂e
+            {{ tooltipDisplay.factoryCount }} 廠 · 合計{{ formatApprox(tooltipDisplay.total.總排放) }}公噸 CO₂e
           </div>
         </div>
         <table class="w-full text-xs">
@@ -262,18 +260,18 @@ onUnmounted(() => {
               class="border-t border-earth-brown/15"
             >
               <td class="px-3 py-1 whitespace-nowrap">{{ f.名稱 }}</td>
-              <td class="px-2 py-1 text-right tabular-nums whitespace-nowrap">{{ formatTonnes(f.範疇一) }}</td>
-              <td class="px-2 py-1 text-right tabular-nums whitespace-nowrap">{{ formatTonnes(f.範疇二) }}</td>
-              <td class="px-3 py-1 text-right tabular-nums whitespace-nowrap font-medium">{{ formatTonnes(f.總排放) }}</td>
+              <td class="px-2 py-1 text-right tabular-nums whitespace-nowrap">{{ formatApprox(f.範疇一) }}</td>
+              <td class="px-2 py-1 text-right tabular-nums whitespace-nowrap">{{ formatApprox(f.範疇二) }}</td>
+              <td class="px-3 py-1 text-right tabular-nums whitespace-nowrap font-medium">{{ formatApprox(f.總排放) }}</td>
             </tr>
             <tr
               v-if="tooltipDisplay.collapsed"
               class="border-t border-earth-brown/20 text-earth-brown/70 italic"
             >
               <td class="px-3 py-1 whitespace-nowrap">其他 {{ tooltipDisplay.collapsed.count }} 廠 合計</td>
-              <td class="px-2 py-1 text-right tabular-nums whitespace-nowrap">{{ formatTonnes(tooltipDisplay.collapsed.範疇一) }}</td>
-              <td class="px-2 py-1 text-right tabular-nums whitespace-nowrap">{{ formatTonnes(tooltipDisplay.collapsed.範疇二) }}</td>
-              <td class="px-3 py-1 text-right tabular-nums whitespace-nowrap font-medium">{{ formatTonnes(tooltipDisplay.collapsed.總排放) }}</td>
+              <td class="px-2 py-1 text-right tabular-nums whitespace-nowrap">{{ formatApprox(tooltipDisplay.collapsed.範疇一) }}</td>
+              <td class="px-2 py-1 text-right tabular-nums whitespace-nowrap">{{ formatApprox(tooltipDisplay.collapsed.範疇二) }}</td>
+              <td class="px-3 py-1 text-right tabular-nums whitespace-nowrap font-medium">{{ formatApprox(tooltipDisplay.collapsed.總排放) }}</td>
             </tr>
           </tbody>
         </table>

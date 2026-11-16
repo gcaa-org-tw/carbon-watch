@@ -1,6 +1,6 @@
 <!-- eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars -->
 <script setup lang="ts">
-import { ref, onMounted, watch, nextTick } from 'vue'
+import { ref, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import * as d3 from 'd3'
 import { feature } from 'topojson-client'
 import type { Topology, GeometryCollection } from 'topojson-specification'
@@ -52,11 +52,16 @@ let g: d3.Selection<SVGGElement, unknown, null, undefined> | null = null
 let zoom: d3.ZoomBehavior<SVGSVGElement, unknown> | null = null
 let markersG: d3.Selection<SVGGElement, unknown, null, undefined> | null = null
 let mapProjection: d3.GeoProjection | null = null
+let offshoreBounds = new Map<string, [[number, number], [number, number]]>()
 // Timestamp until which synthetic clicks are ignored (set right after a
 // touch tap is handled, to swallow the browser's follow-up ghost click).
 let suppressClickUntil = 0
 // Start point of an in-progress single-finger touch on a county path.
 let tapOrigin: { x: number, y: number } | null = null
+
+let drawnSize = { width: 0, height: 0 }
+let drawRun = 0
+let resizeObserver: ResizeObserver | null = null
 
 const initMap = async () => {
   if (!svgRef.value || !containerRef.value) return
@@ -67,6 +72,8 @@ const initMap = async () => {
   const container = containerRef.value
   const width = container.clientWidth
   const height = container.clientHeight
+  drawnSize = { width, height }
+  const run = ++drawRun
 
   // Create SVG
   svg = d3.select(svgRef.value)
@@ -94,12 +101,21 @@ const initMap = async () => {
 
   const path = d3.geoPath().projection(projection)
 
+  const offshoreTopo = await import('~/assets/tw-offshore-counties.json')
+  if (run !== drawRun) return
+  const offshoreTopology = offshoreTopo as unknown as Topology
+  const offshoreData = feature(
+    offshoreTopology,
+    (offshoreTopology.objects as { map: GeometryCollection }).map
+  )
+  const insetPaths = drawOffshoreFrames(offshoreData.features, projection, width, height)
+
   // Draw counties
   g.selectAll('path')
-    .data(geoData.features)
+    .data([...geoData.features, ...offshoreData.features])
     .enter()
     .append('path')
-    .attr('d', path as any)
+    .attr('d', (d: any) => (insetPaths.get(d.properties?.name) ?? path)(d))
     .attr('class', 'county')
     .attr('data-name', (d: any) => d.properties?.name || '')
     .attr('fill', 'var(--color-surface-warm, #f5f5dc)')
@@ -232,6 +248,70 @@ const initMap = async () => {
   emit('mapLoaded')
 }
 
+// 插圖框不超出主投影 (120.03°E, 22.95°N) 以西以南的範圍，該處主圖只有海面
+const OFFSHORE_ORDER = ['連江縣', '金門縣']
+const OFFSHORE_CORNER: [number, number] = [120.03, 22.95]
+
+const drawOffshoreFrames = (
+  features: GeoJSON.Feature[],
+  projection: d3.GeoProjection,
+  width: number,
+  height: number,
+) => {
+  const insetPaths = new Map<string, d3.GeoPath<any, d3.GeoPermissibleObjects>>()
+  offshoreBounds = new Map()
+  const corner = projection(OFFSHORE_CORNER)
+  if (!g || !corner) return insetPaths
+
+  const pad = Math.max(4, width * 0.015)
+  const gap = Math.max(4, height * 0.015)
+  const availH = (height - pad - corner[1] - gap) / 2
+  const frameW = Math.min(corner[0] - pad, availH * 1.8)
+  const frameH = Math.min(availH, frameW * 0.9)
+  const stackTop = height - pad - 2 * frameH - gap
+  const left = corner[0] - frameW
+  const fontSize = Math.max(9, Math.min(12, frameH * 0.16))
+  const inner = Math.max(3, frameH * 0.08)
+  if (frameH <= 0 || frameW <= 0) return insetPaths
+
+  OFFSHORE_ORDER.forEach((name, i) => {
+    const f = features.find(ft => ft.properties?.name === name)
+    if (!f) return
+    const top = stackTop + i * (frameH + gap)
+
+    g!.append('rect')
+      .attr('x', left)
+      .attr('y', top)
+      .attr('width', frameW)
+      .attr('height', frameH)
+      .attr('rx', 2)
+      .attr('fill', 'none')
+      .attr('stroke', 'var(--color-earth-brown, #8B4513)')
+      .attr('stroke-opacity', 0.4)
+      .attr('stroke-width', 0.75)
+      .attr('pointer-events', 'none')
+
+    g!.append('text')
+      .attr('x', left + inner)
+      .attr('y', top + inner)
+      .attr('dominant-baseline', 'hanging')
+      .attr('font-size', fontSize)
+      .attr('fill', 'var(--color-earth-brown, #8B4513)')
+      .attr('pointer-events', 'none')
+      .text(name)
+
+    const insetProjection = d3.geoMercator().fitExtent(
+      [[left + inner, top + inner + fontSize * 1.3], [left + frameW - inner, top + frameH - inner]],
+      f,
+    )
+    const insetPath = d3.geoPath().projection(insetProjection)
+    insetPaths.set(name, insetPath)
+    offshoreBounds.set(name, insetPath.bounds(f))
+  })
+
+  return insetPaths
+}
+
 // 廠區點位：淡紅實心圓點。淡紅 fill 對亮綠 highlight 亮度對比僅約 1:1（紅綠色弱
 // 也難靠色相區辨），邊界由深色外圈承擔——surface-warm 對綠 6.8:1，亮度差對各型
 // 色覺都成立；外徑 2r＋ring＝8px，與先前 × 記號同跨距
@@ -303,7 +383,8 @@ const zoomToRegion = async (regionName: string) => {
 
   // Find the feature for the region
   const regionFeature = geoData.features.find((f: any) => f.properties?.name === regionName)
-  if (!regionFeature) return
+  const insetBounds = offshoreBounds.get(regionName)
+  if (!regionFeature && !insetBounds) return
 
   // Create projection
   const projection = d3.geoMercator()
@@ -312,7 +393,7 @@ const zoomToRegion = async (regionName: string) => {
   const path = d3.geoPath().projection(projection)
 
   // Get bounds of the region
-  const bounds = path.bounds(regionFeature as any)
+  const bounds = insetBounds ?? path.bounds(regionFeature as any)
   const dx = bounds[1][0] - bounds[0][0]
   const dy = bounds[1][1] - bounds[0][1]
   const x = (bounds[0][0] + bounds[1][0]) / 2
@@ -372,17 +453,17 @@ watch(() => props.focusedRegion, async (newRegion) => {
 onMounted(() => {
   initMap()
 
-  // Handle window resize
-  const handleResize = () => {
+  // The container can change size without a window resize (e.g. the phone carousel appearing below the map)
+  resizeObserver = new ResizeObserver(() => {
+    const el = containerRef.value
+    if (!el || (el.clientWidth === drawnSize.width && el.clientHeight === drawnSize.height)) return
     initMap()
-  }
+  })
+  if (containerRef.value) resizeObserver.observe(containerRef.value)
+})
 
-  window.addEventListener('resize', handleResize)
-
-  // Cleanup
-  return () => {
-    window.removeEventListener('resize', handleResize)
-  }
+onBeforeUnmount(() => {
+  resizeObserver?.disconnect()
 })
 </script>
 

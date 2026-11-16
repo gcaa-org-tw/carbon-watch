@@ -88,6 +88,7 @@ interface CompanyData {
   代表縣市: string;
   事業統編: string;
   公司全名: string;
+  持股比率?: string;
 }
 
 /**
@@ -251,7 +252,9 @@ function generateFundCompanyLists(
   const seenPerFund = new Map<string, Set<string>>();
   let unmatched = 0;
 
-  const addHolding = (fundKey: string | undefined, companyUbn: string, label: string) => {
+  const addHolding = (fundKey: string | undefined, row: Record<string, string>) => {
+    const companyUbn = normUBN(row['統一編號']);
+    const label = row['證券簡稱'] || '';
     if (!fundKey || !companyUbn) return;
     const company = companyByUBN.get(companyUbn);
     if (!company) {
@@ -264,14 +267,14 @@ function generateFundCompanyLists(
     if (seen.has(companyUbn)) return; // a fund holds a company once
     seen.add(companyUbn);
     if (!fundCompanyLists.has(fundKey)) fundCompanyLists.set(fundKey, []);
-    fundCompanyLists.get(fundKey)!.push(company);
+    fundCompanyLists.get(fundKey)!.push({ ...company, 持股比率: (row['持股比率'] || '').trim() });
   };
 
   // Manager holdings (VI): resolve fund by real ticker.
   managerHoldings.forEach(row => {
     if (String(row['是否排碳大戶']).trim().toUpperCase() !== 'TRUE') return;
     const fundKey = mgrCodeToFundKey.get((row['基金代號'] || '').trim());
-    addHolding(fundKey, normUBN(row['統一編號']), row['證券簡稱'] || '');
+    addHolding(fundKey, row);
   });
 
   // Added holdings (XV): resolve 基金代號 -> 統編 via sitca; keep only the added 10.
@@ -279,7 +282,7 @@ function generateFundCompanyLists(
     if (String(row['是否排碳大戶']).trim().toUpperCase() !== 'TRUE') return;
     const ubn = esgCodeToUbn.get((row['基金代號'] || '').trim());
     if (!ubn || !addedUbnSet.has(ubn)) return; // skip in-manager ESG funds (counted via VI)
-    addHolding(ubn, normUBN(row['統一編號']), row['證券簡稱'] || '');
+    addHolding(ubn, row);
   });
 
   fundCompanyLists.forEach((companies, fundKey) =>

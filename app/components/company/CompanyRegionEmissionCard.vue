@@ -8,7 +8,7 @@ interface Props {
 const props = defineProps<Props>()
 
 const formattedEmission = computed(() => {
-  return props.排放量.toLocaleString('zh-TW')
+  return formatApproxWithUnit(props.排放量, '公噸')
 })
 </script>
 
@@ -27,7 +27,7 @@ const formattedEmission = computed(() => {
       />
     </div>
     <p class="text-sm text-earth-brown whitespace-nowrap">
-      {{ formattedEmission }} 公噸
+      {{ formattedEmission }}
     </p>
   </div>
 </template>

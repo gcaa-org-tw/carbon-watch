@@ -5,8 +5,10 @@ const props = withDefaults(defineProps<{
   rows: CompanyData[]
   // 基金頁：把燃煤使用量欄移到排放量前，並預設以燃煤用量遞減排序
   coalFirst?: boolean
+  showHoldingShare?: boolean
 }>(), {
   coalFirst: false,
+  showHoldingShare: false,
 })
 
 /* ── 欄位定義 ─────────────────────────────────────────── */
@@ -25,6 +27,12 @@ const COAL_KEY = '燃煤使用量（公噸）' as const
 const CAPACITY_KEY = '再生能源設置容量' as const
 const INTENSITY_KEY = '近三年能效進步率' as const
 const EMISSION_KEY = '溫室氣體排放量（公噸二氧化碳當量）' as const
+const HOLDING_KEY = '持股比率' as const
+
+const TARGET_YEAR_KEYS: Partial<Record<keyof CompanyData, keyof CompanyData>> = {
+  節能目標設定: '節能目標年設定',
+  中期再生能源目標設定: '再生能源目標年設定',
+}
 
 const BASE_COLUMNS: Col[] = [
   { key: '公司', label: '企業名稱', kind: 'company', sortable: true },
@@ -36,23 +44,28 @@ const BASE_COLUMNS: Col[] = [
   { key: '有具體減量策略', label: '有關鍵減量策略', align: 'c', kind: 'status', sortable: true },
   { key: '範疇三揭露', label: '範疇三揭露', align: 'c', kind: 'status', sortable: true },
   { key: '範疇三減量規劃', label: '範疇三減量規劃', align: 'c', kind: 'status', sortable: true },
-  { key: '近三年能效進步率', label: '近三年能源密集度變化率', align: 'c', kind: 'num', sortable: true },
+  { key: '近三年能效進步率', label: '近三年（2022–2024）能源密集度變化率', align: 'c', kind: 'num', sortable: true },
   { key: '節能目標設定', label: '節能目標設定', align: 'c', kind: 'num', sortable: true },
   { key: '再生能源使用率', label: '2024 年再生能源使用率', align: 'c', kind: 'num', sortable: true },
-  { key: '再生能源設置容量', label: '再生能源設置容量（kW）', align: 'r', kind: 'num', sortable: true },
+  { key: '再生能源設置容量', label: '2024 年再生能源設置容量（kW）', align: 'r', kind: 'num', sortable: true },
   { key: '是否完成用電大戶再生能源設置義務', label: '用電大戶再生能源設置義務', align: 'c', kind: 'status', sortable: true },
   { key: '中期再生能源目標設定', label: '中期再生能源目標設定', align: 'c', kind: 'num', sortable: true },
   { key: 'RE100 承諾', label: 'RE100 承諾', align: 'c', kind: 'status', sortable: true },
-  { key: '燃煤使用量（公噸）', label: '燃煤使用量（公噸）', align: 'r', kind: 'num', sortable: true },
+  { key: '燃煤使用量（公噸）', label: '2025 年燃煤使用量（公噸）', align: 'r', kind: 'num', sortable: true },
 ]
 
 // coalFirst：把燃煤欄移到企業名稱／產業分類之後、排放量之前（基金頁倡議框架）
+const HOLDING_COLUMN: Col = { key: HOLDING_KEY, label: '持股佔比', align: 'r', kind: 'num', sortable: true }
+
 const COLUMNS = computed<Col[]>(() => {
-  if (!props.coalFirst) return BASE_COLUMNS
-  const coal = BASE_COLUMNS.find(c => c.key === COAL_KEY)
-  if (!coal) return BASE_COLUMNS
-  const rest = BASE_COLUMNS.filter(c => c.key !== COAL_KEY)
-  return [...rest.slice(0, 2), coal, ...rest.slice(2)]
+  const coal = props.coalFirst ? BASE_COLUMNS.find(c => c.key === COAL_KEY) : undefined
+  const rest = coal ? BASE_COLUMNS.filter(c => c.key !== COAL_KEY) : BASE_COLUMNS
+  return [
+    ...rest.slice(0, 2),
+    ...(props.showHoldingShare ? [HOLDING_COLUMN] : []),
+    ...(coal ? [coal] : []),
+    ...rest.slice(2),
+  ]
 })
 
 /* ── 格式化 ───────────────────────────────────────────── */
@@ -101,6 +114,12 @@ const formatPercent = (s: string): string => {
   return Number.isNaN(n) ? s : `${n.toFixed(1)}%`
 }
 
+const targetYearNote = (company: CompanyData, col: Col): string | undefined => {
+  const yearKey = TARGET_YEAR_KEYS[col.key]
+  const year = yearKey ? String(company[yearKey] ?? '').trim() : ''
+  return /^\d{4}$/.test(year) ? `（${year} 年）` : undefined
+}
+
 const EMOJI_CHECK = String.fromCodePoint(0x2705)
 const EMOJI_CROSS = String.fromCodePoint(0x274C)
 const TEXT_CHECK = String.fromCodePoint(0x2713)
@@ -145,6 +164,7 @@ const buildCell = (company: CompanyData, col: Col): Cell => {
       }
       if (col.key === COAL_KEY || col.key === CAPACITY_KEY) return { kind: 'num', text: formatTonnes(String(raw)) }
       const s = String(raw).trim()
+      if (col.key === HOLDING_KEY) return { kind: 'num', text: s }
       if (/^-?[\d,]+(\.\d+)?$/.test(s)) {
         const n = parseNum(s)
         return { kind: 'num', text: Number.isNaN(n) ? s : n.toLocaleString('zh-TW') }
@@ -152,7 +172,7 @@ const buildCell = (company: CompanyData, col: Col): Cell => {
       if (s.endsWith('%')) {
         const n = parseNum(s)
         const tone = col.key === INTENSITY_KEY && !Number.isNaN(n) && n !== 0 ? (n < 0 ? 'good' : 'bad') : undefined
-        return { kind: 'num', text: formatPercent(s), tone }
+        return { kind: 'num', text: formatPercent(s), tone, note: targetYearNote(company, col) }
       }
       return { kind: 'num', text: s }
     }
@@ -200,13 +220,14 @@ const sortValue = (company: CompanyData, col: Col): number | string => {
   const raw = company[col.key]
   if (isTextCol(col)) return String(raw ?? '')
   if (col.key === 'SBTi 承諾') return sbtiRank(raw)
-  if (placeholderFor(company, col)) return Number.NaN
   if (col.kind === 'status') {
     const { text } = statusCell(company, col)
-    if (text === TEXT_CHECK) return 2
-    if (text === TEXT_CROSS) return 0
+    if (text === TEXT_CHECK) return 3
+    if (text === TEXT_CROSS) return 2
+    if (text === NOT_DISCLOSED) return 1
     return Number.NaN
   }
+  if (placeholderFor(company, col)) return Number.NaN
   return parseNum(raw)
 }
 

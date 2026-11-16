@@ -22,7 +22,19 @@ const tooltipState = ref<{
   value: string
 } | null>(null)
 
-const valueFormat = d3.format(',.0f')
+const yTickFormat = (yScale: d3.ScaleLinear<number, number>) => {
+  const ticks = yScale.ticks(5)
+  const step = ticks.length > 1 ? ticks[1]! - ticks[0]! : 1
+  const max = ticks[ticks.length - 1] ?? 0
+  const unit = max >= 1e8 ? 1e8 : max >= 1e4 ? 1e4 : 1
+  const suffix = unit === 1e8 ? '億' : unit === 1e4 ? '萬' : ''
+  const digits = unit === 1 ? 0 : Math.max(0, Math.ceil(Math.log10(unit / step) - 1e-9))
+  return (d: d3.NumberValue) => {
+    const v = Number(d)
+    if (v === 0) return '0'
+    return `${(v / unit).toLocaleString('zh-TW', { minimumFractionDigits: digits, maximumFractionDigits: digits })}${suffix}`
+  }
+}
 
 onMounted(() => {
   if (chartRef.value && props.data.length > 0) {
@@ -91,7 +103,7 @@ function drawSingleBar(
         x: event.clientX - containerRect.left,
         y: event.clientY - containerRect.top,
         label: `${point.year} 年`,
-        value: `${valueFormat(point.value)} 公噸`,
+        value: formatApproxWithUnit(point.value, '公噸'),
       }
     })
     .on('mouseleave', () => {
@@ -105,7 +117,7 @@ function drawSingleBar(
     .attr('fill', '#C4BE9A')
     .attr('font-size', '12px')
     .attr('pointer-events', 'none')
-    .text(valueFormat(point.value))
+    .text(formatApprox(point.value))
 
   g.append('g')
     .attr('transform', `translate(0, ${innerHeight})`)
@@ -115,7 +127,7 @@ function drawSingleBar(
     .attr('font-size', '12px')
 
   g.append('g')
-    .call(d3.axisLeft(yScale).ticks(5).tickFormat(d => d3.format(',.0f')(d as number)))
+    .call(d3.axisLeft(yScale).ticks(5).tickFormat(yTickFormat(yScale)))
     .selectAll('text')
     .attr('fill', '#C4BE9A')
     .attr('font-size', '12px')
@@ -236,7 +248,7 @@ function drawChart() {
         x: event.clientX - containerRect.left,
         y: event.clientY - containerRect.top,
         label: `${d.year} 年`,
-        value: `${valueFormat(d.value)} 公噸`,
+        value: formatApproxWithUnit(d.value, '公噸'),
       }
     })
     .on('mouseleave', () => {
@@ -266,7 +278,7 @@ function drawChart() {
 
   const yAxis = d3.axisLeft(yScale)
     .ticks(5)
-    .tickFormat(d => d3.format(',.0f')(d as number))
+    .tickFormat(yTickFormat(yScale))
 
   g.append('g')
     .call(yAxis)
