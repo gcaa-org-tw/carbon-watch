@@ -1,12 +1,28 @@
 name: Sync Data from Google Spreadsheet
 
 on:
-  workflow_dispatch: # Manual trigger only
+  workflow_dispatch:
+    inputs:
+      scope:
+        description: 'all = every tab; fund = fund holdings tabs only'
+        type: choice
+        options:
+          - all
+          - fund
+        default: all
+  schedule:
+    - cron: '0 3 * * *'
+
+permissions:
+  contents: write
+  actions: write
 
 jobs:
   sync-data:
     runs-on: ubuntu-latest
-    
+    env:
+      FUND_ONLY: ${{ github.event_name == 'schedule' || inputs.scope == 'fund' }}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -26,19 +42,36 @@ jobs:
         env:
           GOOGLE_SHEETS_API_KEY: ${{ secrets.GOOGLE_SHEETS_API_KEY }}
           GOOGLE_SHEETS_ID: ${{ secrets.GOOGLE_SHEETS_ID }}
-        run: npm run download-data
+        run: |
+          if [ "$FUND_ONLY" = "true" ]; then
+            npm run download-fund-data
+          else
+            npm run download-data
+          fi
 
       - name: Rebuild all derived JSON
         # rebuild-data chains all 6 transforms (company, fund, coal, trend,
         # region-map, top-company-region). Calling it here keeps CI and local
         # runs in sync — when a new transform is added to package.json's
         # rebuild-data chain, CI picks it up automatically.
-        run: npm run rebuild-data
+        run: |
+          if [ "$FUND_ONLY" = "true" ]; then
+            npm run transform-fund-data
+          else
+            npm run rebuild-data
+          fi
       
       - name: Commit and push changes
+        id: commit
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+          if [ "${{ github.event_name }}" = "schedule" ] && git diff --quiet -- app/assets/data/fund-period.json; then
+            echo "Holdings quarter unchanged; nothing to publish"
+            exit 0
+          fi
+
           git add raw-data/ app/assets/data/
           
           # Check if there are any changes to commit
@@ -47,4 +80,11 @@ jobs:
           else
             git commit -m "chore: sync data from Google Spreadsheet [skip ci]"
             git push origin main
+            echo "pushed=true" >> "$GITHUB_OUTPUT"
           fi
+
+      - name: Deploy
+        if: steps.commit.outputs.pushed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run deploy.yml --ref main
