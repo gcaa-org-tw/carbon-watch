@@ -225,6 +225,15 @@ function buildFund(
   };
 }
 
+function holdingsPeriod(rows: Record<string, string>[]): { 年度: number; 季別: number } {
+  const periods = [...new Set(rows.map(row => `${row['年度']}-${row['季別']}`))];
+  const [年度, 季別] = (periods[0] ?? '').split('-').map(Number);
+  if (periods.length !== 1 || !年度 || !季別) {
+    throw new Error(`Holdings must cover exactly one quarter, found: ${periods.join(', ')}`);
+  }
+  return { 年度, 季別 };
+}
+
 /**
  * Join holdings (VI manager + XV added) to funds and companies, keyed by fundKey.
  * Manager holdings resolve via the ticker map; added holdings via the sitca
@@ -315,6 +324,9 @@ async function transformFundData() {
         `ESG: ${esgSummary.length} funds / ${esgHoldings.length} holdings; sitca: ${sitca.length}`
     );
 
+    const period = holdingsPeriod([...managerHoldings, ...esgHoldings]);
+    logger.info(`Holdings quarter: ${period.年度} Q${period.季別}`);
+
     // Read company list JSON
     const companyListPath = join(OUTPUT_DIR, 'company-list.json');
     let companyListData: CompanyData[];
@@ -395,6 +407,12 @@ async function transformFundData() {
     const fundListPath = join(OUTPUT_DIR, 'fund-list.json');
     writeFileSync(fundListPath, JSON.stringify(fundList, null, 2), 'utf-8');
     logger.success(`Saved fund list to: fund-list.json`);
+    writeFileSync(
+      join(OUTPUT_DIR, 'fund-period.json'),
+      JSON.stringify(period, null, 2),
+      'utf-8'
+    );
+    logger.success(`Saved holdings quarter to: fund-period.json`);
 
     // Map fundKey -> metadata for per-fund files.
     const fundMetaMap = new Map<string, FundData>();

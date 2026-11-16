@@ -52,6 +52,11 @@ const CONSUMED_TABS: { tab: string; consumer: string }[] = [
   { tab: '鋼鐵業工廠對照', consumer: 'tools/lib/coal-source.ts' },
 ];
 
+const FUND_ONLY = process.argv.includes('--fund-only');
+const TABS = FUND_ONLY
+  ? CONSUMED_TABS.filter(({ consumer }) => consumer === 'tools/transform-fund-data.ts')
+  : CONSUMED_TABS;
+
 // Output directory for raw CSV files
 const RAW_DATA_DIR = join(__dirname, '..', 'raw-data');
 
@@ -101,7 +106,7 @@ async function downloadRawData() {
     // Initialize Google Sheets API
     const sheets = google.sheets({ version: 'v4', auth: API_KEY });
 
-    logger.info(`Downloading ${CONSUMED_TABS.length} whitelisted Sheet B tabs`);
+    logger.info(`Downloading ${TABS.length} whitelisted Sheet B tabs`);
 
     // Create raw-data directory if it doesn't exist
     try {
@@ -116,7 +121,7 @@ async function downloadRawData() {
     let successCount = 0;
     let failureCount = 0;
 
-    for (const { tab, consumer } of CONSUMED_TABS) {
+    for (const { tab, consumer } of TABS) {
       try {
         logger.info(`Fetching tab: "${tab}" (consumed by ${consumer})`);
 
