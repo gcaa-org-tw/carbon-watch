@@ -160,7 +160,7 @@ const fundHref = (key: string): string =>
               :class="{ active: sortKey === 'pct' }"
               @click="setSort('pct')"
             >
-              排碳大戶佔比<span class="arrow">{{ arrow('pct') }}</span>
+              排碳大戶家數佔比<span class="arrow">{{ arrow('pct') }}</span>
             </th>
             <th
               class="r sortable"
