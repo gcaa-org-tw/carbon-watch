@@ -28,7 +28,7 @@ const MARKET_VALUE_UNIT = 1_000_000
 const stats = computed(() => [
   { label: '總市值', value: `${formatApprox(props.marketValue * MARKET_VALUE_UNIT)}元` },
   { label: '排碳大戶家數', value: `${props.emitterCount} 家` },
-  { label: '排碳大戶佔比', value: `${props.emitterShare.toFixed(1)}%` },
+  { label: '排碳大戶家數佔比', value: `${props.emitterShare.toFixed(1)}%` },
   { label: '排碳大戶總碳排量', value: formatEmissions(props.emitterEmissions) },
 ])
 </script>
