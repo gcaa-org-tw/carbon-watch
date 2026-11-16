@@ -234,6 +234,41 @@ function holdingsPeriod(rows: Record<string, string>[]): { 年度: number; 季�
   return { 年度, 季別 };
 }
 
+function assertSummaryMatchesHoldings(
+  label: string,
+  summary: Record<string, string>[],
+  holdings: Record<string, string>[]
+) {
+  const total = new Map<string, number>();
+  const emitters = new Map<string, number>();
+  holdings.forEach(row => {
+    const code = (row['基金代號'] || '').trim();
+    total.set(code, (total.get(code) ?? 0) + 1);
+    if (String(row['是否排碳大戶']).trim().toUpperCase() === 'TRUE') {
+      emitters.set(code, (emitters.get(code) ?? 0) + 1);
+    }
+  });
+  const summaryCodes = summary.map(row => (row['基金代號'] || '').trim()).filter(Boolean);
+  const mismatched = summary
+    .filter(row => (row['基金代號'] || '').trim())
+    .filter(row => {
+      const code = row['基金代號']!.trim();
+      return (
+        parseNumber(row['持股企業數'] ?? '') !== (total.get(code) ?? 0) ||
+        parseNumber(row['排碳大戶家數'] ?? '') !== (emitters.get(code) ?? 0)
+      );
+    })
+    .map(row => row['基金代號']!.trim());
+  const orphans = [...total.keys()].filter(code => !summaryCodes.includes(code));
+  if (mismatched.length > 0 || orphans.length > 0) {
+    throw new Error(
+      `${label}: fund summary and holdings disagree ` +
+        `(count mismatch: ${mismatched.join(', ') || 'none'}; ` +
+        `holdings without summary: ${orphans.join(', ') || 'none'})`
+    );
+  }
+}
+
 /**
  * Join holdings (VI manager + XV added) to funds and companies, keyed by fundKey.
  * Manager holdings resolve via the ticker map; added holdings via the sitca
@@ -324,6 +359,8 @@ async function transformFundData() {
         `ESG: ${esgSummary.length} funds / ${esgHoldings.length} holdings; sitca: ${sitca.length}`
     );
 
+    assertSummaryMatchesHoldings('XII vs VI', managerSummary, managerHoldings);
+    assertSummaryMatchesHoldings('XIV vs XV', esgSummary, esgHoldings);
     const period = holdingsPeriod([...managerHoldings, ...esgHoldings]);
     logger.info(`Holdings quarter: ${period.年度} Q${period.季別}`);
 
