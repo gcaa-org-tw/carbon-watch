@@ -2,6 +2,9 @@
 interface Props {
   公司: string
   公司全名?: string
+  產業分類?: string
+  事業統編?: string
+  公司代號?: string
   淨零目標年?: string
   有永續報告書?: boolean
   年排放量: number
@@ -13,9 +16,15 @@ interface Props {
 
 const props = defineProps<Props>()
 
-const formattedEmission = computed(() => {
-  return props.年排放量.toLocaleString('zh-TW')
-})
+const title = computed(() => props.公司全名 ? `${props.公司全名}（${props.公司}）` : props.公司)
+
+const UNLISTED = '非上市櫃'
+const identifiers = computed(() => [
+  props.事業統編 ? `統編 ${props.事業統編}` : '',
+  props.公司代號 && props.公司代號 !== UNLISTED ? `股票代號 ${props.公司代號}` : '',
+].filter(Boolean).join('；'))
+
+const formattedEmission = computed(() => formatApproxWithUnit(props.年排放量, '公噸'))
 
 const netZeroText = computed(() => {
   const placeholder = reportPlaceholder(props.淨零目標年, props.有永續報告書 !== false)
@@ -28,9 +37,7 @@ const feeNote = computed(() =>
   `以每公噸 300 元乘上${props.排放年度 ? ` ${props.排放年度} 年` : ''}排放量估算，未扣除免徵額與優惠費率`
 )
 
-const formattedFee = computed(() => {
-  return props.預期碳費.toLocaleString('zh-TW')
-})
+const formattedFee = computed(() => formatApproxWithUnit(props.預期碳費, '元'))
 
 // Positive means increase, negative means decrease
 const changeText = computed(() => {
@@ -56,10 +63,13 @@ const isDecrease = computed(() => props.年度變化 !== undefined && props.年�
     <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
       <div class="mt-0 sm:mt-8 mb-8 pb-8 min-w-0">
         <h1 class="text-3xl sm:text-[2.5rem] font-bold text-earth-brown leading-[1.2]">
-          {{ 公司 }}
+          {{ title }}
         </h1>
-        <p v-if="公司全名" class="mt-2 text-sm text-earth-brown/70 break-words">
-          {{ 公司全名 }}
+        <p v-if="產業分類" class="mt-2 text-sm text-earth-brown/70">
+          {{ 產業分類 }}
+        </p>
+        <p v-if="identifiers" class="mt-1 text-sm text-earth-brown/70">
+          {{ identifiers }}
         </p>
       </div>
 
@@ -79,7 +89,7 @@ const isDecrease = computed(() => props.年度變化 !== undefined && props.年�
       <div class="flex-1">
         <div class="flex items-center justify-between gap-4 flex-wrap">
           <p class="text-l font-bold text-earth-brown">
-            {{ 排放年度 ? `${排放年度} 年碳排` : '年碳排' }} <span class="whitespace-nowrap"><span class="font-semibold">{{ formattedEmission }}</span> 公噸</span>
+            {{ 排放年度 ? `${排放年度} 年碳排` : '年碳排' }} <span class="font-semibold whitespace-nowrap">{{ formattedEmission }}</span>
           </p>
           <div class="flex items-center gap-3 text-sm">
             <span v-if="formattedTaiwanShare !== null" class="flex items-center gap-1.5 text-earth-brown">
@@ -109,7 +119,7 @@ const isDecrease = computed(() => props.年度變化 !== undefined && props.年�
       <!-- Carbon fee -->
       <div class="md:text-right">
         <p class="text-l font-bold text-earth-brown">
-          預期碳費：<span class="font-semibold whitespace-nowrap">{{ formattedFee }} 元</span>
+          預期碳費：<span class="font-semibold whitespace-nowrap">{{ formattedFee }}</span>
         </p>
         <p class="mt-1 text-xs text-earth-brown/60">
           {{ feeNote }}

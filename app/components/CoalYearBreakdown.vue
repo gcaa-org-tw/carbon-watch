@@ -7,8 +7,6 @@ interface Props {
 }
 
 defineProps<Props>()
-
-const formatTonnes = (n: number) => Math.round(n).toLocaleString('en-US')
 </script>
 
 <template>
@@ -28,7 +26,7 @@ const formatTonnes = (n: number) => Math.round(n).toLocaleString('en-US')
       >
         <td class="py-1">{{ y }} 年</td>
         <td class="py-1 text-right tabular-nums whitespace-nowrap">
-          {{ coalValueOf(factory, y) > 0 ? formatTonnes(coalValueOf(factory, y)) : '—' }}<CoalTrend
+          {{ coalValueOf(factory, y) > 0 ? formatApprox(coalValueOf(factory, y)) : '—' }}<CoalTrend
             :current="coalValueOf(factory, y)"
             :previous="coalValueOf(factory, y - 1)"
           />

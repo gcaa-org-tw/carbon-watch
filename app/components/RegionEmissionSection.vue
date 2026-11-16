@@ -349,7 +349,6 @@ const heatItems = [
         {{ item.label }}
       </div>
     </div>
-    <p class="map-note">地圖未繪出金門縣、連江縣，兩縣皆無製造業排碳大戶。</p>
 
     <Teleport to="body">
       <div
@@ -384,12 +383,6 @@ const heatItems = [
   background: var(--color-bg-elevated);
   border: 1px solid var(--color-bg-border);
   border-radius: 8px;
-}
-
-.map-note {
-  margin-top: 8px;
-  font-size: 11px;
-  color: var(--color-text-muted);
 }
 
 .heat-label {

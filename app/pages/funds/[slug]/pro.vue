@@ -61,10 +61,14 @@ useHead({
       :unified-id="fundData.meta.基金統編"
       :name="fundData.meta.基金名稱"
       :is-esg="fundData.meta.是否ESG基金"
+      :market-value="fundData.meta.總市值"
+      :emitter-count="fundData.meta.排碳大戶家數"
+      :emitter-share="fundData.meta.排碳大戶佔比"
+      :emitter-emissions="fundData.meta.排碳大戶總碳排量"
     />
 
     <div class="co-body">
-      <CompanyTable v-if="companies.length" :rows="companies" :is-pro="true" :coal-first="true" />
+      <CompanyTable v-if="companies.length" :rows="companies" :is-pro="true" :coal-first="true" :show-holding-share="true" />
 
       <p v-else class="empty-note">
         此基金無排碳大戶企業資料

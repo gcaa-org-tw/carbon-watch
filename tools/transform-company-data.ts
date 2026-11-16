@@ -242,6 +242,8 @@ function mergeCompanyData(
   return mergedData;
 }
 
+const HUB_PASSTHROUGH_FIELDS = ['公司代號', '節能目標年設定', '再生能源目標年設定'] as const;
+
 /**
  * Add 代表縣市, 事業統編, 公司全名 to each company.
  *
@@ -260,13 +262,13 @@ function addRepresentativeCity(
   logger.info('Step 3: Adding 代表縣市, 事業統編, and 公司全名 data');
 
   // Hub: 公司簡稱 -> { 統一編號, 公司全稱 }. Authoritative for all 287 companies.
-  const hubByAbbr = new Map<string, { taxCode: string; fullName: string }>();
+  const hubByAbbr = new Map<string, { taxCode: string; fullName: string; row: Record<string, string> }>();
   for (const row of hubData) {
     const abbr = row['公司簡稱']?.trim();
     const taxCode = row['統一編號']?.trim();
     const fullName = row['公司全稱']?.trim() ?? '';
     if (abbr && taxCode) {
-      hubByAbbr.set(abbr, { taxCode, fullName });
+      hubByAbbr.set(abbr, { taxCode, fullName, row });
     }
   }
   logger.info(`Loaded ${hubByAbbr.size} 公司簡稱 mappings from 排碳大戶表_Data.csv`);
@@ -297,6 +299,11 @@ function addRepresentativeCity(
 
     const { taxCode, fullName } = hubMatch;
     const city = taxCodeToCity.get(taxCode) ?? '';
+
+    for (const field of HUB_PASSTHROUGH_FIELDS) {
+      const value = hubMatch.row[field]?.trim();
+      if (value && value !== 'NA') company[field] = value;
+    }
 
     if (!city) {
       failedCompanies.push(companyName);

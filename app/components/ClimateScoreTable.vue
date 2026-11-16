@@ -8,11 +8,13 @@ const props = withDefaults(defineProps<{
   showLegend?: boolean
   // 基金頁：插入燃煤使用量欄並預設以燃煤用量遞減排序（排放量為次要排序）
   coalFirst?: boolean
+  showHoldingShare?: boolean
   moreLink?: { label: string, to: string }
 }>(), {
   showRank: false,
   showLegend: true,
   coalFirst: false,
+  showHoldingShare: false,
   moreLink: undefined,
 })
 
@@ -69,15 +71,6 @@ const netZeroText = (company: CompanyData): string => {
   return s === '無' || s === '無承諾' ? NOT_DISCLOSED : s
 }
 
-// 燃煤使用量：整數公噸；空白顯示破折號，0 顯示 0（company-grade-map：≥1 即「遠低於期望」）
-const formatCoal = (raw: string): string => {
-  const s = String(raw ?? '').trim()
-  if (s === '' || s === 'NA') return NOT_DISCLOSED
-  const n = Number(s.replace(/,/g, ''))
-  if (Number.isNaN(n)) return NOT_DISCLOSED
-  return n.toLocaleString('zh-TW', { maximumFractionDigits: 0 })
-}
-
 const isBlankField = (raw: unknown): boolean => {
   const s = String(raw ?? '').trim()
   return s === '' || s === 'NA'
@@ -99,6 +92,7 @@ const formatSbti = (raw: string): string => {
 const SORT_FIELDS: Record<string, keyof CompanyData> = {
   company: '公司',
   industry: '產業分類',
+  holding: '持股比率',
   coal: '燃煤使用量（公噸）',
   emission: '溫室氣體排放量（公噸二氧化碳當量）',
   netZero: '淨零目標年',
@@ -184,7 +178,8 @@ const tableRows = computed(() =>
     rank: rankByCompany.value.get(company['公司']) ?? 0,
     公司: company['公司'],
     產業分類: company['產業分類'],
-    燃煤: formatCoal(company['燃煤使用量（公噸）']),
+    持股比率: company['持股比率'] || NOT_DISCLOSED,
+    燃煤: formatTonnes(company['燃煤使用量（公噸）']),
     有燃煤: Number(String(company['燃煤使用量（公噸）'] ?? '').replace(/,/g, '')) > 0,
     排放量: formatEmissions(company['溫室氣體排放量（公噸二氧化碳當量）']),
     排放年度: fallbackEmissionYear(company),
@@ -238,13 +233,22 @@ const legendItems = [
               產業分類<span class="arrow">{{ arrow('industry') }}</span>
             </th>
             <th
+              v-if="showHoldingShare"
+              rowspan="2"
+              class="r sortable"
+              :class="{ active: sortKey === 'holding' }"
+              @click="setSort('holding')"
+            >
+              持股佔比<span class="arrow">{{ arrow('holding') }}</span>
+            </th>
+            <th
               v-if="coalFirst"
               rowspan="2"
               class="r sortable"
               :class="{ active: sortKey === 'coal' }"
               @click="setSort('coal')"
             >
-              燃煤<br>使用量（公噸）<span class="arrow">{{ arrow('coal') || '↓' }}</span>
+              2025 年燃煤<br>使用量（公噸）<span class="arrow">{{ arrow('coal') || '↓' }}</span>
             </th>
             <th
               rowspan="2"
@@ -274,19 +278,19 @@ const legendItems = [
               SBTi<br>承諾<span class="arrow">{{ arrow('sbti') }}</span>
             </th>
             <th class="c sortable" :class="{ active: sortKey === 'd0' }" @click="setSort('d0')">
-              絕對<br>減量目標<span class="arrow">{{ arrow('d0') }}</span>
+              2030 年絕對<br>減量目標<span class="arrow">{{ arrow('d0') }}</span>
             </th>
             <th class="c sortable" :class="{ active: sortKey === 'd1' }" @click="setSort('d1')">
-              再生能源<br>使用率目標<span class="arrow">{{ arrow('d1') }}</span>
+              2030 年再生能源<br>使用率目標<span class="arrow">{{ arrow('d1') }}</span>
             </th>
             <th class="c sortable" :class="{ active: sortKey === 'd2' }" @click="setSort('d2')">
-              能源效率<br>進步目標<span class="arrow">{{ arrow('d2') }}</span>
+              2030 年能源效率<br>進步目標<span class="arrow">{{ arrow('d2') }}</span>
             </th>
             <th class="c sortable" :class="{ active: sortKey === 'd3' }" @click="setSort('d3')">
               2024 年<br>再生能源使用率<span class="arrow">{{ arrow('d3') }}</span>
             </th>
             <th class="c sortable" :class="{ active: sortKey === 'd4' }" @click="setSort('d4')">
-              近三年<br>能源密集度變化<span class="arrow">{{ arrow('d4') }}</span>
+              近三年（2022–2024）<br>能源密集度變化<span class="arrow">{{ arrow('d4') }}</span>
             </th>
             <th class="c sortable" :class="{ active: sortKey === 'd5' }" @click="setSort('d5')">
               範疇三<br>減量規劃<span class="arrow">{{ arrow('d5') }}</span>
@@ -304,6 +308,7 @@ const legendItems = [
               </NuxtLink>
             </td>
             <td><span class="badge">{{ row.產業分類 }}</span></td>
+            <td v-if="showHoldingShare" class="r td-num">{{ row.持股比率 }}</td>
             <td v-if="coalFirst" class="r">
               <span :class="row.有燃煤 ? 'td-num td-coal' : row.燃煤 === '—' ? 'td-muted' : 'td-num'">{{ row.燃煤 }}</span>
             </td>

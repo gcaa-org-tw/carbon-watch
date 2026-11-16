@@ -188,10 +188,6 @@ const tooltipStyle = computed(() => {
   return { left: `${x}px`, top: `${y}px` }
 })
 
-const formatTonnes = (n: number) => Math.round(n).toLocaleString('en-US')
-
-const formatTenThousandTonnes = (n: number) => Math.round(n / 10_000).toLocaleString('en-US')
-
 const isStreetLevel = (f: CoalMapFactory) => f.座標來源.startsWith('OSM')
 </script>
 
@@ -203,7 +199,7 @@ const isStreetLevel = (f: CoalMapFactory) => f.座標來源.startsWith('OSM')
         用煤工廠地圖
       </h1>
       <p class="text-earth-brown max-w-3xl leading-relaxed">
-        {{ selectedYear }} 年，{{ companyCount }} 家排碳大戶共 {{ activeInYear.length }} 座工廠申報用煤，合計約 {{ formatTenThousandTonnes(totalTonnes) }} 萬公噸。點大小代表該廠 {{ selectedYear }} 年的用煤量，顏色代表產業別。
+        {{ selectedYear }} 年，{{ companyCount }} 家排碳大戶共 {{ activeInYear.length }} 座工廠申報用煤，合計{{ formatApprox(totalTonnes) }}公噸。點大小代表該廠 {{ selectedYear }} 年的用煤量，顏色代表產業別。
       </p>
       <p class="text-sm text-earth-brown/70 mt-3 max-w-3xl">
         範疇說明：本地圖僅涵蓋排碳大戶（本站追蹤的製造業排碳大戶）的用煤工廠，不含電力業；全台工業用煤另有約百家非排碳大戶的小型用煤工廠，合計約佔工業用煤總量 1%。
@@ -223,7 +219,7 @@ const isStreetLevel = (f: CoalMapFactory) => f.座標來源.startsWith('OSM')
     </div>
 
     <!-- Stat strip -->
-    <div class="grid grid-cols-3 gap-4 mb-8 max-w-2xl">
+    <div class="flex gap-6 sm:grid sm:grid-cols-3 sm:gap-4 mb-8 max-w-2xl">
       <div>
         <div class="text-2xl sm:text-3xl font-bold text-green-mint">{{ companyCount }}</div>
         <div class="text-sm text-earth-brown/80 mt-1">用煤企業</div>
@@ -233,7 +229,7 @@ const isStreetLevel = (f: CoalMapFactory) => f.座標來源.startsWith('OSM')
         <div class="text-sm text-earth-brown/80 mt-1">用煤工廠</div>
       </div>
       <div>
-        <div class="text-2xl sm:text-3xl font-bold text-green-mint whitespace-nowrap">{{ formatTenThousandTonnes(totalTonnes) }}<span class="text-xs sm:text-lg font-normal ml-0.5 sm:ml-1">萬公噸</span></div>
+        <div class="text-2xl sm:text-3xl font-bold text-green-mint whitespace-nowrap">{{ formatApprox(totalTonnes) }}<span class="text-xs sm:text-lg font-normal ml-0.5 sm:ml-1">公噸</span></div>
         <div class="text-sm text-earth-brown/80 mt-1">{{ selectedYear }} 年用煤量</div>
       </div>
     </div>
@@ -312,7 +308,7 @@ const isStreetLevel = (f: CoalMapFactory) => f.座標來源.startsWith('OSM')
           <div class="mt-4">
             <div class="text-sm text-earth-brown/70">{{ selectedYear }} 年用煤量</div>
             <div class="text-2xl font-bold text-earth-brown mt-0.5">
-              {{ coalValueOf(selected, selectedYear) > 0 ? `${formatTonnes(coalValueOf(selected, selectedYear))} 公噸` : '無申報數值' }}<CoalTrend
+              {{ coalValueOf(selected, selectedYear) > 0 ? formatApproxWithUnit(coalValueOf(selected, selectedYear), '公噸') : '無申報數值' }}<CoalTrend
                 :current="coalValueOf(selected, selectedYear)"
                 :previous="coalValueOf(selected, selectedYear - 1)"
               />
@@ -358,7 +354,7 @@ const isStreetLevel = (f: CoalMapFactory) => f.座標來源.startsWith('OSM')
                   <span class="block text-sm text-earth-brown truncate">{{ f.廠名 }}</span>
                   <span class="block text-xs text-earth-brown/60">{{ f.縣市 }}</span>
                 </span>
-                <span class="text-sm text-earth-brown tabular-nums shrink-0">{{ formatTonnes(coalValueOf(f, selectedYear)) }} 公噸<CoalTrend
+                <span class="text-sm text-earth-brown tabular-nums shrink-0">{{ formatApproxWithUnit(coalValueOf(f, selectedYear), '公噸') }}<CoalTrend
                   :current="coalValueOf(f, selectedYear)"
                   :previous="coalValueOf(f, selectedYear - 1)"
                 /></span>
@@ -396,7 +392,7 @@ const isStreetLevel = (f: CoalMapFactory) => f.座標來源.startsWith('OSM')
         <h3 class="text-lg font-bold text-green-mint">{{ selected.廠名 }}</h3>
         <div v-if="selected.公司全名 !== selected.廠名" class="text-sm text-earth-brown/80 mt-0.5">{{ selected.公司全名 }}</div>
         <div class="text-sm text-earth-brown mt-1">
-          {{ selectedYear }} 年 {{ coalValueOf(selected, selectedYear) > 0 ? `${formatTonnes(coalValueOf(selected, selectedYear))} 公噸` : '無申報數值' }}<CoalTrend
+          {{ selectedYear }} 年 {{ coalValueOf(selected, selectedYear) > 0 ? formatApproxWithUnit(coalValueOf(selected, selectedYear), '公噸') : '無申報數值' }}<CoalTrend
             :current="coalValueOf(selected, selectedYear)"
             :previous="coalValueOf(selected, selectedYear - 1)"
           />
@@ -433,7 +429,7 @@ const isStreetLevel = (f: CoalMapFactory) => f.座標來源.startsWith('OSM')
             <span class="text-xs text-earth-brown/70">{{ f.縣市 }}</span>
           </div>
           <div class="text-sm text-earth-brown font-medium leading-snug line-clamp-2">{{ f.廠名 }}</div>
-          <div class="text-xs text-earth-brown/80 mt-1 tabular-nums">{{ formatTonnes(coalValueOf(f, selectedYear)) }} 公噸<CoalTrend
+          <div class="text-xs text-earth-brown/80 mt-1 tabular-nums">{{ formatApproxWithUnit(coalValueOf(f, selectedYear), '公噸') }}<CoalTrend
             :current="coalValueOf(f, selectedYear)"
             :previous="coalValueOf(f, selectedYear - 1)"
           /></div>
@@ -511,7 +507,7 @@ const isStreetLevel = (f: CoalMapFactory) => f.座標來源.startsWith('OSM')
                 class="px-3 py-2 text-right text-earth-brown tabular-nums whitespace-nowrap"
                 :class="y === selectedYear ? 'font-semibold' : ''"
               >
-                {{ coalValueOf(f, y) > 0 ? formatTonnes(coalValueOf(f, y)) : '—' }}<CoalTrend
+                {{ coalValueOf(f, y) > 0 ? formatApprox(coalValueOf(f, y)) : '—' }}<CoalTrend
                   :current="coalValueOf(f, y)"
                   :previous="coalValueOf(f, y - 1)"
                 />
@@ -552,7 +548,7 @@ const isStreetLevel = (f: CoalMapFactory) => f.座標來源.startsWith('OSM')
           {{ hovered.廠名 }}
         </div>
         <div class="text-xs text-earth-brown mt-0.5 whitespace-nowrap">
-          {{ hovered.業別 }} · {{ hovered.縣市 }} · {{ formatTonnes(coalValueOf(hovered, selectedYear)) }} 公噸
+          {{ hovered.業別 }} · {{ hovered.縣市 }} · {{ formatApproxWithUnit(coalValueOf(hovered, selectedYear), '公噸') }}
         </div>
       </div>
     </Teleport>

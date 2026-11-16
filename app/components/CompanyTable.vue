@@ -10,6 +10,7 @@ interface Props {
   // 並預設以燃煤用量遞減排序（溫室氣體排放量為次要排序）。首頁與
   // /companies 不傳，維持無燃煤欄。
   coalFirst?: boolean
+  showHoldingShare?: boolean
   moreLink?: { label: string, to: string }
 }
 
@@ -18,6 +19,7 @@ withDefaults(defineProps<Props>(), {
   showLegend: true,
   showRank: false,
   coalFirst: false,
+  showHoldingShare: false,
   moreLink: undefined,
 })
 </script>
@@ -30,6 +32,7 @@ withDefaults(defineProps<Props>(), {
     :show-rank="showRank"
     :show-legend="showLegend"
     :coal-first="coalFirst"
+    :show-holding-share="showHoldingShare"
     :more-link="moreLink"
   />
 
@@ -38,5 +41,6 @@ withDefaults(defineProps<Props>(), {
     v-else
     :rows="rows"
     :coal-first="coalFirst"
+    :show-holding-share="showHoldingShare"
   />
 </template>

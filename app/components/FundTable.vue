@@ -32,7 +32,8 @@ const filteredRows = computed(() => {
 })
 
 /* ── 格式化 ───────────────────────────────────────────── */
-const formatMarketValue = (n: number): string => n.toLocaleString('zh-TW')
+const MARKET_VALUE_UNIT = 1_000_000
+const formatMarketValue = (n: number): string => formatApprox(n * MARKET_VALUE_UNIT)
 
 const formatShare = (n: number): string => `${n.toFixed(1)}%`
 
@@ -98,9 +99,6 @@ const sortedRows = computed(() => {
 // funds); the first column may still *display* 基金代號.
 const fundHref = (key: string): string =>
   `/funds/${key}${isPro.value ? '/pro' : ''}`
-
-const fundLabel = (fund: FundData): string =>
-  fund.基金統編 ? `${fund.基金名稱}（${fund.基金統編}）` : fund.基金名稱
 </script>
 
 <template>
@@ -134,7 +132,7 @@ const fundLabel = (fund: FundData): string =>
               :class="{ active: sortKey === 'name' }"
               @click="setSort('name')"
             >
-              基金名稱（基金統編）<span class="arrow">{{ arrow('name') }}</span>
+              基金名稱<span class="arrow">{{ arrow('name') }}</span>
             </th>
             <th
               class="c sortable"
@@ -148,7 +146,7 @@ const fundLabel = (fund: FundData): string =>
               :class="{ active: sortKey === 'mv' }"
               @click="setSort('mv')"
             >
-              總市值（百萬新台幣）<span class="arrow">{{ arrow('mv') }}</span>
+              總市值（新台幣）<span class="arrow">{{ arrow('mv') }}</span>
             </th>
             <th
               class="c sortable"
@@ -176,14 +174,16 @@ const fundLabel = (fund: FundData): string =>
         <tbody>
           <tr v-for="fund in sortedRows" :key="fund.fundKey">
             <td class="col-sticky col-sticky-1">
-              <NuxtLink
-                v-if="fund.排碳大戶家數 > 0"
-                class="td-code"
-                :to="fundHref(fund.fundKey)"
-              >
-                {{ fund.基金代號 }}
-              </NuxtLink>
-              <span v-else class="td-code td-static">{{ fund.基金代號 }}</span>
+              <template v-if="fund.基金代號">
+                <NuxtLink
+                  v-if="fund.排碳大戶家數 > 0"
+                  class="td-code"
+                  :to="fundHref(fund.fundKey)"
+                >
+                  {{ fund.基金代號 }}
+                </NuxtLink>
+                <span v-else class="td-code td-static">{{ fund.基金代號 }}</span>
+              </template>
             </td>
             <td class="td-fund col-sticky col-sticky-2 col-sticky-last">
               <NuxtLink
@@ -191,10 +191,10 @@ const fundLabel = (fund: FundData): string =>
                 class="td-fund-link"
                 :to="fundHref(fund.fundKey)"
               >
-                {{ fundLabel(fund) }}<EsgLeaf v-if="fund.是否ESG基金" />
+                {{ fund.基金名稱 }}<EsgLeaf v-if="fund.是否ESG基金" />
               </NuxtLink>
               <span v-else class="td-fund-link td-static">
-                {{ fundLabel(fund) }}<EsgLeaf v-if="fund.是否ESG基金" />
+                {{ fund.基金名稱 }}<EsgLeaf v-if="fund.是否ESG基金" />
               </span>
             </td>
             <td class="c">
