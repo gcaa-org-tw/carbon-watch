@@ -1,4 +1,4 @@
-# 合併重建 臺灣國際減碳倡議企業名單.xlsx（Drive id 1AyCyX5zS-oBaAe102LSAchVmPPAvHN7b）
+# 合併重建 臺灣國際減碳倡議企業名單.xlsx
 #
 # 用法：python3 build_xlsx.py <base_xlsx> <output_xlsx>
 #   base_xlsx  = Drive 現版下載檔（2026-07-29 起含 qyke 的「存檔企業名單」分頁）
