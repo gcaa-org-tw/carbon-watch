@@ -11,7 +11,7 @@ on:
           - fund
         default: all
   schedule:
-    - cron: '0 3 * * *'
+    - cron: '17 3 * * *'
 
 permissions:
   contents: write
