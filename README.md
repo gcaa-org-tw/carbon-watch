@@ -45,7 +45,7 @@ cp .env.example .env
 
 ```env
 GOOGLE_SHEETS_API_KEY=your_api_key_here
-GOOGLE_SHEETS_ID=1vRFQ6RbeBXDgp-IgWh5ue2W0SBJqAIWR9QML0AmceoR6nO_5Q83QGsalaCDqAAyOX_pIK2hOQZ-wdwb
+GOOGLE_SHEETS_ID=your_spreadsheet_id_here
 ```
 
 如何取得 API 金鑰：

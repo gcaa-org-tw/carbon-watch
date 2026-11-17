@@ -5,8 +5,6 @@
  * - Fetches data from Google Sheets API
  * - Uses tab names as CSV filenames
  * - Logs all operations for transparency and traceability
- * 
- * Data source: https://docs.google.com/spreadsheets/d/e/2PACX-1vRFQ6RbeBXDgp-IgWh5ue2W0SBJqAIWR9QML0AmceoR6nO_5Q83QGsalaCDqAAyOX_pIK2hOQZ-wdwb/pubhtml
  */
 
 import 'dotenv/config';

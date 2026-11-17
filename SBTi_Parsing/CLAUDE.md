@@ -16,18 +16,18 @@ homepage. The full chain (all formula-driven, single manual root):
    `?page=N&q=1&sort=0&ascending=true`, 20 companies/page, company row +
    intro row interleaved)
 2. → scrape sheet「（爬蟲資料）臺灣加入國際減碳倡議企業動態儀表板」
-   id `1Ys5JuyGXLaRH-bJwvGw4PpQiMM9Zm5-dqJO0u_Mv8P0`, tab `raw_data` A:E
+   tab `raw_data` A:E
    (公司名稱 / SBTi 中文 / RE100 / EV100 / EP100 as TRUE/FALSE).
    **This is the only thing you update manually.**
 3. → IMPORTRANGE into「排碳大戶觀測站_raw_data」
-   id `1N0bEtpU-Oh5c7rgwzhdldifSs7A7kP_cEWdqwTin2gU`, tab `raw_國際減碳倡議`
+   tab `raw_國際減碳倡議`
    (F:H formulas add 簡稱/股號/統編 via exact-name match on raw_上市櫃公司列表,
    fallback raw_非上市櫃列表)
 4. → `排碳大戶表_Data` col O「中期目標是否取得SBT認證」(INDEX/MATCH by 統編,
    default「無」) → `I. 總表` SBTi 承諾 → public sheet → CI sync → site
 
 Separate deliverable: qyke's snapshot xlsx「臺灣國際減碳倡議企業名單.xlsx」
-Drive id `1AyCyX5zS-oBaAe102LSAchVmPPAvHN7b`. **Maintained by qyke — do not
+**Maintained by qyke — do not
 touch** (decision #11, 2026-07-29). Verified the same day: no tab in the hub
 spreadsheet references this file (anchor-cell scan of all raw_* tabs), so his
 tab renames can never break the site chain. `build_xlsx.py` can regenerate a
