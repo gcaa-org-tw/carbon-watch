@@ -45,6 +45,11 @@ title: 免責聲明與資料來源
 *  <a href="https://data.gov.tw/dataset/28568" target="_blank">興櫃公司基本資料</a>
 *  <a href="https://data.gov.tw/dataset/28567" target="_blank">公開發行公司基本資料</a>
 
+內政部國土測繪中心：
+*  <a href="https://data.gov.tw/dataset/7442" target="_blank">直轄市、縣市界線(TWD97經緯度)</a>
+
+   本網站地圖的縣市界線取自 Daniel Kao 整理的 <a href="https://github.com/dkaoster/taiwan-atlas" target="_blank">taiwan-atlas 2021.9.20</a>（<a href="https://thaubing-esg.gcaa.org.tw/licenses/taiwan-atlas.txt" target="_blank">MIT 授權</a>），並經簡化。此開放資料依<a href="https://data.gov.tw/license" target="_blank">政府資料開放授權條款</a>進行公眾釋出。
+
 ### 公開資訊觀測站資料：
 *  <a href="https://mops.twse.com.tw/mops/#/web/t163sb04" target="_blank">公司營運資料－綜合損益表</a>
 *  <a href="https://mopsov.twse.com.tw/mops/web/t78sb35_new" target="_blank">國內成分股ETF每季持股明細表</a>
