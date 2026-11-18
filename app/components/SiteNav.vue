@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 
+const DONATE_URL = 'https://gcaa.neticrm.tw/civicrm/contribute/transact?reset=1&id=41&utm_source=Web&utm_content=ESG&utm_campaign=HEAD'
+
 const mobileMenuOpen = ref(false)
 const { isPro } = useViewMode()
 
@@ -13,8 +15,8 @@ interface MenuItem {
 
 const menuItems = computed<MenuItem[]>(() => [
   { to: isPro.value ? '/companies/pro' : '/companies', label: '依企業查詢' },
-  { to: '/funds', label: '依基金持股查詢' },
-  { to: '/coal-map', label: '用煤工廠地圖' },
+  { to: '/funds', label: '依基金查詢' },
+  { to: '/coal-map', label: '依燃煤使用查詢' },
   { to: '/methodology', label: '氣候績效指標方法論' },
 ])
 
@@ -36,50 +38,53 @@ const closeMobileMenu = () => {
         排碳大戶觀測站
       </NuxtLink>
 
-      <!-- Desktop Menu -->
-      <div class="hidden lg:flex items-center gap-6">
-        <template v-for="item in menuItems" :key="item.label">
-          <span v-if="!item.hidden && item.disabled" class="nav-link nav-link--disabled">
-            {{ item.label }}
-          </span>
-          <NuxtLink
-            v-else-if="!item.hidden"
-            :to="item.to!"
-            class="nav-link"
-          >
-            {{ item.label }}
-          </NuxtLink>
-        </template>
+      <div class="flex items-center gap-3 lg:gap-6">
+        <!-- Desktop Menu -->
+        <div class="hidden lg:flex items-center gap-6">
+          <template v-for="item in menuItems" :key="item.label">
+            <span v-if="!item.hidden && item.disabled" class="nav-link nav-link--disabled">
+              {{ item.label }}
+            </span>
+            <NuxtLink
+              v-else-if="!item.hidden"
+              :to="item.to!"
+              class="nav-link"
+            >
+              {{ item.label }}
+            </NuxtLink>
+          </template>
+        </div>
 
         <a
-          href="https://gcaa.neticrm.tw/civicrm/contribute/transact?reset=1&id=41&utm_source=Web&utm_content=ESG&utm_campaign=HEAD"
+          :href="DONATE_URL"
           target="_blank"
           rel="noopener noreferrer"
           class="btn-donate"
         >
+          <UIcon name="i-heroicons-heart-20-solid" class="btn-donate-icon" aria-hidden="true" />
           捐款支持
         </a>
-      </div>
 
-      <!-- Mobile Hamburger -->
-      <button
-        class="lg:hidden flex flex-col justify-center items-center w-10 h-10 gap-1.5"
-        aria-label="Toggle menu"
-        @click="toggleMobileMenu"
-      >
-        <span
-          class="w-6 h-0.5 bg-earth-brown transition-all duration-300"
-          :class="mobileMenuOpen ? 'rotate-45 translate-y-2' : ''"
-        />
-        <span
-          class="w-6 h-0.5 bg-earth-brown transition-all duration-300"
-          :class="mobileMenuOpen ? 'opacity-0' : ''"
-        />
-        <span
-          class="w-6 h-0.5 bg-earth-brown transition-all duration-300"
-          :class="mobileMenuOpen ? '-rotate-45 -translate-y-2' : ''"
-        />
-      </button>
+        <!-- Mobile Hamburger -->
+        <button
+          class="lg:hidden flex flex-col justify-center items-center w-10 h-10 gap-1.5"
+          aria-label="Toggle menu"
+          @click="toggleMobileMenu"
+        >
+          <span
+            class="w-6 h-0.5 bg-earth-brown transition-all duration-300"
+            :class="mobileMenuOpen ? 'rotate-45 translate-y-2' : ''"
+          />
+          <span
+            class="w-6 h-0.5 bg-earth-brown transition-all duration-300"
+            :class="mobileMenuOpen ? 'opacity-0' : ''"
+          />
+          <span
+            class="w-6 h-0.5 bg-earth-brown transition-all duration-300"
+            :class="mobileMenuOpen ? '-rotate-45 -translate-y-2' : ''"
+          />
+        </button>
+      </div>
     </div>
 
     <!-- Mobile Menu Drawer -->
@@ -112,14 +117,6 @@ const closeMobileMenu = () => {
               {{ item.label }}
             </NuxtLink>
           </template>
-          <a
-            href="https://gcaa.neticrm.tw/civicrm/contribute/transact?reset=1&id=41&utm_source=Web&utm_content=ESG&utm_campaign=HEAD"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="btn-donate w-fit"
-          >
-            捐款支持
-          </a>
         </div>
       </div>
     </Transition>
@@ -161,6 +158,7 @@ const closeMobileMenu = () => {
   color: var(--color-green-spring);
   letter-spacing: -0.01em;
   text-decoration: none;
+  white-space: nowrap;
 }
 
 .nav-dot {
@@ -210,13 +208,15 @@ a.router-link-active.nav-link::after {
 
 /* Donate button */
 .btn-donate {
-  background: var(--color-green-forest);
-  color: var(--color-green-100);
-  border: 1px solid var(--color-green-500);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--color-green-200);
+  color: var(--color-text-inverted);
   border-radius: 8px;
-  padding: 6px 14px;
+  padding: 7px 14px;
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 700;
   cursor: pointer;
   transition: background 0.15s;
   text-decoration: none;
@@ -224,6 +224,27 @@ a.router-link-active.nav-link::after {
 }
 
 .btn-donate:hover {
-  background: var(--color-green-500);
+  background: var(--color-green-50);
+}
+
+.btn-donate:focus-visible {
+  outline: 2px solid var(--color-green-50);
+  outline-offset: 2px;
+}
+
+.btn-donate-icon {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 359px) {
+  .nav-inner {
+    padding: 0 1rem;
+  }
+
+  .btn-donate-icon {
+    display: none;
+  }
 }
 </style>

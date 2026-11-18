@@ -5,7 +5,7 @@ import type { CoalMapData } from '~/types/coalMap'
 const coalMap = coalMapJson as unknown as CoalMapData
 
 useHead({
-  title: '用煤工廠地圖',
+  title: '依燃煤使用查詢',
   meta: [
     { name: 'description', content: '台灣排碳大戶用煤工廠分布地圖：以用煤申報資料呈現各廠逐年用煤量。' },
   ],

@@ -7,7 +7,7 @@ definePageMeta({
 
 // SEO metadata
 useSeoMeta({
-  title: '依基金持股查詢',
+  title: '依基金查詢',
   description: '追蹤台灣投資基金的排碳大戶投資狀況，分析基金持股企業碳排放、燃煤使用等環境指標。協助投資人做出更負責任的投資決策。',
 })
 
@@ -19,7 +19,7 @@ useSeoMeta({
       <NuxtLink to="/" class="back-link">
         ← 回首頁
       </NuxtLink>
-      <h1>依基金持股查詢</h1>
+      <h1>依基金查詢</h1>
       <p class="page-note">
         追蹤台灣投資基金的排碳大戶投資狀況
       </p>

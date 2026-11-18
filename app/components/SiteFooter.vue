@@ -1,7 +1,3 @@
-<script setup lang="ts">
-const DONATE_URL = 'https://gcaa.neticrm.tw/civicrm/contribute/transact?reset=1&id=41&utm_source=Web&utm_content=ESG&utm_campaign=FOOT'
-</script>
-
 <template>
   <footer class="site-footer">
     <div class="footer-left">
@@ -11,38 +7,22 @@ const DONATE_URL = 'https://gcaa.neticrm.tw/civicrm/contribute/transact?reset=1&
       <a href="https://thaubing.gcaa.org.tw/" target="_blank" rel="noopener noreferrer">透明足跡計畫</a>
       推動<br>
       <span class="footer-fine">
-        原始碼以 MIT 釋出 · 網站資料以 創用 CC 姓名標示-非商業性 4.0 國際 授權條款釋出
+        <a href="https://github.com/gcaa-org-tw/carbon-watch" target="_blank" rel="noopener noreferrer">原始碼</a>以 MIT 釋出 · 網站資料以 創用 CC
+        <a href="https://creativecommons.org/licenses/by-nc/4.0/deed.zh-hant" target="_blank" rel="noopener noreferrer">姓名標示─非商業性 4.0 國際</a>
+        授權條款釋出
       </span>
     </div>
 
     <div class="footer-right">
-      <a
-        class="footer-link"
-        href="https://github.com/gcaa-org-tw/carbon-watch"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        原始碼
-      </a>
-      <a
-        class="footer-link"
-        href="https://creativecommons.org/licenses/by-nc/4.0/deed.zh-hant"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        創用 CC 授權
-      </a>
+      <NuxtLink class="footer-link" to="/about">
+        計畫緣起
+      </NuxtLink>
+      <NuxtLink class="footer-link" to="/data-source">
+        資料來源
+      </NuxtLink>
       <NuxtLink class="footer-link" to="/terms-of-service">
         免責聲明
       </NuxtLink>
-      <a
-        class="btn-donate"
-        :href="DONATE_URL"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        捐款支持
-      </a>
     </div>
   </footer>
 </template>
@@ -97,24 +77,6 @@ const DONATE_URL = 'https://gcaa.neticrm.tw/civicrm/contribute/transact?reset=1&
 
 .footer-link:hover {
   color: var(--color-green-spring);
-}
-
-.btn-donate {
-  background: var(--color-green-forest);
-  color: var(--color-green-100);
-  border: 1px solid var(--color-green-500);
-  border-radius: 8px;
-  padding: 5px 12px;
-  font-size: 12px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background 0.15s;
-  text-decoration: none;
-  white-space: nowrap;
-}
-
-.btn-donate:hover {
-  background: var(--color-green-500);
 }
 
 @media (max-width: 900px) {
