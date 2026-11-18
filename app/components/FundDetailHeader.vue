@@ -36,7 +36,7 @@ const stats = computed(() => [
 <template>
   <header class="co-header">
     <NuxtLink to="/funds" class="back-link">
-      ← 依基金持股查詢
+      ← 依基金查詢
     </NuxtLink>
     <h1>{{ name }}<EsgLeaf v-if="isEsg" /></h1>
     <p v-if="codeDisplay" class="fund-code">
