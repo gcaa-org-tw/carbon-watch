@@ -1,6 +1,6 @@
 /**
  * Download raw data from Google Sheets and save as CSV files
- * 
+ *
  * This script implements Phase 1 (items 1 & 2) of the data source roadmap:
  * - Fetches data from Google Sheets API
  * - Uses tab names as CSV filenames
@@ -9,10 +9,21 @@
 
 import 'dotenv/config';
 import { google } from 'googleapis';
-import { writeFileSync, mkdirSync } from 'fs';
+import { writeFileSync, mkdirSync, appendFileSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { Logger } from './lib/logger.js';
+import { checkFundTabs } from './lib/fund-checks.js';
+import {
+  checkTabValues,
+  decideGroups,
+  groupLabel,
+  groupTabs,
+  summarizeOutcomes,
+  type ConsumedTab,
+  type GroupCheck,
+  type TabFetch,
+} from './lib/sync-groups.js';
 
 // Get directory path for ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -26,33 +37,51 @@ const SPREADSHEET_ID = process.env.GOOGLE_SHEETS_ID;
 // downloading every tab created ~24 orphan CSVs in raw-data/ that nothing read,
 // drowning out the signal. Add a row here when a new transform / analyze
 // script picks up a Sheet B tab; remove a row when no consumer is left.
-const CONSUMED_TABS: { tab: string; consumer: string }[] = [
-  { tab: 'I. 總表（易讀版）', consumer: 'tools/transform-company-data.ts' },
-  { tab: 'I. 總表（進階版）', consumer: 'tools/transform-company-data.ts' },
-  { tab: 'I. 總表各欄數值分級', consumer: 'tools/transform-company-data.ts' },
-  { tab: 'II. 公司總表（原始值）', consumer: 'tools/transform-company-data.ts' },
-  { tab: 'XII. 基金排碳量資訊', consumer: 'tools/transform-fund-data.ts' },
-  { tab: '排碳大戶表_Data', consumer: 'tools/transform-company-data.ts' },
-  { tab: '雷達圖_Data', consumer: 'tools/transform-company-data.ts' },
-  { tab: '溫室氣體排放', consumer: 'tools/transform-trend-data.ts' },
-  { tab: '能源消耗', consumer: 'tools/transform-trend-data.ts' },
-  { tab: 'VI. 所有基金與排碳大戶對照', consumer: 'tools/transform-fund-data.ts' },
-  { tab: 'XIII. ESG基金_sitca', consumer: 'tools/transform-fund-data.ts' },
-  { tab: 'XIV. ESG基金summary', consumer: 'tools/transform-fund-data.ts' },
-  { tab: 'XV. ESG持股明細', consumer: 'tools/transform-fund-data.ts' },
-  { tab: '工廠縣市排放_歷年', consumer: 'tools/transform-region-map-data.ts' },
-  { tab: '廠座標', consumer: 'tools/transform-top-company-region-data.ts' },
-  { tab: '用煤者_廠', consumer: 'tools/lib/coal-source.ts' },
-  { tab: '用煤者_公司', consumer: 'tools/lib/coal-source.ts' },
-  { tab: '用煤者產業對照', consumer: 'tools/lib/coal-source.ts' },
-  { tab: '燃煤工廠座標', consumer: 'tools/lib/coal-source.ts' },
-  { tab: '鋼鐵業用煤_歷年', consumer: 'tools/lib/coal-source.ts' },
-  { tab: '鋼鐵業工廠對照', consumer: 'tools/lib/coal-source.ts' },
+const CONSUMED_TABS: ConsumedTab[] = [
+  { tab: 'I. 總表（易讀版）', consumers: ['tools/transform-company-data.ts'] },
+  { tab: 'I. 總表（進階版）', consumers: ['tools/transform-company-data.ts'] },
+  { tab: 'I. 總表各欄數值分級', consumers: ['tools/transform-company-data.ts'] },
+  { tab: 'II. 公司總表（原始值）', consumers: ['tools/transform-company-data.ts'] },
+  { tab: 'XII. 基金排碳量資訊', consumers: ['tools/transform-fund-data.ts'] },
+  { tab: '排碳大戶表_Data', consumers: ['tools/transform-company-data.ts', 'tools/transform-coal-map-data.ts'] },
+  { tab: '雷達圖_Data', consumers: ['tools/transform-company-data.ts'] },
+  { tab: '溫室氣體排放', consumers: ['tools/transform-trend-data.ts', 'tools/transform-company-data.ts'] },
+  { tab: '能源消耗', consumers: ['tools/transform-trend-data.ts'] },
+  { tab: 'VI. 所有基金與排碳大戶對照', consumers: ['tools/transform-fund-data.ts'] },
+  { tab: 'XIII. ESG基金_sitca', consumers: ['tools/transform-fund-data.ts'] },
+  { tab: 'XIV. ESG基金summary', consumers: ['tools/transform-fund-data.ts'] },
+  { tab: 'XV. ESG持股明細', consumers: ['tools/transform-fund-data.ts'] },
+  {
+    tab: '工廠縣市排放_歷年',
+    consumers: [
+      'tools/transform-region-map-data.ts',
+      'tools/transform-company-data.ts',
+      'tools/transform-top-company-region-data.ts',
+    ],
+  },
+  { tab: '廠座標', consumers: ['tools/transform-top-company-region-data.ts'] },
+  { tab: '用煤者_廠', consumers: ['tools/transform-coal-map-data.ts'] },
+  { tab: '用煤者_公司', consumers: ['tools/transform-company-data.ts', 'tools/transform-coal-usage-data.ts'] },
+  { tab: '用煤者產業對照', consumers: ['tools/transform-coal-map-data.ts'] },
+  { tab: '燃煤工廠座標', consumers: ['tools/transform-coal-map-data.ts'] },
+  {
+    tab: '鋼鐵業用煤_歷年',
+    consumers: [
+      'tools/transform-company-data.ts',
+      'tools/transform-coal-usage-data.ts',
+      'tools/transform-coal-map-data.ts',
+    ],
+  },
+  { tab: '鋼鐵業工廠對照', consumers: ['tools/transform-coal-map-data.ts'] },
 ];
+
+const GROUP_CHECKS: Record<string, GroupCheck> = {
+  'tools/transform-fund-data.ts': checkFundTabs,
+};
 
 const FUND_ONLY = process.argv.includes('--fund-only');
 const TABS = FUND_ONLY
-  ? CONSUMED_TABS.filter(({ consumer }) => consumer === 'tools/transform-fund-data.ts')
+  ? CONSUMED_TABS.filter(({ consumers }) => consumers.includes('tools/transform-fund-data.ts'))
   : CONSUMED_TABS;
 
 // Output directory for raw CSV files
@@ -115,13 +144,11 @@ async function downloadRawData() {
       throw error;
     }
 
-    // Download data from each whitelisted tab
-    let successCount = 0;
-    let failureCount = 0;
+    const fetched = new Map<string, TabFetch>();
 
-    for (const { tab, consumer } of TABS) {
+    for (const { tab, consumers } of TABS) {
       try {
-        logger.info(`Fetching tab: "${tab}" (consumed by ${consumer})`);
+        logger.info(`Fetching tab: "${tab}" (consumed by ${consumers.join(', ')})`);
 
         const response = await sheets.spreadsheets.values.get({
           spreadsheetId: SPREADSHEET_ID,
@@ -129,46 +156,55 @@ async function downloadRawData() {
         });
 
         const values = response.data.values;
-
-        if (!values || values.length === 0) {
-          throw new Error('tab is empty');
-        }
-        const firstCell = String(values[0]?.[0] ?? '');
-        if (firstCell.startsWith('#') || firstCell === 'Loading...') {
-          throw new Error(`import not resolved (A1 = ${firstCell})`);
+        const problem = checkTabValues(values);
+        if (problem !== null || !values) {
+          throw new Error(problem ?? 'tab is empty');
         }
 
-        // Convert to CSV
-        const csv = arrayToCSV(values);
-
-        // Use tab name as filename (UTF-8 encoding supports non-ASCII characters)
-        const fileName = `${tab}.csv`;
-        const filePath = join(RAW_DATA_DIR, fileName);
-
-        // Write CSV file with UTF-8 encoding
-        writeFileSync(filePath, csv, 'utf-8');
-
-        logger.success(
-          `Saved "${tab}" to ${fileName} (${values.length} rows, ${values[0]?.length || 0} columns)`
-        );
-        successCount++;
+        fetched.set(tab, { ok: true, csv: arrayToCSV(values) });
+        logger.success(`Fetched "${tab}" (${values.length} rows, ${values[0]?.length || 0} columns)`);
       } catch (error) {
         logger.error(`Failed to download tab "${tab}"`, error);
-        failureCount++;
+        fetched.set(tab, { ok: false, error: error instanceof Error ? error.message : String(error) });
       }
+    }
+
+    const outcomes = decideGroups(groupTabs(TABS), fetched, GROUP_CHECKS);
+
+    for (const outcome of outcomes) {
+      const label = groupLabel(outcome.group);
+      if (outcome.failure) {
+        const { tab, error } = outcome.failure;
+        logger.error(`Skipped group [${label}]: "${tab}" failed (${error}); its ${outcome.group.tabs.length} CSVs are left as they were`);
+        console.log(`::error title=Tab group skipped::[${label}] "${tab}" failed: ${error}`);
+        continue;
+      }
+      for (const [tab, csv] of outcome.csvByTab) {
+        const fileName = `${tab}.csv`;
+        writeFileSync(join(RAW_DATA_DIR, fileName), csv, 'utf-8');
+        logger.success(`Saved "${tab}" to ${fileName}`);
+      }
+    }
+
+    const skippedCount = outcomes.filter(outcome => outcome.failure).length;
+    if (process.env.GITHUB_OUTPUT) {
+      appendFileSync(process.env.GITHUB_OUTPUT, `skipped=${skippedCount > 0}\n`);
+    }
+    if (process.env.GITHUB_STEP_SUMMARY) {
+      appendFileSync(process.env.GITHUB_STEP_SUMMARY, `\n#### Tab groups\n\n${summarizeOutcomes(outcomes)}\n\n`);
     }
 
     // Summary
     logger.info('='.repeat(60));
-    logger.success(`Successfully downloaded: ${successCount} sheets`);
-    if (failureCount > 0) {
-      logger.error(`Failed to download: ${failureCount} sheets`);
+    logger.success(`Synced groups: ${outcomes.length - skippedCount} of ${outcomes.length}`);
+    if (skippedCount > 0) {
+      logger.error(`Skipped groups: ${skippedCount} of ${outcomes.length}`);
     }
     logger.logDuration();
     logger.info('='.repeat(60));
 
-    // Exit with error code if any failures
-    if (failureCount > 0) {
+    if (skippedCount === outcomes.length) {
+      logger.error('Every tab group was skipped; nothing to publish');
       process.exit(1);
     }
   } catch (error) {

@@ -20,8 +20,6 @@ permissions:
 jobs:
   sync-data:
     runs-on: ubuntu-latest
-    env:
-      FUND_ONLY: ${{ github.event_name == 'schedule' || inputs.scope == 'fund' }}
 
     steps:
       - name: Checkout repository
@@ -37,9 +35,20 @@ jobs:
       
       - name: Install dependencies
         run: npm ci
+
+      - name: Decide sync scope
+        id: mode
+        env:
+          SYNC_EVENT: ${{ github.event_name }}
+          SYNC_SCOPE: ${{ inputs.scope }}
+          GOOGLE_SHEETS_API_KEY: ${{ secrets.GOOGLE_SHEETS_API_KEY }}
+          GOOGLE_SHEETS_ID: ${{ secrets.GOOGLE_SHEETS_ID }}
+        run: npm run decide-sync-mode
       
       - name: Download raw data from Google Spreadsheet
+        id: download
         env:
+          FUND_ONLY: ${{ steps.mode.outputs.fund_only }}
           GOOGLE_SHEETS_API_KEY: ${{ secrets.GOOGLE_SHEETS_API_KEY }}
           GOOGLE_SHEETS_ID: ${{ secrets.GOOGLE_SHEETS_ID }}
         run: |
@@ -54,6 +63,8 @@ jobs:
         # region-map, top-company-region). Calling it here keeps CI and local
         # runs in sync — when a new transform is added to package.json's
         # rebuild-data chain, CI picks it up automatically.
+        env:
+          FUND_ONLY: ${{ steps.mode.outputs.fund_only }}
         run: |
           if [ "$FUND_ONLY" = "true" ]; then
             npm run transform-fund-data
@@ -63,19 +74,26 @@ jobs:
       
       - name: Commit and push changes
         id: commit
+        env:
+          FUND_ONLY: ${{ steps.mode.outputs.fund_only }}
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
-          if [ "${{ github.event_name }}" = "schedule" ] && git diff --quiet -- app/assets/data/fund-period.json; then
+          git add raw-data/ app/assets/data/
+          CHANGED=$(git diff --staged --name-only | wc -l | tr -d ' ')
+          echo "Files changed: $CHANGED"
+
+          if [ "${{ github.event_name }}" = "schedule" ] && [ "$FUND_ONLY" = "true" ] && git diff --staged --quiet -- app/assets/data/fund-period.json; then
             echo "Holdings quarter unchanged; nothing to publish"
+            echo "- Files changed: $CHANGED (not committed: holdings quarter unchanged)" >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
 
-          git add raw-data/ app/assets/data/
-          
+          echo "- Files changed: $CHANGED" >> "$GITHUB_STEP_SUMMARY"
+
           # Check if there are any changes to commit
-          if git diff --staged --quiet; then
+          if [ "$CHANGED" -eq 0 ]; then
             echo "No changes to commit"
           else
             git commit -m "chore: sync data from Google Spreadsheet [skip ci]"
@@ -88,3 +106,9 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh workflow run deploy.yml --ref main
+
+      - name: Fail if any tab group was skipped
+        if: steps.download.outputs.skipped == 'true'
+        run: |
+          echo "::error title=Data sync incomplete::Some tab groups were skipped and kept their previous data; see the Tab groups table in the job summary"
+          exit 1
