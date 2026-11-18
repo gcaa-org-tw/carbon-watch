@@ -46,6 +46,7 @@ jobs:
         run: npm run decide-sync-mode
       
       - name: Download raw data from Google Spreadsheet
+        id: download
         env:
           FUND_ONLY: ${{ steps.mode.outputs.fund_only }}
           GOOGLE_SHEETS_API_KEY: ${{ secrets.GOOGLE_SHEETS_API_KEY }}
@@ -105,3 +106,9 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh workflow run deploy.yml --ref main
+
+      - name: Fail if any tab group was skipped
+        if: steps.download.outputs.skipped == 'true'
+        run: |
+          echo "::error title=Data sync incomplete::Some tab groups were skipped and kept their previous data; see the Tab groups table in the job summary"
+          exit 1
