@@ -41,7 +41,6 @@ const CONSUMED_TABS: ConsumedTab[] = [
   { tab: 'I. 總表（易讀版）', consumers: ['tools/transform-company-data.ts'] },
   { tab: 'I. 總表（進階版）', consumers: ['tools/transform-company-data.ts'] },
   { tab: 'I. 總表各欄數值分級', consumers: ['tools/transform-company-data.ts'] },
-  { tab: 'II. 公司總表（原始值）', consumers: ['tools/transform-company-data.ts'] },
   { tab: 'XII. 基金排碳量資訊', consumers: ['tools/transform-fund-data.ts'] },
   { tab: '排碳大戶表_Data', consumers: ['tools/transform-company-data.ts', 'tools/transform-coal-map-data.ts'] },
   { tab: '雷達圖_Data', consumers: ['tools/transform-company-data.ts'] },

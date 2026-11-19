@@ -85,7 +85,7 @@ const clearFilters = () => {
 
 const selectUi = {
   base: 'filter-sel',
-  content: 'bg-surface-warm border border-green-deep/40',
+  content: 'min-w-fit bg-surface-warm border border-green-deep/40',
   item: 'text-earth-brown data-highlighted:bg-green-deep/30 data-highlighted:text-white',
 }
 </script>

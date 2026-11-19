@@ -1,41 +1,41 @@
 [
   {
-    "industry": "石化業",
-    "count": 74,
-    "scoredCount": 42,
+    "industry": "電子零組件製造業",
+    "count": 84,
+    "scoredCount": 63,
     "avgScores": [
-      1.55,
-      0.36,
-      0.83,
-      0.38,
-      0.86,
-      0.98
+      1.38,
+      0.97,
+      0.48,
+      0.6,
+      0.57,
+      1.27
     ]
   },
   {
-    "industry": "半導體業",
-    "count": 49,
-    "scoredCount": 35,
+    "industry": "化學材料及肥料製造業",
+    "count": 57,
+    "scoredCount": 32,
     "avgScores": [
-      1.31,
-      1.03,
-      0.54,
-      0.66,
-      0.26,
-      1.37
+      1.63,
+      0.31,
+      0.91,
+      0.41,
+      0.75,
+      1.03
     ]
   },
   {
-    "industry": "鋼鐵業",
-    "count": 32,
-    "scoredCount": 18,
+    "industry": "基本金屬製造業",
+    "count": 30,
+    "scoredCount": 16,
     "avgScores": [
-      0.89,
-      0.22,
+      1.06,
+      0.31,
       0,
-      0.17,
-      0.5,
-      1.06
+      0.19,
+      0.38,
+      1.19
     ]
   },
   {
@@ -52,59 +52,33 @@
     ]
   },
   {
-    "industry": "電子業",
-    "count": 24,
-    "scoredCount": 20,
-    "avgScores": [
-      1.3,
-      0.75,
-      0.15,
-      0.7,
-      1.2,
-      0.95
-    ]
-  },
-  {
-    "industry": "光電業",
-    "count": 14,
+    "industry": "非金屬礦物製品製造業",
+    "count": 21,
     "scoredCount": 11,
     "avgScores": [
-      1.64,
-      1.18,
-      0.73,
       0.36,
-      0.55,
-      1.45
+      0,
+      0.27,
+      0,
+      1.73,
+      0.73
     ]
   },
   {
-    "industry": "非金屬製品加工業",
-    "count": 13,
-    "scoredCount": 5,
+    "industry": "食品及飼品製造業",
+    "count": 14,
+    "scoredCount": 7,
     "avgScores": [
-      0.2,
+      0.57,
+      0.14,
       0,
-      0,
-      0,
-      2,
-      0.6
+      0.14,
+      0.86,
+      1.14
     ]
   },
   {
-    "industry": "食品業",
-    "count": 12,
-    "scoredCount": 6,
-    "avgScores": [
-      0.5,
-      0,
-      0,
-      0.17,
-      1,
-      1.17
-    ]
-  },
-  {
-    "industry": "造紙業",
+    "industry": "紙漿、紙及紙製品製造業",
     "count": 11,
     "scoredCount": 5,
     "avgScores": [
@@ -117,60 +91,112 @@
     ]
   },
   {
-    "industry": "水泥業",
-    "count": 8,
+    "industry": "金屬製品製造業",
+    "count": 10,
     "scoredCount": 6,
     "avgScores": [
-      0.5,
+      0.83,
+      0.17,
       0,
-      0.5,
       0,
-      1.5,
-      0.83
-    ]
-  },
-  {
-    "industry": "銅製造業",
-    "count": 6,
-    "scoredCount": 2,
-    "avgScores": [
       1,
-      0.5,
-      0,
-      0,
-      1.5,
       1
     ]
   },
   {
-    "industry": "汽機車業",
-    "count": 4,
-    "scoredCount": 2,
-    "avgScores": [
-      0.5,
-      0.5,
-      0,
-      0,
-      1.5,
-      1
-    ]
-  },
-  {
-    "industry": "鋁製造業",
-    "count": 3,
+    "industry": "其他化學製品製造業",
+    "count": 8,
     "scoredCount": 3,
     "avgScores": [
       1.33,
-      0.67,
-      0,
-      0,
+      0.33,
+      2,
+      0.33,
       1,
-      2
+      1
     ]
   },
   {
-    "industry": "電池製造業",
-    "count": 2,
+    "industry": "石油及煤製品製造業",
+    "count": 4,
+    "scoredCount": 3,
+    "avgScores": [
+      2.33,
+      0,
+      0,
+      0,
+      0,
+      1
+    ]
+  },
+  {
+    "industry": "橡膠製品製造業",
+    "count": 4,
+    "scoredCount": 3,
+    "avgScores": [
+      0.67,
+      0.33,
+      0,
+      0.33,
+      3,
+      0.67
+    ]
+  },
+  {
+    "industry": "其他運輸工具及其零件製造業",
+    "count": 4,
+    "scoredCount": 4,
+    "avgScores": [
+      1,
+      0.5,
+      0.75,
+      0.75,
+      1.5,
+      1.5
+    ]
+  },
+  {
+    "industry": "電腦、電子產品及光學製品製造業",
+    "count": 3,
+    "scoredCount": 3,
+    "avgScores": [
+      1,
+      1,
+      0,
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "industry": "塑膠製品製造業",
+    "count": 3,
+    "scoredCount": 2,
+    "avgScores": [
+      0,
+      2,
+      0,
+      0.5,
+      1.5,
+      1
+    ]
+  },
+  {
+    "industry": "汽車及其零件製造業",
+    "count": 3,
+    "scoredCount": 1,
+    "avgScores": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "industry": "電力設備及配備製造業",
+    "count": 3,
     "scoredCount": 1,
     "avgScores": [
       0,
@@ -182,8 +208,8 @@
     ]
   },
   {
-    "industry": "眼鏡製造業",
-    "count": 1,
+    "industry": "其他製造業",
+    "count": 2,
     "scoredCount": 1,
     "avgScores": [
       0,
@@ -195,20 +221,7 @@
     ]
   },
   {
-    "industry": "碾穀、磨粉及澱粉製品製造業",
-    "count": 1,
-    "scoredCount": 1,
-    "avgScores": [
-      1,
-      1,
-      0,
-      0,
-      0,
-      1
-    ]
-  },
-  {
-    "industry": "金屬加工用機械設備製造業",
+    "industry": "機械設備製造業",
     "count": 1,
     "scoredCount": 1,
     "avgScores": [
@@ -216,45 +229,6 @@
       0,
       3,
       0,
-      0,
-      2
-    ]
-  },
-  {
-    "industry": "造船業",
-    "count": 1,
-    "scoredCount": 1,
-    "avgScores": [
-      1,
-      0,
-      0,
-      0,
-      0,
-      1
-    ]
-  },
-  {
-    "industry": "航空業",
-    "count": 1,
-    "scoredCount": 1,
-    "avgScores": [
-      1,
-      0,
-      3,
-      0,
-      3,
-      1
-    ]
-  },
-  {
-    "industry": "自行車業",
-    "count": 1,
-    "scoredCount": 1,
-    "avgScores": [
-      1,
-      1,
-      0,
-      3,
       0,
       2
     ]
