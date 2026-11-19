@@ -6,6 +6,7 @@
     "build": "nuxt build",
     "dev": "nuxt dev",
     "generate": "nuxt generate && tsx tools/generate-sitemap.ts",
+    "mirror": "MIRROR_BUILD=true RECORDS_ENABLED=true nuxt generate && tsx tools/build-mirror.ts",
     "preview": "nuxt preview",
     "lint": "eslint --ext .js,.ts,.vue .",
     "decide-sync-mode": "tsx tools/decide-sync-mode.ts",
