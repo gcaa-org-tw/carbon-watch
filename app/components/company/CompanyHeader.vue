@@ -11,7 +11,7 @@ interface Props {
   排放年度?: number
   全台佔比?: number
   年度變化?: number
-  推估碳費: number | null
+  預期碳費: number
 }
 
 const props = defineProps<Props>()
@@ -33,9 +33,11 @@ const netZeroText = computed(() => {
   return raw === '無' || raw === '無承諾' ? NOT_DISCLOSED : raw
 })
 
-const formattedFee = computed(() =>
-  props.推估碳費 === null ? '無資料' : formatApproxWithUnit(props.推估碳費, '元')
+const feeNote = computed(() =>
+  `以每公噸 300 元乘上${props.排放年度 ? ` ${props.排放年度} 年` : ''}排放量估算，未扣除免徵額與優惠費率`
 )
+
+const formattedFee = computed(() => formatApproxWithUnit(props.預期碳費, '元'))
 
 // Positive means increase, negative means decrease
 const changeText = computed(() => {
@@ -117,10 +119,10 @@ const isDecrease = computed(() => props.年度變化 !== undefined && props.年�
       <!-- Carbon fee -->
       <div class="md:text-right">
         <p class="text-l font-bold text-earth-brown">
-          推估碳費：<span class="font-semibold whitespace-nowrap">{{ formattedFee }}</span>
+          預期碳費：<span class="font-semibold whitespace-nowrap">{{ formattedFee }}</span>
         </p>
-        <p v-if="推估碳費 !== null" class="mt-1 text-xs text-earth-brown/60">
-          計入高碳洩漏風險行業與優惠費率
+        <p class="mt-1 text-xs text-earth-brown/60">
+          {{ feeNote }}
         </p>
       </div>
     </div>
