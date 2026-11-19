@@ -31,6 +31,13 @@ const taiwanPercentage = computed(() => {
   return (companyEmission.value / totalTaiwanEmissions.value) * 100
 })
 
+// Advocacy framing: 300 NTD/tonne without 25,000 t/factory exemption or
+// 自主減量 discounts. Diverges from 環境部 payable amount on purpose.
+const CARBON_FEE_RATE = 300 // NTD per tonne
+const expectedCarbonFee = computed(() => {
+  return companyEmission.value * CARBON_FEE_RATE
+})
+
 // Top 3 縣市 emission distribution (real data from IV. 企業縣市排放絕對值（公式）.csv)
 // 縣市佔比 = company emission in this county / sum of all 排碳大戶 in this county × 100
 const regionEmissions = computed(() => props.company.regionEmissions ?? [])
@@ -127,7 +134,7 @@ const 淨零年預估排放量 = computed(() => {
       :排放年度="latestEmissionYear"
       :全台佔比="taiwanPercentage"
       :年度變化="company.年度變化 ?? undefined"
-      :推估碳費="company['碳費_優惠費率（元）'] ?? null"
+      :預期碳費="expectedCarbonFee"
     />
 
     <div v-if="regionEmissions.length > 0" class="mt-5">
