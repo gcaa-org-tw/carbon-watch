@@ -1,4 +1,7 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+const recordsEnabled = process.env.RECORDS_ENABLED === 'true'
+const recordsRoutes = ['/records', '/download']
+
 export default defineNuxtConfig({
   modules: [
     '@nuxt/content',
@@ -54,6 +57,18 @@ export default defineNuxtConfig({
   compatibilityDate: '2024-04-03',
   nitro: {
     preset: 'static',
+  },
+  vite: {
+    define: {
+      __RECORDS_ENABLED__: JSON.stringify(recordsEnabled),
+    },
+  },
+  hooks: {
+    'pages:extend'(pages) {
+      if (recordsEnabled) return
+      const kept = pages.filter(page => !recordsRoutes.some(route => page.path === route || page.path.startsWith(`${route}/`)))
+      pages.splice(0, pages.length, ...kept)
+    },
   },
   srcDir: 'app/',
 })
