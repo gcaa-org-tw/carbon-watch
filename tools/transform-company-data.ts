@@ -787,6 +787,47 @@ function applySustainabilityReportFlag(
   return companyList;
 }
 
+const CARBON_FEE_FIELDS = [
+  '碳費表廠數',
+  '碳費_一般費率（元）',
+  '高碳洩漏廠數',
+  '自主減量A級廠數',
+  '自主減量B級廠數',
+  '自主減量未申請廠數',
+  '碳費_優惠費率（元）',
+] as const;
+
+function applyCarbonFee(
+  companyList: Record<string, string>[],
+  feeData: Record<string, string>[],
+  logger: Logger
+): Record<string, string>[] {
+  const feeByUbn = new Map<string, Record<string, string>>();
+  for (const row of feeData) {
+    const ubn = padUBN(row['統一編號']);
+    if (ubn) feeByUbn.set(ubn, row);
+  }
+
+  let withFee = 0;
+  let notOnSheet = 0;
+  const unmatched: string[] = [];
+  for (const company of companyList) {
+    const row = feeByUbn.get(padUBN(company['事業統編']));
+    if (!row) unmatched.push(company['公司']);
+    for (const field of CARBON_FEE_FIELDS) {
+      (company as Record<string, unknown>)[field] = row ? parseNumber(row[field]) ?? null : null;
+    }
+    if (row && parseNumber(row['碳費_一般費率（元）']) !== undefined) withFee++;
+    else if (row) notOnSheet++;
+  }
+
+  logger.success(
+    `碳費: ${withFee}/${companyList.length} companies with a fee, ${notOnSheet} not on the fee sheet, ${unmatched.length} missing from 碳費.csv`
+  );
+  unmatched.forEach(name => logger.info(`  - ${name}`));
+  return companyList;
+}
+
 function applyCoalUsageFromHistory(
   companyList: Record<string, string>[],
   coalByCompany: Map<string, YearTonnes>,
@@ -958,6 +999,12 @@ async function transformCompanyData() {
     companyList = applyCoalShare(companyList, logger);
 
     companyList = applySustainabilityReportFlag(companyList, hubData, logger);
+
+    const feeCsvPath = join(RAW_DATA_DIR, '碳費.csv');
+    logger.info(`Reading carbon fee data from: ${feeCsvPath}`);
+    const feeData = parseCSV(readFileSync(feeCsvPath, 'utf-8'));
+    logger.info(`Parsed ${feeData.length} records from 碳費.csv`);
+    companyList = applyCarbonFee(companyList, feeData, logger);
 
     const industryAverages = computeIndustryAverages(radarData, logger);
     logger.info(`Computed averages for ${industryAverages.size} industries`);

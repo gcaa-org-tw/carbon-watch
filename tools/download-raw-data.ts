@@ -44,6 +44,7 @@ const CONSUMED_TABS: ConsumedTab[] = [
   { tab: 'XII. 基金排碳量資訊', consumers: ['tools/transform-fund-data.ts'] },
   { tab: '排碳大戶表_Data', consumers: ['tools/transform-company-data.ts', 'tools/transform-coal-map-data.ts'] },
   { tab: '雷達圖_Data', consumers: ['tools/transform-company-data.ts'] },
+  { tab: '碳費', consumers: ['tools/transform-company-data.ts'] },
   { tab: '溫室氣體排放', consumers: ['tools/transform-trend-data.ts', 'tools/transform-company-data.ts'] },
   { tab: '能源消耗', consumers: ['tools/transform-trend-data.ts'] },
   { tab: 'VI. 所有基金與排碳大戶對照', consumers: ['tools/transform-fund-data.ts'] },
