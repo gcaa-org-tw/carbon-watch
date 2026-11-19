@@ -42,17 +42,14 @@ const expectedCarbonFee = computed(() => {
 // 縣市佔比 = company emission in this county / sum of all 排碳大戶 in this county × 100
 const regionEmissions = computed(() => props.company.regionEmissions ?? [])
 
-// Coal usage historical data from coal-usage-map.json (keyed by 公司全名)
-const normalizeName = (raw: string | undefined): string =>
-  (raw || '').replace(/臺/g, '台').trim()
-
+// Coal usage historical data from coal-usage-map.json (keyed by 事業統編)
 const coalUsageData = computed(() => {
-  const fullName = normalizeName(props.company['公司全名'])
-  if (!fullName) return []
-  return (coalUsageMap as Record<string, Array<{ year: number; value: number }>>)[fullName] || []
+  const ubn = (props.company['事業統編'] ?? '').trim()
+  if (!ubn) return []
+  return (coalUsageMap as Record<string, Array<{ year: number; value: number }>>)[ubn.padStart(8, '0')] || []
 })
 
-// Trend data (排放量、密集度、能源、能源密集度) keyed by 公司全名（臺→台 normalized），fallback to 事業統編
+// Trend data (排放量、密集度、能源、能源密集度) keyed by 事業統編
 const trendEntry = computed(() => findTrendEntry(props.company))
 
 const latestEmissionYear = computed(() => {

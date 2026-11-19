@@ -1,12 +1,12 @@
 /**
  * Trend Data Transformer
  *
- * Reads two raw CSVs from raw-data/:
+ * Reads raw CSVs from raw-data/:
  *  - 溫室氣體排放.csv (keyed by 事業統編): emissions + intensity 2022-2024
- *  - 能源消耗.csv (keyed by 證券代號): energy use + energy intensity 2022-2024
+ *  - 能源消耗.csv (company name only): energy use + energy intensity 2022-2024
+ *  - 排碳大戶表_Data.csv: 公司全稱 + 曾用名稱 → 統一編號, for the name-only rows
  *
- * Outputs `app/assets/data/trend-map.json` keyed by 公司全名 (full company name,
- * 臺→台 normalized to match hub).
+ * Outputs `app/assets/data/trend-map.json` keyed by 事業統編 (8 digits).
  *
  * ## Output shape
  *
@@ -27,7 +27,7 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'fs'
 import { join, dirname } from 'path'
 import { fileURLToPath } from 'url'
 import { Logger } from './lib/logger.js'
-import { normalizeCompanyName } from './lib/normalize.js'
+import { createCompanyUBNResolver, normalizeUBN } from './lib/normalize.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -91,7 +91,6 @@ function parseValue(raw: string | undefined): number | null {
 type Point = { year: number; value: number }
 type Series = Point[]
 type TrendEntry = {
-  事業統編?: string
   ghg?: Series
   ghgIntensity?: Series
   energy?: Series
@@ -99,9 +98,9 @@ type TrendEntry = {
 }
 type TrendMap = Record<string, TrendEntry>
 
-function ensure(map: TrendMap, name: string): TrendEntry {
-  if (!map[name]) map[name] = {}
-  return map[name]
+function ensure(map: TrendMap, ubn: string): TrendEntry {
+  if (!map[ubn]) map[ubn] = {}
+  return map[ubn]
 }
 
 function buildSeries(row: Record<string, string>, columns: Record<number, string>): Series {
@@ -123,21 +122,29 @@ async function transformTrendData() {
 
     const ghgPath = join(RAW_DATA_DIR, '溫室氣體排放.csv')
     const energyPath = join(RAW_DATA_DIR, '能源消耗.csv')
+    const hubPath = join(RAW_DATA_DIR, '排碳大戶表_Data.csv')
 
     if (!existsSync(ghgPath)) throw new Error(`Missing ${ghgPath}`)
     if (!existsSync(energyPath)) throw new Error(`Missing ${energyPath}`)
+    if (!existsSync(hubPath)) throw new Error(`Missing ${hubPath}`)
 
     const ghgData = parseCSV(readFileSync(ghgPath, 'utf-8'))
     const energyData = parseCSV(readFileSync(energyPath, 'utf-8'))
     logger.info(`溫室氣體排放: ${ghgData.length} rows`)
     logger.info(`能源消耗: ${energyData.length} rows`)
 
+    const resolveUBN = createCompanyUBNResolver(parseCSV(readFileSync(hubPath, 'utf-8')))
     const trendMap: TrendMap = {}
+    const unresolved: string[] = []
 
     let ghgCount = 0
     for (const row of ghgData) {
-      const name = normalizeCompanyName(row['公司'])
-      if (!name) continue
+      const rowUBN = normalizeUBN(row['事業統編'])
+      const ubn = rowUBN ? rowUBN.padStart(8, '0') : resolveUBN(row['公司'])
+      if (!ubn) {
+        if (row['公司']?.trim()) unresolved.push(`溫室氣體排放: ${row['公司'].trim()}`)
+        continue
+      }
 
       const ghg = buildSeries(row, {
         2022: '2022總排放',
@@ -151,9 +158,7 @@ async function transformTrendData() {
       })
       if (ghg.length === 0 && ghgIntensity.length === 0) continue
 
-      const entry = ensure(trendMap, name)
-      const ubn = (row['事業統編'] || '').trim()
-      if (ubn) entry.事業統編 = ubn.padStart(8, '0')
+      const entry = ensure(trendMap, ubn)
       if (ghg.length > 0) entry.ghg = ghg
       if (ghgIntensity.length > 0) entry.ghgIntensity = ghgIntensity
       ghgCount++
@@ -162,8 +167,11 @@ async function transformTrendData() {
 
     let energyCount = 0
     for (const row of energyData) {
-      const name = normalizeCompanyName(row['公司名稱'])
-      if (!name) continue
+      const ubn = resolveUBN(row['公司名稱'])
+      if (!ubn) {
+        if (row['公司名稱']?.trim()) unresolved.push(`能源消耗: ${row['公司名稱'].trim()}`)
+        continue
+      }
 
       const energy = buildSeries(row, {
         2022: '2022年度總能源使用量',
@@ -177,12 +185,15 @@ async function transformTrendData() {
       })
       if (energy.length === 0 && energyIntensity.length === 0) continue
 
-      const entry = ensure(trendMap, name)
+      const entry = ensure(trendMap, ubn)
       if (energy.length > 0) entry.energy = energy
       if (energyIntensity.length > 0) entry.energyIntensity = energyIntensity
       energyCount++
     }
     logger.success(`Loaded energy series for ${energyCount} companies`)
+    if (unresolved.length > 0) {
+      logger.info(`Rows without a roster 統一編號 (${unresolved.length}): ${unresolved.join('、')}`)
+    }
 
     mkdirSync(OUTPUT_DIR, { recursive: true })
     const outPath = join(OUTPUT_DIR, 'trend-map.json')

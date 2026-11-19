@@ -68,8 +68,8 @@ import { readFileSync, writeFileSync, mkdirSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { Logger } from './lib/logger.js';
-import { createFactoryUBNResolver, normalizeCompanyName, normalizeCounty } from './lib/normalize.js';
-import { loadCoalByCompany, padUBN, type YearTonnes } from './lib/coal-source.js';
+import { createFactoryUBNResolver, normalizeCounty } from './lib/normalize.js';
+import { loadCoalByUBN, padUBN, type YearTonnes } from './lib/coal-source.js';
 
 // Get directory path for ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -242,26 +242,22 @@ function mergeCompanyData(
   return mergedData;
 }
 
-const HUB_PASSTHROUGH_FIELDS = ['公司代號', '節能目標年設定', '再生能源目標年設定'] as const;
+const HUB_PASSTHROUGH_FIELDS = ['公司代號', '節能目標年設定', '再生能源目標年設定', '曾用名稱'] as const;
 
 /**
  * Add 代表縣市, 事業統編, 公司全名 to each company.
  *
- * Sources:
- *   - 統一編號 + 公司全稱: hub 排碳大戶表_Data (SOT-derived, covers all 287).
- *   - 代表縣市: II. 公司總表 (max-emission county, semantically distinct from
- *     hub's 最大廠所處縣市 which is the single largest factory; for multi-factory
- *     companies the two can disagree — II.'s aggregation is the canonical one).
+ * Source: hub 排碳大戶表_Data. 代表縣市 is its 最大廠所處縣市 column, which
+ * reads the roster's max-emission county.
  */
 function addRepresentativeCity(
   companyList: Record<string, string>[],
-  companyDetailData: Record<string, string>[],
   hubData: Record<string, string>[],
   logger: Logger
 ): Record<string, string>[] {
   logger.info('Step 3: Adding 代表縣市, 事業統編, and 公司全名 data');
 
-  // Hub: 公司簡稱 -> { 統一編號, 公司全稱 }. Authoritative for all 287 companies.
+  // Hub: 公司簡稱 -> { 統一編號, 公司全稱 }.
   const hubByAbbr = new Map<string, { taxCode: string; fullName: string; row: Record<string, string> }>();
   for (const row of hubData) {
     const abbr = row['公司簡稱']?.trim();
@@ -272,17 +268,6 @@ function addRepresentativeCity(
     }
   }
   logger.info(`Loaded ${hubByAbbr.size} 公司簡稱 mappings from 排碳大戶表_Data.csv`);
-
-  // II. 公司總表: 事業統編 -> 代表縣市. Max-emission county per company.
-  const taxCodeToCity = new Map<string, string>();
-  for (const detail of companyDetailData) {
-    const taxCode = detail['事業統編']?.trim();
-    const city = detail['代表縣市']?.trim();
-    if (taxCode && city) {
-      taxCodeToCity.set(taxCode, city);
-    }
-  }
-  logger.info(`Loaded ${taxCodeToCity.size} city mappings from II. 公司總表（原始值）.csv`);
 
   let successCount = 0;
   const failedCompanies: string[] = [];
@@ -298,7 +283,7 @@ function addRepresentativeCity(
     }
 
     const { taxCode, fullName } = hubMatch;
-    const city = taxCodeToCity.get(taxCode) ?? '';
+    const city = hubMatch.row['最大廠所處縣市']?.trim() ?? '';
 
     for (const field of HUB_PASSTHROUGH_FIELDS) {
       const value = hubMatch.row[field]?.trim();
@@ -810,7 +795,7 @@ function applyCoalUsageFromHistory(
   let matched = 0;
   let withCoal = 0;
   for (const company of companyList) {
-    const years = coalByCompany.get(normalizeCompanyName(company['公司全名']));
+    const years = coalByCompany.get(padUBN(company['事業統編']));
     if (!years) continue;
     const coal = years.get(2025) ?? 0;
     company['燃煤使用量（公噸）'] = coal > 0 ? String(coal) : '';
@@ -819,7 +804,7 @@ function applyCoalUsageFromHistory(
   }
 
   logger.success(
-    `燃煤使用量改採 2025 年資料：${matched}/${companyList.length} 家有公司全名可對應，${withCoal} 家數值大於零`
+    `燃煤使用量改採 2025 年資料：${matched}/${companyList.length} 家有統編可對應，${withCoal} 家數值大於零`
   );
   return companyList;
 }
@@ -919,19 +904,13 @@ async function transformCompanyData() {
     logger.success(`Transformed grade map: ${gradeMapFields.length} fields`);
     logger.info(`Grade map fields: ${gradeMapFields.join(', ')}`);
 
-    // 3. Load company detail (代表縣市 lookup) + hub (統編 / 公司全稱 lookup).
-    const companyDetailCsvPath = join(RAW_DATA_DIR, 'II. 公司總表（原始值）.csv');
-    logger.info(`Reading company detail data from: ${companyDetailCsvPath}`);
-    const companyDetailCsvContent = readFileSync(companyDetailCsvPath, 'utf-8');
-    const companyDetailData = parseCSV(companyDetailCsvContent);
-    logger.info(`Parsed ${companyDetailData.length} records from II. 公司總表（原始值）.csv`);
-
+    // 3. Load hub (統編 / 公司全稱 / 代表縣市 lookup).
     const hubCsvPath = join(RAW_DATA_DIR, '排碳大戶表_Data.csv');
     logger.info(`Reading hub data from: ${hubCsvPath}`);
     const hubData = parseCSV(readFileSync(hubCsvPath, 'utf-8'));
     logger.info(`Parsed ${hubData.length} records from 排碳大戶表_Data.csv`);
 
-    companyList = addRepresentativeCity(companyList, companyDetailData, hubData, logger);
+    companyList = addRepresentativeCity(companyList, hubData, logger);
 
     // Override 年碳排 (latest 2024) + 年度變化 (2024 vs 2023) from SOT 溫室氣體排放 tab.
     // 易讀版 carries a stale snapshot (台塑化 24,467,047 is the 2022 value), and hub
@@ -942,8 +921,8 @@ async function transformCompanyData() {
     logger.info(`Parsed ${trendCsvData.length} records from 溫室氣體排放.csv`);
     companyList = applyLatestEmissionFromTrend(companyList, trendCsvData, logger);
 
-    const coalByCompany = loadCoalByCompany(RAW_DATA_DIR);
-    logger.info(`Loaded coal usage of ${coalByCompany.size} companies from 用煤者_公司.csv and 鋼鐵業用煤_歷年.csv`);
+    const { byUBN: coalByCompany, offRoster: coalOffRoster } = loadCoalByUBN(RAW_DATA_DIR);
+    logger.info(`Loaded coal usage of ${coalByCompany.size} roster companies from 用煤者_公司.csv and 鋼鐵業用煤_歷年.csv (${coalOffRoster.length} source companies not on the roster)`);
     companyList = applyCoalUsageFromHistory(companyList, coalByCompany, logger);
 
     // Add per-company top-3 縣市 emission distribution from factory-level SOT

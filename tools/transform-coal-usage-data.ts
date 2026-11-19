@@ -2,7 +2,7 @@
  * Coal Usage Data Transformer
  *
  * Reads the fuel-season company file and the steel coal file
- * (merged in tools/lib/coal-source.ts) and outputs a JSON map keyed by 公司全名.
+ * (merged in tools/lib/coal-source.ts) and outputs a JSON map keyed by 事業統編.
  *
  * ## Usage
  *
@@ -25,13 +25,14 @@
  * Record<string, Array<{ year: number; value: number }>>
  * ```
  *
- * Keyed by 公司全名 (full company name, 臺→台 normalized to match hub). Each
+ * Keyed by 事業統編 (8 digits). Company names in the source resolve through the
+ * hub's 公司全稱 and 曾用名稱; companies off the roster are left out. Each
  * entry is an array of yearly data points sorted by year ascending, with only
  * non-zero values included.
  */
 
 import { writeFileSync, mkdirSync } from 'fs';
-import { loadCoalByCompany } from './lib/coal-source.js';
+import { loadCoalByUBN } from './lib/coal-source.js';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { Logger } from './lib/logger.js';
@@ -54,19 +55,19 @@ async function transformCoalUsageData() {
     logger.info('Starting coal usage data transformation');
 
     // 1. Load company coal usage (fuel file + steel override)
-    const coalByCompany = loadCoalByCompany(RAW_DATA_DIR);
-    logger.info(`Loaded ${coalByCompany.size} companies`);
+    const { byUBN: coalByCompany, offRoster } = loadCoalByUBN(RAW_DATA_DIR);
+    logger.info(`Loaded ${coalByCompany.size} roster companies (${offRoster.length} source companies not on the roster)`);
 
     // 2. Skip pre-2021: 2020 only covers ~46% of coal-using companies in the source,
     //    causing inconsistent chart start points across companies.
     const MIN_YEAR = 2023;
 
-    // 3. Transform to map keyed by 公司
+    // 3. Transform to map keyed by 事業統編
     const coalUsageMap: Record<string, Array<{ year: number; value: number }>> = {};
 
     let processedCount = 0;
 
-    for (const [companyName, years] of coalByCompany) {
+    for (const [ubn, years] of coalByCompany) {
       const dataPoints: Array<{ year: number; value: number }> = [];
 
       for (const [year, value] of years) {
@@ -78,7 +79,7 @@ async function transformCoalUsageData() {
       if (dataPoints.length > 0) {
         // Sort by year ascending
         dataPoints.sort((a, b) => a.year - b.year);
-        coalUsageMap[companyName] = dataPoints;
+        coalUsageMap[ubn] = dataPoints;
         processedCount++;
       }
     }

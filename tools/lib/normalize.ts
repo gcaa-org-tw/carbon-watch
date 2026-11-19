@@ -20,9 +20,25 @@ export function normalizeCompanyName(raw: string | undefined): string {
   return (raw || '').replace(/臺/g, '台').trim();
 }
 
+// 曾用名稱 holds former names separated by 、.
+export function createCompanyUBNResolver(
+  hubRows: Array<Record<string, string>>
+): (name: string | undefined) => string | undefined {
+  const byName = new Map<string, string>();
+  for (const row of hubRows) {
+    const ubn = normalizeUBN(row['統一編號']);
+    if (!ubn) continue;
+    for (const name of [row['公司全稱'], ...(row['曾用名稱'] || '').split('、')]) {
+      const key = normalizeCompanyName(name);
+      if (key) byName.set(key, ubn.padStart(8, '0'));
+    }
+  }
+  return name => byName.get(normalizeCompanyName(name));
+}
+
 // Branch offices (分公司) file factory emissions under their own 統編, so a
 // factory row whose 事業統編 is not a tracked company falls back to the
-// tracked company whose 公司全名 prefixes its 事業名稱.
+// tracked company whose 公司全名 or 曾用名稱 prefixes its 事業名稱.
 export function createFactoryUBNResolver(
   companies: Array<Record<string, unknown>>
 ): (row: Record<string, string>) => string | undefined {
@@ -32,8 +48,10 @@ export function createFactoryUBNResolver(
     const ubn = String(c['事業統編'] ?? '').trim();
     if (!ubn) continue;
     allowedUBNs.add(ubn);
-    const fullName = normalizeCompanyName(String(c['公司全名'] ?? ''));
-    if (fullName) byFullName.push([fullName, ubn]);
+    for (const raw of [String(c['公司全名'] ?? ''), ...String(c['曾用名稱'] ?? '').split('、')]) {
+      const name = normalizeCompanyName(raw);
+      if (name) byFullName.push([name, ubn]);
+    }
   }
   byFullName.sort((a, b) => b[0].length - a[0].length);
 

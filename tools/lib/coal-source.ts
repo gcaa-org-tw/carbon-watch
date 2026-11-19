@@ -1,6 +1,6 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { normalizeCompanyName, normalizeCounty, normalizeUBN } from './normalize.js';
+import { createCompanyUBNResolver, normalizeCompanyName, normalizeCounty, normalizeUBN } from './normalize.js';
 
 export type YearTonnes = Map<number, number>;
 
@@ -78,7 +78,7 @@ function loadSteelCoalByCompany(rawDataDir: string): Map<string, YearTonnes> {
   return byCompany;
 }
 
-export function loadCoalByCompany(rawDataDir: string): Map<string, YearTonnes> {
+function loadCoalByCompany(rawDataDir: string): Map<string, YearTonnes> {
   const steelByCompany = loadSteelCoalByCompany(rawDataDir);
   const byCompany = new Map<string, YearTonnes>();
   for (const row of readRows(join(rawDataDir, '用煤者_公司.csv'))) {
@@ -88,6 +88,25 @@ export function loadCoalByCompany(rawDataDir: string): Map<string, YearTonnes> {
   }
   for (const [name, years] of steelByCompany) byCompany.set(name, years);
   return byCompany;
+}
+
+export function loadCoalByUBN(rawDataDir: string): {
+  byUBN: Map<string, YearTonnes>;
+  offRoster: string[];
+} {
+  const resolveUBN = createCompanyUBNResolver(readRows(join(rawDataDir, '排碳大戶表_Data.csv')));
+  const byUBN = new Map<string, YearTonnes>();
+  const offRoster: string[] = [];
+  for (const [name, years] of loadCoalByCompany(rawDataDir)) {
+    const ubn = resolveUBN(name);
+    if (!ubn) {
+      offRoster.push(name);
+      continue;
+    }
+    if (byUBN.has(ubn)) throw new Error(`用煤者_公司.csv: more than one company row resolves to 統一編號 ${ubn} (${name})`);
+    byUBN.set(ubn, years);
+  }
+  return { byUBN, offRoster };
 }
 
 export interface CoalFactory {
