@@ -127,7 +127,7 @@ const 淨零年預估排放量 = computed(() => {
       :排放年度="latestEmissionYear"
       :全台佔比="taiwanPercentage"
       :年度變化="company.年度變化 ?? undefined"
-      :碳費="company"
+      :推估碳費="company['碳費_優惠費率（元）'] ?? null"
     />
 
     <div v-if="regionEmissions.length > 0" class="mt-5">

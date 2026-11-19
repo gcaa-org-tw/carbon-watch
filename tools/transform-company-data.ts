@@ -787,15 +787,7 @@ function applySustainabilityReportFlag(
   return companyList;
 }
 
-const CARBON_FEE_FIELDS = [
-  '碳費表廠數',
-  '碳費_一般費率（元）',
-  '高碳洩漏廠數',
-  '自主減量A級廠數',
-  '自主減量B級廠數',
-  '自主減量未申請廠數',
-  '碳費_優惠費率（元）',
-] as const;
+const CARBON_FEE_FIELD = '碳費_優惠費率（元）';
 
 function applyCarbonFee(
   companyList: Record<string, string>[],
@@ -814,10 +806,9 @@ function applyCarbonFee(
   for (const company of companyList) {
     const row = feeByUbn.get(padUBN(company['事業統編']));
     if (!row) unmatched.push(company['公司']);
-    for (const field of CARBON_FEE_FIELDS) {
-      (company as Record<string, unknown>)[field] = row ? parseNumber(row[field]) ?? null : null;
-    }
-    if (row && parseNumber(row['碳費_一般費率（元）']) !== undefined) withFee++;
+    const fee = row ? parseNumber(row[CARBON_FEE_FIELD]) ?? null : null;
+    (company as Record<string, unknown>)[CARBON_FEE_FIELD] = fee;
+    if (fee !== null) withFee++;
     else if (row) notOnSheet++;
   }
 
