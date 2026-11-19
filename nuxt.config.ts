@@ -1,4 +1,10 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+import { fileURLToPath } from 'node:url'
+
+const recordsEnabled = process.env.RECORDS_ENABLED === 'true'
+const mirrorBuild = process.env.MIRROR_BUILD === 'true'
+const recordsRoutes = ['/records', '/download']
+
 export default defineNuxtConfig({
   modules: [
     '@nuxt/content',
@@ -8,14 +14,17 @@ export default defineNuxtConfig({
     '@nuxt/eslint',
     '@nuxt/ui',
   ],
+  ssr: !mirrorBuild,
   css: ['~/assets/css/main.css'],
   icon: {
     clientBundle: { scan: true },
   },
   fonts: {
     families: [{ name: 'Noto Sans TC', provider: 'none' }],
+    assets: { prefix: mirrorBuild ? '/fonts' : '/_fonts' },
   },
   app: {
+    buildAssetsDir: mirrorBuild ? '/nuxt/' : '/_nuxt/',
     head: {
       htmlAttrs: { lang: 'zh-TW' },
       link: [
@@ -54,6 +63,21 @@ export default defineNuxtConfig({
   compatibilityDate: '2024-04-03',
   nitro: {
     preset: 'static',
+  },
+  vite: {
+    define: {
+      __RECORDS_ENABLED__: JSON.stringify(recordsEnabled),
+    },
+  },
+  hooks: {
+    'pages:extend'(pages) {
+      if (recordsEnabled) return
+      const kept = pages.filter(page => !recordsRoutes.some(route => page.path === route || page.path.startsWith(`${route}/`)))
+      pages.splice(0, pages.length, ...kept)
+    },
+    'pages:routerOptions'({ files }) {
+      if (mirrorBuild) files.push({ path: fileURLToPath(new URL('./app/router.mirror.ts', import.meta.url)) })
+    },
   },
   srcDir: 'app/',
 })

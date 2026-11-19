@@ -5,6 +5,7 @@
 .nitro
 .cache
 dist
+.mirror
 
 # Node dependencies
 node_modules
