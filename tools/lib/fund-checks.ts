@@ -97,6 +97,9 @@ export function assertSummaryMatchesHoldings(
       emitters.set(code, (emitters.get(code) ?? 0) + 1);
     }
   });
+  if (emitters.size === 0) {
+    throw new Error(`${label}: no holding is marked 是否排碳大戶`);
+  }
   const summaryCodes = summary.map(row => (row['基金代號'] || '').trim()).filter(Boolean);
   const mismatched = summary
     .filter(row => (row['基金代號'] || '').trim())
