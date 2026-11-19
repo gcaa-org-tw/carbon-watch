@@ -38,12 +38,6 @@ export interface CompanyData {
   '持股比率'?: string
   '有永續報告書': boolean
   '年度變化'?: number | null
-  '碳費表廠數'?: number | null
-  '碳費_一般費率（元）'?: number | null
-  '高碳洩漏廠數'?: number | null
-  '自主減量A級廠數'?: number | null
-  '自主減量B級廠數'?: number | null
-  '自主減量未申請廠數'?: number | null
   '碳費_優惠費率（元）'?: number | null
   'regionEmissions'?: Array<{ 縣市: string; 排放量: number; 縣市佔比: number }>
   'factoryCounties'?: string[]
