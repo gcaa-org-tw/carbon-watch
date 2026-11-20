@@ -55,5 +55,11 @@ export default defineNuxtConfig({
   nitro: {
     preset: 'static',
   },
+  hooks: {
+    'prerender:routes'({ routes }) {
+      const add = routes.add.bind(routes)
+      routes.add = route => add(/^(?:\/[^/.]+)+$/.test(route) ? `${route}/` : route)
+    },
+  },
   srcDir: 'app/',
 })

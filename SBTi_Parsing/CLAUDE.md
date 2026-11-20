@@ -21,8 +21,10 @@ homepage. The full chain (all formula-driven, single manual root):
    **This is the only thing you update manually.**
 3. → IMPORTRANGE into「排碳大戶觀測站_raw_data」
    tab `raw_國際減碳倡議`
-   (F:H formulas add 簡稱/股號/統編 via exact-name match on raw_上市櫃公司列表,
-   fallback raw_非上市櫃列表)
+   (F:G formulas add 簡稱/股號 via exact-name match on raw_上市櫃公司列表;
+   H is one ARRAYFORMULA that adds 統編 by matching the name, 臺→台
+   normalized, against 排碳大戶名單 全稱 (C), then its 曾用名稱 (O), so only
+   companies on that list get a 統編)
 4. → `排碳大戶表_Data` col O「中期目標是否取得SBT認證」(INDEX/MATCH by 統編,
    default「無」) → `I. 總表` SBTi 承諾 → public sheet → CI sync → site
 
