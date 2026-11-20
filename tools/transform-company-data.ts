@@ -787,7 +787,7 @@ function applySustainabilityReportFlag(
   return companyList;
 }
 
-const CARBON_FEE_FIELD = '碳費_優惠費率（元）';
+const CARBON_FEE_FIELDS = ['碳費_一般費率（元）', '碳費_優惠費率（元）'] as const;
 
 function applyCarbonFee(
   companyList: Record<string, string>[],
@@ -806,9 +806,10 @@ function applyCarbonFee(
   for (const company of companyList) {
     const row = feeByUbn.get(padUBN(company['事業統編']));
     if (!row) unmatched.push(company['公司']);
-    const fee = row ? parseNumber(row[CARBON_FEE_FIELD]) ?? null : null;
-    (company as Record<string, unknown>)[CARBON_FEE_FIELD] = fee;
-    if (fee !== null) withFee++;
+    for (const field of CARBON_FEE_FIELDS) {
+      (company as Record<string, unknown>)[field] = row ? parseNumber(row[field]) ?? null : null;
+    }
+    if (row && parseNumber(row['碳費_一般費率（元）']) !== undefined) withFee++;
     else if (row) notOnSheet++;
   }
 
