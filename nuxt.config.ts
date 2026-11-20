@@ -54,8 +54,11 @@ export default defineNuxtConfig({
   compatibilityDate: '2024-04-03',
   nitro: {
     preset: 'static',
-    prerender: {
-      ignore: [/^(?:\/[^/.]+)+$/],
+  },
+  hooks: {
+    'prerender:routes'({ routes }) {
+      const add = routes.add.bind(routes)
+      routes.add = route => add(/^(?:\/[^/.]+)+$/.test(route) ? `${route}/` : route)
     },
   },
   srcDir: 'app/',
