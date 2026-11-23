@@ -18,6 +18,12 @@ const menuItems = computed<MenuItem[]>(() => [
   { to: '/funds', label: '依基金查詢' },
   { to: '/coal-map', label: '依用煤查詢' },
   { to: '/methodology', label: '氣候績效指標方法論' },
+  ...(__RECORDS_ENABLED__
+    ? [
+        { to: '/records', label: '裁罰、工安與司法案件' },
+        { to: '/download', label: '資料下載' },
+      ]
+    : []),
 ])
 
 const toggleMobileMenu = () => {
