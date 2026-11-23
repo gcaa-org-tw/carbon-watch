@@ -22,6 +22,12 @@ const yearTab = computed({
 
 const yearItems = COAL_YEARS.map(y => ({ label: `${y} 年`, value: String(y) }))
 
+const yearTabsUi = {
+  list: 'bg-bg-elevated ring ring-inset ring-bg-border',
+  indicator: 'bg-green-forest shadow-none',
+  trigger: 'data-[state=inactive]:text-text-muted hover:data-[state=inactive]:not-disabled:text-text-secondary data-[state=active]:text-text-primary',
+}
+
 // Categorical palette validated against the site surface #1A2C1A
 // (dataviz six-checks: lightness band, chroma floor, CVD ΔE 23.7, contrast ≥ 3:1).
 // Assigned to industries in meta.業別排序 fixed order — never re-derived on filter.
@@ -195,13 +201,13 @@ const isStreetLevel = (f: CoalMapFactory) => f.座標來源.startsWith('OSM')
   <div class="py-4">
     <!-- Header -->
     <div class="mb-8">
-      <h1 class="text-4xl font-bold text-green-mint mb-4">
+      <h1 class="text-2xl leading-normal tracking-[-0.015em] font-bold text-text-primary mb-4">
         依燃煤使用查詢
       </h1>
-      <p class="text-earth-brown max-w-3xl leading-relaxed">
+      <p class="text-[13px] text-earth-brown max-w-3xl leading-relaxed">
         {{ selectedYear }} 年，{{ companyCount }} 家排碳大戶共 {{ activeInYear.length }} 座工廠申報用煤，合計{{ formatApprox(totalTonnes) }}公噸。點大小代表該廠 {{ selectedYear }} 年的用煤量，顏色代表產業別。
       </p>
-      <p class="text-sm text-earth-brown/70 mt-3 max-w-3xl">
+      <p class="text-[13px] text-earth-brown mt-3 max-w-3xl">
         範疇說明：本地圖僅涵蓋排碳大戶（本站追蹤的製造業排碳大戶）的用煤工廠，不含電力業；全台工業用煤另有約百家非排碳大戶的小型用煤工廠，合計約佔工業用煤總量 1%。
       </p>
     </div>
@@ -214,6 +220,7 @@ const isStreetLevel = (f: CoalMapFactory) => f.座標來源.startsWith('OSM')
         :items="yearItems"
         :content="false"
         size="sm"
+        :ui="yearTabsUi"
         class="w-full max-w-xs"
       />
     </div>
