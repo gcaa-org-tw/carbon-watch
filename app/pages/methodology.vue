@@ -75,8 +75,7 @@ useSeoMeta({
 
 /* ── 內文 ─────────────────────────────────────────────── */
 .methodology-content :deep(p) {
-  max-width: 900px;
-  font-size: 14px;
+  font-size: 1rem;
   line-height: 1.9;
   color: var(--color-text-secondary);
   margin-bottom: 12px;
@@ -113,7 +112,6 @@ useSeoMeta({
 }
 
 .methodology-content :deep(.aspect p) {
-  max-width: none;
   font-size: 13.5px;
   line-height: 1.8;
   color: var(--color-text-secondary);
