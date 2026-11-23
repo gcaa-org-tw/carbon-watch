@@ -133,7 +133,7 @@ async function transformTopCompanyRegionData() {
     logger.info(`Total Taiwan emissions (2024 SOT): ${totalTaiwanEmissions.toLocaleString()} tonnes`);
 
     // 3) Pick top 10 by 排放量 desc.
-    const top10 = [...companies]
+    const top10: Array<Record<string, unknown> & { _amount: number }> = [...companies]
       .map(c => ({
         ...c,
         _amount: parseAmount((c['溫室氣體排放量（公噸二氧化碳當量）'] as string) || ''),

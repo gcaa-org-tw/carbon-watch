@@ -78,6 +78,10 @@ export default defineNuxtConfig({
     'pages:routerOptions'({ files }) {
       if (mirrorBuild) files.push({ path: fileURLToPath(new URL('./app/router.mirror.ts', import.meta.url)) })
     },
+    'prerender:routes'({ routes }) {
+      const add = routes.add.bind(routes)
+      routes.add = route => add(/^(?:\/[^/.]+)+$/.test(route) ? `${route}/` : route)
+    },
   },
   srcDir: 'app/',
 })

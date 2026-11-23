@@ -50,6 +50,8 @@ const radarDot = (raw: string): string | null => {
 /* ── 格式化 ───────────────────────────────────────────── */
 const hasReport = (company: CompanyData): boolean => company['有永續報告書'] !== false
 
+const hasNoReportRow = computed(() => props.rows.some(company => !hasReport(company)))
+
 const formatTarget = (raw: string): string => {
   if (raw.endsWith('%')) {
     const n = Number.parseFloat(raw)
@@ -327,7 +329,9 @@ const legendItems = [
       </table>
     </div>
 
-    <p class="table-note">無法取得資料的部分用 NA 表示</p>
+    <p class="table-note">
+      <template v-if="hasNoReportRow">NA 表示企業無發行永續報告書，</template>— 表示該企業未揭露
+    </p>
 
     <p v-if="tableRows.length === 0" class="empty-note">找不到符合條件的企業</p>
   </div>
