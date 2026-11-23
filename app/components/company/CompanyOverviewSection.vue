@@ -55,7 +55,7 @@ const latestEmissionYear = computed(() => {
 
 const parseParagraph = (value?: string): string => {
   if (!value) return ''
-  return value.replace(/([。：])(?!$)/g, "$1\n")
+  return value.replace(/(。)(?!$)/g, "$1\n")
 }
 
 const companyReductionStrategy = computed(() =>
