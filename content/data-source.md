@@ -58,7 +58,7 @@ description: 排碳大戶觀測站使用的政府開放資料、公開資訊觀�
 
 ## OpenStreetMap
 
-依燃煤使用查詢的廠區位置，以環境部「環境保護許可管理系統(暨解除列管)對象基本資料」之座標為準；該資料集未提供座標的工廠，改以 OpenStreetMap 依登記地址進行街道級定位（工廠清單中以「＊」標示），非精確廠址。
+依用煤查詢的廠區位置，以環境部「環境保護許可管理系統(暨解除列管)對象基本資料」之座標為準；該資料集未提供座標的工廠，改以 OpenStreetMap 依登記地址進行街道級定位（工廠清單中以「＊」標示），非精確廠址。
 
 本網站取自 OpenStreetMap 的資料，僅有上述依登記地址定位所得之座標。廠區定位資料 <a href="https://www.openstreetmap.org/copyright" target="_blank">© OpenStreetMap 貢獻者</a>，依<a href="https://opendatacommons.org/licenses/odbl/1-0/" target="_blank">開放資料庫授權條款（Open Database License，ODbL）1.0</a> 提供。
 

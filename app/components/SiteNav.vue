@@ -16,7 +16,7 @@ interface MenuItem {
 const menuItems = computed<MenuItem[]>(() => [
   { to: isPro.value ? '/companies/pro' : '/companies', label: '依企業查詢' },
   { to: '/funds', label: '依基金查詢' },
-  { to: '/coal-map', label: '依燃煤使用查詢' },
+  { to: '/coal-map', label: '依用煤查詢' },
   { to: '/methodology', label: '氣候績效指標方法論' },
 ])
 
