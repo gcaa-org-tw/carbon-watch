@@ -202,7 +202,7 @@ const isStreetLevel = (f: CoalMapFactory) => f.座標來源.startsWith('OSM')
     <!-- Header -->
     <div class="mb-8">
       <h1 class="text-2xl leading-normal tracking-[-0.015em] font-bold text-text-primary mb-4">
-        依燃煤使用查詢
+        依用煤查詢
       </h1>
       <p class="text-[13px] text-earth-brown max-w-3xl leading-relaxed">
         {{ selectedYear }} 年，{{ companyCount }} 家排碳大戶共 {{ activeInYear.length }} 座工廠申報用煤，合計{{ formatApprox(totalTonnes) }}公噸。點大小代表該廠 {{ selectedYear }} 年的用煤量，顏色代表產業別。
