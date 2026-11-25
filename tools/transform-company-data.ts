@@ -70,6 +70,7 @@ import { fileURLToPath } from 'url';
 import { Logger } from './lib/logger.js';
 import { createFactoryUBNResolver, normalizeCounty } from './lib/normalize.js';
 import { loadCoalByUBN, padUBN, type YearTonnes } from './lib/coal-source.js';
+import { assertCompanyTaxIds } from './lib/company-checks.js';
 
 // Get directory path for ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -944,6 +945,7 @@ async function transformCompanyData() {
     logger.info(`Parsed ${hubData.length} records from 排碳大戶表_Data.csv`);
 
     companyList = addRepresentativeCity(companyList, hubData, logger);
+    assertCompanyTaxIds(companyList);
 
     // Override 年碳排 (latest 2024) + 年度變化 (2024 vs 2023) from SOT 溫室氣體排放 tab.
     // 易讀版 carries a stale snapshot (台塑化 24,467,047 is the 2022 value), and hub

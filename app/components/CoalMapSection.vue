@@ -329,7 +329,7 @@ const isStreetLevel = (f: CoalMapFactory) => f.座標來源.startsWith('OSM')
           </div>
 
           <UButton
-            :to="`/companies/${encodeURIComponent(selected.公司簡稱)}`"
+            :to="companyPath(selected.事業統編)"
             color="primary"
             size="sm"
             class="mt-4"
@@ -409,7 +409,7 @@ const isStreetLevel = (f: CoalMapFactory) => f.座標來源.startsWith('OSM')
           此廠位置為登記地址街道級定位，非精確廠址座標。
         </div>
         <UButton
-          :to="`/companies/${encodeURIComponent(selected.公司簡稱)}`"
+          :to="companyPath(selected.事業統編)"
           color="primary"
           size="xs"
           class="mt-3"
@@ -492,7 +492,7 @@ const isStreetLevel = (f: CoalMapFactory) => f.座標來源.startsWith('OSM')
               </td>
               <td class="px-3 py-2 whitespace-nowrap">
                 <NuxtLink
-                  :to="`/companies/${encodeURIComponent(f.公司簡稱)}`"
+                  :to="companyPath(f.事業統編)"
                   class="text-green-mint hover:underline"
                 >
                   {{ f.公司簡稱 }}

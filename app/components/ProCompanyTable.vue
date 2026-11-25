@@ -261,6 +261,7 @@ const sortedRows = computed(() => {
 const tableRows = computed(() =>
   sortedRows.value.map(company => ({
     company: company['公司'],
+    事業統編: company['事業統編'],
     cells: COLUMNS.value.map(col => ({ col, cell: buildCell(company, col) })),
   }))
 )
@@ -299,7 +300,7 @@ const tableRows = computed(() =>
               <NuxtLink
                 v-if="cell.kind === 'company'"
                 class="td-company"
-                :to="`/companies/${encodeURIComponent(cell.text)}`"
+                :to="companyPath(row.事業統編)"
               >
                 {{ cell.text }}
               </NuxtLink>

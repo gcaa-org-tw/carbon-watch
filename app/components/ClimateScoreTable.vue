@@ -179,6 +179,7 @@ const tableRows = computed(() =>
   sortedRows.value.map(company => ({
     rank: rankByCompany.value.get(company['公司']) ?? 0,
     公司: company['公司'],
+    事業統編: company['事業統編'],
     產業分類: company['產業分類'],
     持股比率: company['持股比率'] || NOT_DISCLOSED,
     燃煤: formatTonnes(company['燃煤使用量（公噸）']),
@@ -305,7 +306,7 @@ const legendItems = [
               {{ row.rank }}
             </td>
             <td class="col-sticky col-sticky-last" :class="showRank ? 'col-sticky-2' : 'col-sticky-1'">
-              <NuxtLink class="td-company" :to="`/companies/${encodeURIComponent(row.公司)}`">
+              <NuxtLink class="td-company" :to="companyPath(row.事業統編)">
                 {{ row.公司 }}
               </NuxtLink>
             </td>
