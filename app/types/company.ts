@@ -30,7 +30,7 @@ export interface CompanyData {
   '燃煤使用量_2026（公噸）'?: string
   '用煤佔全台製造業比例': string
   '代表縣市'?: string
-  '事業統編'?: string
+  '事業統編': string
   '公司全名'?: string
   '公司代號'?: string
   '節能目標年設定'?: string

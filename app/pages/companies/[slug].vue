@@ -3,18 +3,18 @@ import type { CompanyData } from '~/types/company'
 import companyList from '~/assets/data/company-list.json'
 
 const route = useRoute()
-const companyName = computed(() => route.params.slug as string)
+const taxId = computed(() => route.params.slug as string)
 
 // Load raw data
 const companies = companyList as CompanyData[]
-const company = companies.find(c => c.公司 === companyName.value)
+const company = companies.find(c => c.事業統編 === taxId.value)
 
 // Handle 404
 if (!company) {
   throw createError({
     statusCode: 404,
     statusMessage: '找不到該企業',
-    message: `企業 ${companyName.value} 不存在`,
+    message: `企業 ${taxId.value} 不存在`,
   })
 }
 
