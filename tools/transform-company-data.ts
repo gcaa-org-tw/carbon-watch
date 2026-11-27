@@ -243,7 +243,7 @@ function mergeCompanyData(
   return mergedData;
 }
 
-const HUB_PASSTHROUGH_FIELDS = ['公司代號', '節能目標年設定', '再生能源目標年設定', '曾用名稱'] as const;
+const HUB_PASSTHROUGH_FIELDS = ['公司代號', '節能目標年設定', '再生能源目標年設定', '曾用名稱', '產業小類'] as const;
 
 /**
  * Add 代表縣市, 事業統編, 公司全名 to each company.

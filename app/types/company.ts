@@ -1,6 +1,7 @@
 export interface CompanyData {
   '公司': string
   '產業分類': string
+  '產業小類'?: string
   '溫室氣體排放量（公噸二氧化碳當量）': string
   '淨零目標年': string
   '2030 年減量目標設定': string
