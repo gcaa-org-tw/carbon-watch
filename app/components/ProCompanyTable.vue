@@ -151,7 +151,7 @@ const buildCell = (company: CompanyData, col: Col): Cell => {
     case 'company':
       return { kind: 'company', text: String(raw ?? '') }
     case 'badge':
-      return { kind: 'badge', text: String(raw ?? '') }
+      return { kind: 'badge', text: col.key === '產業分類' ? industryLabel(company['產業分類'], company['產業小類']) : String(raw ?? '') }
     case 'status':
       return statusCell(company, col)
     case 'num': {

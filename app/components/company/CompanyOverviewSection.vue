@@ -121,6 +121,7 @@ const 淨零年預估排放量 = computed(() => {
       :公司="company.公司"
       :公司全名="company.公司全名"
       :產業分類="company.產業分類"
+      :產業小類="company.產業小類"
       :事業統編="company.事業統編"
       :公司代號="company.公司代號"
       :淨零目標年="company.淨零目標年"
