@@ -180,7 +180,7 @@ const tableRows = computed(() =>
     rank: rankByCompany.value.get(company['公司']) ?? 0,
     公司: company['公司'],
     事業統編: company['事業統編'],
-    產業分類: company['產業分類'],
+    產業分類: industryLabel(company['產業分類'], company['產業小類']),
     持股比率: company['持股比率'] || NOT_DISCLOSED,
     燃煤: formatTonnes(company['燃煤使用量（公噸）']),
     有燃煤: Number(String(company['燃煤使用量（公噸）'] ?? '').replace(/,/g, '')) > 0,

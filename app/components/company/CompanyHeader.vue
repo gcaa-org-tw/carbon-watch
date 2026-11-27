@@ -3,6 +3,7 @@ interface Props {
   公司: string
   公司全名?: string
   產業分類?: string
+  產業小類?: string
   事業統編?: string
   公司代號?: string
   淨零目標年?: string
@@ -17,6 +18,8 @@ interface Props {
 const props = defineProps<Props>()
 
 const title = computed(() => props.公司全名 ? `${props.公司全名}（${props.公司}）` : props.公司)
+
+const industryText = computed(() => props.產業分類 ? industryLabel(props.產業分類, props.產業小類) : '')
 
 const UNLISTED = '非上市櫃'
 const identifiers = computed(() => [
@@ -63,8 +66,8 @@ const isDecrease = computed(() => props.年度變化 !== undefined && props.年�
         <h1 class="text-3xl sm:text-[2.5rem] font-bold text-earth-brown leading-[1.2]">
           {{ title }}
         </h1>
-        <p v-if="產業分類" class="mt-2 text-sm text-earth-brown/70">
-          {{ 產業分類 }}
+        <p v-if="industryText" class="mt-2 text-sm text-earth-brown/70">
+          {{ industryText }}
         </p>
         <p v-if="identifiers" class="mt-1 text-sm text-earth-brown/70">
           {{ identifiers }}
